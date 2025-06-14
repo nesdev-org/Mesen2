@@ -2925,6 +2925,9 @@
     <ClInclude Include="NES\Mappers\Homebrew\RainbowAudio.h">
       <Filter>NES\Mappers\Homebrew</Filter>
     </ClInclude>
+    <ClInclude Include="NES\Mappers\Homebrew\RainbowESP.h">
+      <Filter>NES\Mappers\Homebrew</Filter>
+    </ClInclude>
     <ClInclude Include="NES\Debugger\IExtModeMapperDebug.h">
       <Filter>NES\Mappers\Homebrew</Filter>
     </ClInclude>
@@ -3360,6 +3363,9 @@
       <Filter>NES</Filter>
     </ClCompile>
     <ClCompile Include="NES\Mappers\Homebrew\Rainbow.cpp">
+      <Filter>NES\Mappers\Homebrew</Filter>
+    </ClCompile>
+    <ClCompile Include="NES\Mappers\Homebrew\RainbowESP.cpp">
       <Filter>NES\Mappers\Homebrew</Filter>
     </ClCompile>
     <ClCompile Include="SNES\Coprocessors\ST018\St018.cpp">

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -23,6 +23,7 @@
     <ClInclude Include="GBA\GbaWaitStates.h" />
     <ClInclude Include="NES\Epsm.h" />
     <ClInclude Include="NES\Mappers\Homebrew\Rainbow.h" />
+    <ClInclude Include="NES\Mappers\Homebrew\RainbowESP.h" />
     <ClInclude Include="NES\Mappers\Homebrew\RainbowAudio.h" />
     <ClInclude Include="NES\Debugger\IExtModeMapperDebug.h" />
     <ClInclude Include="NES\Mappers\Homebrew\FlashS29.h" />
@@ -885,6 +886,7 @@
     <ClCompile Include="NES\Loaders\StudyBoxLoader.cpp" />
     <ClCompile Include="NES\Loaders\UnifLoader.cpp" />
     <ClCompile Include="NES\Mappers\Homebrew\Rainbow.cpp" />
+    <ClCompile Include="NES\Mappers\Homebrew\RainbowESP.cpp" />
     <ClCompile Include="Shared\Movies\BizHawkMovie.cpp" />
     <ClCompile Include="SNES\Input\SnesBlueRetroController.cpp" />
     <ClCompile Include="SNES\Input\SnesNttDataKeypad.cpp" />
@@ -1234,7 +1236,7 @@
       </AdditionalIncludeDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <ShowIncludes>
@@ -1268,7 +1270,7 @@
       </AdditionalIncludeDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ShowIncludes>
       </ShowIncludes>
