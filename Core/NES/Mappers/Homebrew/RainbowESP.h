@@ -1,8 +1,11 @@
 #pragma once
 #include "pch.h"
 
-#define CURL_STATICLIB
-//#include "NES/Mappers/Homebrew/cURL/curl.h"
+#include "Shared/Emulator.h"
+#include "Shared/BatteryManager.h"
+
+// #define CURL_STATICLIB
+// #include "NES/Mappers/Homebrew/cURL/curl.h"
 
 #include <assert.h>
 #include <array>
@@ -89,7 +92,7 @@ struct UPDpoolAddress
 class BrokeStudioFirmware
 {
 public:
-	BrokeStudioFirmware();
+	BrokeStudioFirmware(Emulator* emu);
 	~BrokeStudioFirmware();
 
 	void rx(uint8_t v);
@@ -333,6 +336,8 @@ private:
 	void cleanupDownload();
 
 private:
+	Emulator* _emu = nullptr;
+
 	deque<uint8_t> rx_buffer;
 	deque<uint8_t> tx_buffer;
 	deque<deque<uint8_t>> tx_messages;

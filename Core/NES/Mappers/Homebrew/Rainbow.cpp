@@ -25,7 +25,7 @@ void Rainbow::InitMapper()
 
 	AddRegisterRange(0x6000, 0xFFFF, MemoryOperation::Any);
 
-	_esp = new BrokeStudioFirmware;
+	_esp = new BrokeStudioFirmware(_emu);
 	EspClearMessageReceived();
 
 	_orgPrgRom = vector<uint8_t>(_prgRom, _prgRom + _prgSize);

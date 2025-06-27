@@ -1,7 +1,10 @@
+#pragma once
 #include "pch.h"
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "NES/Mappers/Homebrew/RainbowESP.h"
 //#include "NES/Mappers/Homebrew/pping.h" // TODO: add ping support
+#include "Shared/Emulator.h"
+#include "Shared/BatteryManager.h"
 #include "Shared/MessageManager.h"
 #include "Utilities/HexUtilities.h"
 #include "Utilities/CRC32.h"
@@ -70,9 +73,11 @@ namespace
 	std::array<string, NUM_FILE_PATHS> dir_names = { "save", "roms", "user" };
 }
 
-BrokeStudioFirmware::BrokeStudioFirmware()
+BrokeStudioFirmware::BrokeStudioFirmware(Emulator* emu)
 {
 	UDBG("[Rainbow] BrokeStudioFirmware constructor");
+
+	_emu = emu;
 
 #ifdef _WIN32
 	// Initialize winsock
@@ -1586,141 +1591,76 @@ void BrokeStudioFirmware::appendFile(I data_begin, I data_end)
 
 void BrokeStudioFirmware::saveFiles()
 {
-#ifdef _WIN32
-	char* value = nullptr;
-	size_t len;
-
-	if(_dupenv_s(&value, &len, "RAINBOW_ESP_FILESYSTEM_FILE") == 0 && value != nullptr) {
-		saveFile(0, value);
-	} else {
-		MessageManager::Log("[Rainbow] RAINBOW_ESP_FILESYSTEM_FILE environment variable is not set");
-	}
-
-	free(value);
-
-	if(_dupenv_s(&value, &len, "RAINBOW_SD_FILESYSTEM_FILE") == 0 && value != nullptr) {
-		saveFile(2, value);
-	} else {
-		MessageManager::Log("[Rainbow] RAINBOW_SD_FILESYSTEM_FILE environment variable is not set");
-	}
-
-	free(value);
-#else
-	char const* esp_filesystem_file_path = ::getenv("RAINBOW_ESP_FILESYSTEM_FILE");
-	if(esp_filesystem_file_path == NULL) {
-		MessageManager::Log("[Rainbow] RAINBOW_ESP_FILESYSTEM_FILE environment variable is not set");
-	} else {
-		saveFile(0, esp_filesystem_file_path);
-	}
-
-	char const* sd_filesystem_file_path = ::getenv("RAINBOW_SD_FILESYSTEM_FILE");
-	if(sd_filesystem_file_path == NULL) {
-		MessageManager::Log("[Rainbow] RAINBOW_SD_FILESYSTEM_FILE environment variable is not set");
-	} else {
-		saveFile(2, sd_filesystem_file_path);
-	}
-#endif
+	saveFile(0, ".esp.fs"); // save esp flash
+	saveFile(2, ".sd.fs"); // save sd card
 }
 
-void BrokeStudioFirmware::saveFile(uint8_t drive, char const* filename)
+void BrokeStudioFirmware::saveFile(uint8_t drive, char const* extension)
 {
-	ofstream ofs(filename, std::fstream::binary);
-	if(ofs.fail()) {
-		MessageManager::Log("[Rainbow] Couldn't open RAINBOW_FILESYSTEM_FILE (" + string(filename) + ")");
-		return;
-	}
+	vector<uint8_t> fileContent;
 
 	//header
-	ofs << 'R';
-	ofs << 'N';
-	ofs << 'B';
-	ofs << 'W';
-	ofs << 'F';
-	ofs << 'S';
-	ofs << (char)0x1A;
+	fileContent.push_back('R');
+	fileContent.push_back('N');
+	fileContent.push_back('B');
+	fileContent.push_back('W');
+	fileContent.push_back('F');
+	fileContent.push_back('S');
+	fileContent.push_back(0x1a);
 
 	//file format version
-	ofs << (char)(0x00);
+	fileContent.push_back(0x00);
 
 	for(auto file = this->files.begin(); file != this->files.end(); ++file) {
 		if(file->drive != drive) continue;
 
 		//file separator
-		ofs << 'F';
-		ofs << '>';
+		fileContent.push_back('F');
+		fileContent.push_back('>');
 
 		//filename length
-		ofs << (char)file->filename.length();
+		fileContent.push_back((char)file->filename.length());
 
 		//filename
 		for(char& c : string(file->filename)) {
-			ofs << (c);
+			fileContent.push_back(c);
 		}
 		//data size
 		size_t size = file->data.size();
-		ofs << (char)((size & 0xff000000) >> 24);
-		ofs << (char)((size & 0x00ff0000) >> 16);
-		ofs << (char)((size & 0x0000ff00) >> 8);
-		ofs << (char)((size & 0x000000ff));
+		fileContent.push_back((char)((size & 0xff000000) >> 24));
+		fileContent.push_back((char)((size & 0x00ff0000) >> 16));
+		fileContent.push_back((char)((size & 0x0000ff00) >> 8));
+		fileContent.push_back((char)((size & 0x000000ff)));
 
 		//actual data
 		for(uint8_t byte : file->data) {
-			ofs << (char)byte;
+			fileContent.push_back((char)byte);
 		}
 	}
+	fileContent.push_back(0xff);
+	_emu->GetBatteryManager()->SaveBattery(extension, fileContent.data(), (uint32_t)fileContent.size());
 }
 
 void BrokeStudioFirmware::loadFiles()
 {
-#ifdef _WIN32
-	char* value = nullptr;
-	size_t len;
-
-	if(_dupenv_s(&value, &len, "RAINBOW_ESP_FILESYSTEM_FILE") == 0 && value != nullptr) {
-		isEspFlashFilePresent = true;
-		loadFile(0, value);
-	} else {
-		isEspFlashFilePresent = false;
-		MessageManager::Log("[Rainbow] RAINBOW_ESP_FILESYSTEM_FILE environment variable is not set");
-	}
-
-	free(value);
-
-	if(_dupenv_s(&value, &len, "RAINBOW_SD_FILESYSTEM_FILE") == 0 && value != nullptr) {
-		isSdCardFilePresent = true;
-		loadFile(2, value);
-	} else {
-		isSdCardFilePresent = false;
-		MessageManager::Log("[Rainbow] RAINBOW_SD_FILESYSTEM_FILE  environment variable is not set");
-	}
-
-	free(value);
-#else
-	char const* esp_filesystem_file_path = ::getenv("RAINBOW_ESP_FILESYSTEM_FILE");
-	if(esp_filesystem_file_path == NULL) {
-		isEspFlashFilePresent = false;
-		MessageManager::Log("[Rainbow] RAINBOW_ESP_FILESYSTEM_FILE environment variable is not set");
-	} else {
-		isEspFlashFilePresent = true;
-		loadFile(0, esp_filesystem_file_path);
-	}
-
-	char const* sd_filesystem_file_path = ::getenv("RAINBOW_SD_FILESYSTEM_FILE");
-	if(sd_filesystem_file_path == NULL) {
-		isSdCardFilePresent = false;
-		MessageManager::Log("[Rainbow] RAINBOW_SD_FILESYSTEM_FILE  environment variable is not set");
-	} else {
-		isSdCardFilePresent = true;
-		loadFile(2, sd_filesystem_file_path);
-	}
-#endif
+	loadFile(0, ".esp.fs"); // load esp flash
+	loadFile(2, ".sd.fs"); // load sd card
 }
 
-void BrokeStudioFirmware::loadFile(uint8_t drive, char const* filename)
+void BrokeStudioFirmware::loadFile(uint8_t drive, char const* extension)
 {
-	ifstream ifs(filename, std::fstream::binary);
-	if(ifs.fail()) {
-		MessageManager::Log("[Rainbow] Couldn't open RAINBOW_FILESYSTEM_FILE (" + string(filename) + ")");
+	uint8_t* fileContent = new uint8_t[ESP_FLASH_SIZE];
+	_emu->GetBatteryManager()->LoadBattery(extension, fileContent, ESP_FLASH_SIZE);
+
+	// check file header
+	if(fileContent[0] != 'R' ||
+		fileContent[1] != 'N' ||
+		fileContent[2] != 'B' ||
+		fileContent[3] != 'W' ||
+		fileContent[4] != 'F' ||
+		fileContent[5] != 'S' ||
+		fileContent[6] != 0x1a) {
+		MessageManager::Log("[Rainbow] File system file header is invalid");
 		return;
 	}
 
@@ -1731,34 +1671,22 @@ void BrokeStudioFirmware::loadFile(uint8_t drive, char const* filename)
 	uint32_t size;
 	uint8_t v;
 
-	//check file header
-	string header;
-	header.push_back(ifs.get());	//R
-	header.push_back(ifs.get());	//N
-	header.push_back(ifs.get());	//B
-	header.push_back(ifs.get());	//W
-	header.push_back(ifs.get());	//F
-	header.push_back(ifs.get());	//S
-	header.push_back(ifs.get());	//0x1A
-	if(header != "RNBWFS\x1a") {
-		MessageManager::Log("[Rainbow] RAINBOW_FILESYSTEM_FILE (" + string(filename) + ") file invalid");
-		return;
-	}
+	// check version
+	if(fileContent[7] == 0) {
+		size_t i = 8;
+		while(i < ESP_FLASH_SIZE) {
 
-	//file format version
-	v = ifs.get();
-
-	if(v == 0) {
-		while(ifs.peek() != EOF) {
-
-			//check file separator
-			header = "";
-			header.push_back(ifs.get());	//F
-			header.push_back(ifs.get());	//>
-			if(header != "F>") {
-				MessageManager::Log("[Rainbow] RAINBOW_FILESYSTEM_FILE (" + string(filename) + ") file malformed");
+			// check file separator
+			if(fileContent[i] == 0xff) {
+				MessageManager::Log("[Rainbow] File system file EOF");
+				break;
+			} else if(fileContent[i] != 'F' ||
+				fileContent[i + 1] != '>') {
+				MessageManager::Log("[Rainbow] File system file malformed");
 				return;
 			}
+			i++;
+			i++;
 
 			FileStruct temp_file;
 
@@ -1766,36 +1694,38 @@ void BrokeStudioFirmware::loadFile(uint8_t drive, char const* filename)
 			temp_file.drive = drive;
 
 			//filename length
-			l = ifs.get();
+			l = fileContent[i++];
 			temp_file.filename.reserve(l);
 
 			//filename
-			for(size_t i = 0; i < l; ++i) {
-				temp_file.filename.push_back(ifs.get());
+			for(size_t j = 0; j < l; ++j) {
+				temp_file.filename.push_back(fileContent[i++]);
 			}
 
 			//data size
 			size = 0;
-			t = ifs.get();
+			t = fileContent[i++];
 			size |= (t << 24);
-			t = ifs.get();
+			t = fileContent[i++];
 			size |= (t << 16);
-			t = ifs.get();
+			t = fileContent[i++];
 			size |= (t << 8);
-			t = ifs.get();
+			t = fileContent[i++];
 			size |= t;
 			temp_file.data.clear();
 			temp_file.data.reserve(size);
 
 			//actual data
-			for(uint32_t i = 0; i < size; ++i) {
-				t = ifs.get();
+			for(uint32_t j = 0; j < size; ++j) {
+				t = fileContent[i++];
 				temp_file.data.push_back(t);
 			}
 			this->files.push_back(temp_file);
+
 		}
 	} else {
-		MessageManager::Log("[Rainbow] RAINBOW_FILESYSTEM_FILE (" + string(filename) + ") format version unknown");
+		MessageManager::Log("[Rainbow] File system file format version unknown");
+		return;
 	}
 }
 
