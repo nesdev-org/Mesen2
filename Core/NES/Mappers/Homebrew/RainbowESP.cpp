@@ -1661,15 +1661,14 @@ void BrokeStudioFirmware::loadFile(uint8_t drive, char const* extension)
 		fileContent[5] != 'S' ||
 		fileContent[6] != 0x1a) {
 		MessageManager::Log("[Rainbow] File system file header is invalid");
+		delete fileContent;
 		return;
 	}
 
 	clearFiles(drive);
 
-	uint8_t l;
 	uint8_t t;
 	uint32_t size;
-	uint8_t v;
 
 	// check version
 	if(fileContent[7] == 0) {
@@ -1683,6 +1682,7 @@ void BrokeStudioFirmware::loadFile(uint8_t drive, char const* extension)
 			} else if(fileContent[i] != 'F' ||
 				fileContent[i + 1] != '>') {
 				MessageManager::Log("[Rainbow] File system file malformed");
+				delete fileContent;
 				return;
 			}
 			i++;
@@ -1694,11 +1694,11 @@ void BrokeStudioFirmware::loadFile(uint8_t drive, char const* extension)
 			temp_file.drive = drive;
 
 			//filename length
-			l = fileContent[i++];
-			temp_file.filename.reserve(l);
+			t = fileContent[i++];
+			temp_file.filename.reserve(t);
 
 			//filename
-			for(size_t j = 0; j < l; ++j) {
+			for(size_t j = 0; j < t; ++j) {
 				temp_file.filename.push_back(fileContent[i++]);
 			}
 
@@ -1725,8 +1725,9 @@ void BrokeStudioFirmware::loadFile(uint8_t drive, char const* extension)
 		}
 	} else {
 		MessageManager::Log("[Rainbow] File system file format version unknown");
-		return;
 	}
+
+	delete fileContent;
 }
 
 void BrokeStudioFirmware::clearFiles(uint8_t drive)
