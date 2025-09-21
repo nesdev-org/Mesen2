@@ -1095,8 +1095,8 @@ void BrokeStudioFirmware::processBufferedMessage()
 			if(message_size >= 2 && message_size <= 5) {
 				if(this->working_file.active) {
 					this->working_file.offset = this->rx_buffer.at(2);
-					if(message_size == 3) this->working_file.offset += this->rx_buffer.at(3) << 8;
-					if(message_size == 4) this->working_file.offset += this->rx_buffer.at(4) << 16;
+					if(message_size >= 3) this->working_file.offset += this->rx_buffer.at(3) << 8;
+					if(message_size >= 4) this->working_file.offset += this->rx_buffer.at(4) << 16;
 					if(message_size == 5) this->working_file.offset += this->rx_buffer.at(5) << 24;
 				}
 			}
