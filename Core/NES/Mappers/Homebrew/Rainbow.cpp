@@ -11,6 +11,7 @@
 #include "Utilities/BitUtilities.h"
 #include "Utilities/HexUtilities.h"
 #include "Utilities/Patches/IpsPatcher.h"
+#include "Utilities/FolderUtilities.h"
 
 Rainbow::Rainbow()
 {
@@ -25,12 +26,16 @@ void Rainbow::InitMapper()
 
 	AddRegisterRange(0x6000, 0xFFFF, MemoryOperation::Any);
 
-	_esp = new BrokeStudioFirmware(_emu);
-	EspClearMessageReceived();
-
 	_orgPrgRom = vector<uint8_t>(_prgRom, _prgRom + _prgSize);
 	_orgChrRom = vector<uint8_t>(_chrRom, _chrRom + _chrRomSize);
 	ApplySaveData();
+}
+
+void Rainbow::InitMapper(RomData& romData)
+{
+	string romname = romData.Info.Path + FolderUtilities::GetFilename(romData.Info.Filename, false);
+	_esp = new BrokeStudioFirmware(_emu, romname);
+	EspClearMessageReceived();
 }
 
 void Rainbow::ApplySaveData()

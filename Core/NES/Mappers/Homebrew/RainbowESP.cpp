@@ -3,8 +3,6 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "NES/Mappers/Homebrew/RainbowESP.h"
 //#include "NES/Mappers/Homebrew/pping.h" // TODO: add ping support
-#include "Shared/Emulator.h"
-#include "Shared/BatteryManager.h"
 #include "Shared/MessageManager.h"
 #include "Utilities/HexUtilities.h"
 #include "Utilities/CRC32.h"
@@ -73,11 +71,12 @@ namespace
 	std::array<string, NUM_FILE_PATHS> dir_names = { "save", "roms", "user" };
 }
 
-BrokeStudioFirmware::BrokeStudioFirmware(Emulator* emu)
+BrokeStudioFirmware::BrokeStudioFirmware(Emulator* emu, const string& fsPath)
 {
 	UDBG("[Rainbow] BrokeStudioFirmware constructor");
 
-	_emu = emu;
+	this->_emu = emu;
+	this->fsPath = fsPath;
 
 #ifdef _WIN32
 	// Initialize winsock
@@ -141,8 +140,8 @@ BrokeStudioFirmware::BrokeStudioFirmware(Emulator* emu)
 		{"", "", false},
 	} };
 
-	// Load file list from save file (if any)
-	this->loadFiles();
+	// load file sytems
+	this->loadFileSystems();
 
 	// Mark ping result as useless
 	this->ping_ready = false;
@@ -952,14 +951,14 @@ void BrokeStudioFirmware::processBufferedMessage()
 				this->working_file.active = true;
 				this->working_file.offset = 0;
 				this->working_file.file = &this->files.at(i);
-				this->saveFiles();
+				this->saveFileSystems();
 			}
 			break;
 		}
 		case toesp_cmds_t::FILE_CLOSE:
 			UDBG("[Rainbow] ESP received command FILE_CLOSE");
 			this->working_file.active = false;
-			this->saveFiles();
+			this->saveFileSystems();
 			break;
 		case toesp_cmds_t::FILE_STATUS:
 		{
@@ -1080,7 +1079,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 				break;
 			} else {
 				this->files.erase(this->files.begin() + i);
-				this->saveFiles();
+				this->saveFileSystems();
 			}
 
 			this->tx_messages.push_back({
@@ -1456,7 +1455,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 						int i = findFile(file_config.drive, filename);
 						if(i != -1) {
 							this->files.erase(this->files.begin() + i);
-							this->saveFiles();
+							this->saveFileSystems();
 						}
 					} else {
 						// Invalid path / file
@@ -1589,68 +1588,33 @@ void BrokeStudioFirmware::appendFile(I data_begin, I data_end)
 	}
 }
 
-void BrokeStudioFirmware::saveFiles()
+void BrokeStudioFirmware::loadFileSystems()
 {
-	saveFile(0, ".esp.fs"); // save esp flash
-	saveFile(2, ".sd.fs"); // save sd card
+	loadFileSystem(0, this->fsPath + ".esp.fs");
+	loadFileSystem(2, this->fsPath + ".sd.fs");
 }
 
-void BrokeStudioFirmware::saveFile(uint8_t drive, char const* extension)
-{
-	vector<uint8_t> fileContent;
-
-	//header
-	fileContent.push_back('R');
-	fileContent.push_back('N');
-	fileContent.push_back('B');
-	fileContent.push_back('W');
-	fileContent.push_back('F');
-	fileContent.push_back('S');
-	fileContent.push_back(0x1a);
-
-	//file format version
-	fileContent.push_back(0x00);
-
-	for(auto file = this->files.begin(); file != this->files.end(); ++file) {
-		if(file->drive != drive) continue;
-
-		//file separator
-		fileContent.push_back('F');
-		fileContent.push_back('>');
-
-		//filename length
-		fileContent.push_back((char)file->filename.length());
-
-		//filename
-		for(char& c : string(file->filename)) {
-			fileContent.push_back(c);
-		}
-		//data size
-		size_t size = file->data.size();
-		fileContent.push_back((char)((size & 0xff000000) >> 24));
-		fileContent.push_back((char)((size & 0x00ff0000) >> 16));
-		fileContent.push_back((char)((size & 0x0000ff00) >> 8));
-		fileContent.push_back((char)((size & 0x000000ff)));
-
-		//actual data
-		for(uint8_t byte : file->data) {
-			fileContent.push_back((char)byte);
-		}
-	}
-	fileContent.push_back(0xff);
-	_emu->GetBatteryManager()->SaveBattery(extension, fileContent.data(), (uint32_t)fileContent.size());
-}
-
-void BrokeStudioFirmware::loadFiles()
-{
-	loadFile(0, ".esp.fs"); // load esp flash
-	loadFile(2, ".sd.fs"); // load sd card
-}
-
-void BrokeStudioFirmware::loadFile(uint8_t drive, char const* extension)
+void BrokeStudioFirmware::loadFileSystem(uint8_t drive, string fsname)
 {
 	uint8_t* fileContent = new uint8_t[ESP_FLASH_SIZE];
-	_emu->GetBatteryManager()->LoadBattery(extension, fileContent, ESP_FLASH_SIZE);
+
+	// try to open file system file
+	ifstream ifs(fsname, ios::binary);
+	if(ifs.fail()) {
+		MessageManager::Log("[Rainbow] Could not open file system file '" + fsname + "' (file does not exist?)");
+		return;
+	}
+
+	// TODO: store only file name, file size and data offset in file system file
+	//			then open file system each file for R/W operations
+	// copy file system content to buffer
+	for(size_t i = 0; i < ESP_FLASH_SIZE; i++) {
+		if(ifs.peek() == EOF) break;
+		fileContent[i] = ifs.get();
+	}
+
+	// close file system file
+	ifs.close();
 
 	// check file header
 	if(fileContent[0] != 'R' ||
@@ -1728,6 +1692,70 @@ void BrokeStudioFirmware::loadFile(uint8_t drive, char const* extension)
 	}
 
 	delete fileContent;
+}
+
+void BrokeStudioFirmware::saveFileSystems()
+{
+	saveFileSystem(0, this->fsPath + ".esp.fs");
+	saveFileSystem(2, this->fsPath + ".sd.fs");
+}
+
+void BrokeStudioFirmware::saveFileSystem(uint8_t drive, string fsname)
+{
+	vector<uint8_t> fileContent;
+
+	//header
+	fileContent.push_back('R');
+	fileContent.push_back('N');
+	fileContent.push_back('B');
+	fileContent.push_back('W');
+	fileContent.push_back('F');
+	fileContent.push_back('S');
+	fileContent.push_back(0x1a);
+
+	//file format version
+	fileContent.push_back(0x00);
+
+	for(auto file = this->files.begin(); file != this->files.end(); ++file) {
+		if(file->drive != drive) continue;
+
+		//file separator
+		fileContent.push_back('F');
+		fileContent.push_back('>');
+
+		//filename length
+		fileContent.push_back((char)file->filename.length());
+
+		//filename
+		for(char& c : string(file->filename)) {
+			fileContent.push_back(c);
+		}
+		//data size
+		size_t size = file->data.size();
+		fileContent.push_back((char)((size & 0xff000000) >> 24));
+		fileContent.push_back((char)((size & 0x00ff0000) >> 16));
+		fileContent.push_back((char)((size & 0x0000ff00) >> 8));
+		fileContent.push_back((char)((size & 0x000000ff)));
+
+		//actual data
+		for(uint8_t byte : file->data) {
+			fileContent.push_back((char)byte);
+		}
+	}
+	fileContent.push_back(0xff);
+
+	// try to open file system file
+	ofstream ofs(fsname, ios::binary);
+	if(ofs.fail()) {
+		MessageManager::Log("[Rainbow] Could not open file system file '" + fsname + "'");
+		return;
+	}
+
+	for(size_t i = 0; i < fileContent.size(); i++) {
+		ofs.put(fileContent.at(i));
+	}
+
+	ofs.close();
 }
 
 void BrokeStudioFirmware::clearFiles(uint8_t drive)
@@ -2294,7 +2322,7 @@ void BrokeStudioFirmware::downloadFile(string const& url, uint8_t path, uint8_t 
 			// Store data
 			string filename = this->getAutoFilename(path, file);
 			this->files.push_back(FileStruct({ 0, filename, data }));
-			this->saveFiles();
+			this->saveFileSystems();
 
 			// Write result message
 			this->tx_messages.push_back({

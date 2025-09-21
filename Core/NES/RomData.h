@@ -64,6 +64,7 @@ struct NesRomInfo
 {
 	string RomName;
 	string Filename;
+	string Path;
 	RomFormat Format = {};
 
 	bool IsNes20Header = false;

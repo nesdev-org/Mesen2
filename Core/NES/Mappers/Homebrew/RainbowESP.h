@@ -92,7 +92,7 @@ struct UPDpoolAddress
 class BrokeStudioFirmware
 {
 public:
-	BrokeStudioFirmware(Emulator* emu);
+	BrokeStudioFirmware(Emulator* emu, const string& fsPath);
 	~BrokeStudioFirmware();
 
 	void rx(uint8_t v);
@@ -297,6 +297,8 @@ private:
 
 	void processBufferedMessage();
 	FileConfig parseFileConfig(uint8_t config);
+
+	// file system files
 	int findFile(uint8_t drive, string filename);
 	int findPath(uint8_t drive, string path);
 	string getAutoFilename(uint8_t path, uint8_t file);
@@ -305,11 +307,14 @@ private:
 	void writeFile(I data_begin, I data_end);
 	template<class I>
 	void appendFile(I data_begin, I data_end);
-	void saveFiles();
-	void saveFile(uint8_t drive, char const* filename);
-	void loadFiles();
-	void loadFile(uint8_t drive, char const* filename);
 	void clearFiles(uint8_t drive);
+
+	// physical file system files in the same folder as the game ROM
+	string fsPath;
+	void loadFileSystems();
+	void loadFileSystem(uint8_t drive, string fsname);
+	void saveFileSystems();
+	void saveFileSystem(uint8_t drive, string fsname);
 
 	template<class I>
 	void sendUdpDatagramToServer(I begin, I end);
