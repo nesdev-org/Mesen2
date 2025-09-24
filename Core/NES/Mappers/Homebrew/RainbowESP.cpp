@@ -1602,6 +1602,7 @@ void BrokeStudioFirmware::loadFileSystem(uint8_t drive, string fsname)
 	ifstream ifs(fsname, ios::binary);
 	if(ifs.fail()) {
 		MessageManager::Log("[Rainbow] Could not open file system file '" + fsname + "' (file does not exist?)");
+		delete fileContent;
 		return;
 	}
 
