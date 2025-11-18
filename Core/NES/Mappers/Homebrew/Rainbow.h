@@ -111,7 +111,6 @@ private:
 
 	uint8_t _oamExtUpdatePage = 0;
 	uint8_t _oamSlowUpdatePage = 0;
-	// uint8_t _oamCode[0x506] = {};
 	uint8_t _oamCode[0x600] = {};
 	bool _oamCodeLocked = false;
 
