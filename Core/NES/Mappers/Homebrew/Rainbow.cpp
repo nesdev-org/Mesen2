@@ -269,6 +269,8 @@ void Rainbow::UpdateState()
 
 void Rainbow::ProcessCpuClock()
 {
+	EspCheckNewMessage();
+
 	BaseProcessCpuClock();
 
 	_jitterCounter++;
@@ -575,7 +577,7 @@ uint8_t Rainbow::ReadRegister(uint16_t addr)
 		case 0x4190: return (uint8_t)_espEnabled | ((uint8_t)_wifiIrqEnabled << 1);
 		case 0x4191:
 		{
-			_dataReceived = EspMessageReceived() ? 1 : 0;
+			_dataReceived = _dataReceived ? 1 : 0;
 			_dataReady = _esp->getDataReadyIO() ? 1 : 0;
 			return ((uint8_t)_dataReady << 6) | ((uint8_t)_dataReceived << 7);
 		}
@@ -1145,19 +1147,11 @@ void Rainbow::EspCheckNewMessage()
 	if(_espEnabled && _esp->getDataReadyIO() && _dataReceived == false) {
 		uint8_t message_length = _esp->tx();
 		_mapperRam[0x1800 + (_recvDstAddr << 8)] = message_length;
-		// _fpgaRam[0x1800 + (_recvDstAddr << 8)] = message_length;
 		for(uint8_t i = 0; i < message_length; i++) {
 			_mapperRam[0x1800 + (_recvDstAddr << 8) + 1 + i] = _esp->tx();
-			// _fpgaRam[0x1800 + (_recvDstAddr << 8) + 1 + i] = _esp->tx();
 		}
 		_dataReceived = true;
 	}
-}
-
-bool Rainbow::EspMessageReceived()
-{
-	EspCheckNewMessage();
-	return _dataReceived;
 }
 
 void Rainbow::EspClearMessageReceived()
