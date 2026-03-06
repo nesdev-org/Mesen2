@@ -22,11 +22,15 @@ private:
 	string _romFolder;
 	string _trackPath;
 
+	uint16_t _audioResumeTrack = 0;
+	uint32_t _audioResumeOffset = 8;
+
 	bool _repeat = false;
 	bool _paused = false;
 	bool _audioBusy = false; //Always false
 	bool _dataBusy = false; //Always false
 	bool _trackMissing = false;
+	bool _resume = false;
 
 	ifstream _dataFile;
 	uint32_t _dataSize;
