@@ -288,6 +288,7 @@ void Rainbow::ProcessCpuClock()
 	BaseProcessCpuClock();
 
 	_jitterCounter++;
+	_parityCounter = !_parityCounter;
 
 	_audio->Clock();
 
@@ -571,6 +572,7 @@ uint8_t Rainbow::ReadRegister(uint16_t addr)
 				);
 
 		case 0x4154: return _jitterCounter;
+		case 0x4157: return ((uint8_t)_parityCounter << 7);
 
 		case 0x415F:
 		{
@@ -683,6 +685,13 @@ void Rainbow::WriteRegister(uint16_t addr, uint8_t value)
 			break;
 
 		case 0x4153: _slIrqOffset = std::clamp<uint8_t>(value, 1, 170); break;
+		case 0x4157:
+			// As documented, we would expect this write to clear the parity counter.
+			// https://github.com/BrokeStudio/rainbow-net/blob/master/NES/mapper-doc.md#cpu-cycle-parity-4157-read-write
+			// However, behavior on the real Rainbow devcart suggest there is a 1 clock cycle delay between the write
+			// landing and the tracked parity actually being reset. We account for that here by inverting the written parity.
+			_parityCounter = true;
+			break;		
 
 		case 0x4158: BitUtilities::SetBits<8>(_cpuIrqReloadValue, value); break;
 		case 0x4159: BitUtilities::SetBits<0>(_cpuIrqReloadValue, value); break;
@@ -876,6 +885,7 @@ vector<MapperStateEntry> Rainbow::GetMapperStateEntries()
 	entries.push_back(MapperStateEntry("$4151/2", "Enabled", _slIrqEnabled));
 	entries.push_back(MapperStateEntry("$4153", "Cycle Offset", _slIrqOffset, MapperStateValueType::Number8));
 	entries.push_back(MapperStateEntry("$4154", "Jitter Counter", _jitterCounter, MapperStateValueType::Number8));
+	entries.push_back(MapperStateEntry("$4157", "Parity Counter", _parityCounter));
 
 	entries.push_back(MapperStateEntry("", "CPU IRQ"));
 	entries.push_back(MapperStateEntry("$4158/9", "Reload Value", _cpuIrqReloadValue, MapperStateValueType::Number16));
@@ -1068,6 +1078,7 @@ void Rainbow::Serialize(Serializer& s)
 	SV(_inFrame);
 	SV(_inHBlank);
 	SV(_jitterCounter);
+	SV(_parityCounter);
 	SV(_cpuIrqCounter);
 	SV(_cpuIrqReloadValue);
 	SV(_cpuIrqEnabled);
