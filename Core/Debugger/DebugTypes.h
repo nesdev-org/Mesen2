@@ -210,7 +210,8 @@ enum class TileLayout
 {
 	Normal,
 	SingleLine8x16,
-	SingleLine16x16
+	SingleLine16x16,
+	Vertical
 };
 
 enum class TileBackground

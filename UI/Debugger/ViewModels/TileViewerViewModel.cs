@@ -362,6 +362,11 @@ namespace Mesen.Debugger.ViewModels
 					return new PixelPoint(displayColumn, displayRow);
 				}
 
+				case TileLayout.Vertical: {
+					int index = row * ColumnCount + column;
+					return new PixelPoint(index / RowCount, index % RowCount);
+				}
+
 				case TileLayout.Normal:
 					return pos;
 
@@ -392,6 +397,11 @@ namespace Mesen.Debugger.ViewModels
 					int displayColumn = ((column & ~0x01) * 2 + ((row & 0x01) != 0 ? 2 : 0) + (column & 0x01)) % ColumnCount;
 					int displayRow = (row & ~0x01) + ((column >= ColumnCount / 2) ? 1 : 0);
 					return new PixelPoint(displayColumn, displayRow);
+				}
+
+				case TileLayout.Vertical: {
+					int index = column * RowCount + row;
+					return new PixelPoint(index % ColumnCount, index / ColumnCount);
 				}
 
 				case TileLayout.Normal:

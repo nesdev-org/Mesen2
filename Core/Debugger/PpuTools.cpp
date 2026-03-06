@@ -141,13 +141,14 @@ void PpuTools::InternalGetTileView(GetTileViewOptions options, uint8_t *source, 
 	int rowCount = (int)std::ceil((double)tileCount / options.Width);
 
 	for(int row = 0; row < rowCount; row++) {
-		uint32_t baseOffset = row * bytesPerTile * options.Width;
+		uint32_t baseOffset = (options.Layout == TileLayout::Vertical) ? (row * bytesPerTile) : (row * bytesPerTile * options.Width);
+		
 		if(baseOffset >= srcSize) {
 			break;
 		}
 
 		for(int column = 0; column < options.Width; column++) {
-			uint32_t addr = baseOffset + bytesPerTile * column;
+			uint32_t addr = (options.Layout == TileLayout::Vertical) ? (baseOffset + bytesPerTile * column * options.Height) : (baseOffset + bytesPerTile * column);
 
 			int baseOutputOffset;
 			if(options.Layout == TileLayout::SingleLine8x16) {

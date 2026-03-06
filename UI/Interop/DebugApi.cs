@@ -1422,7 +1422,8 @@ namespace Mesen.Interop
 	{
 		Normal,
 		SingleLine8x16,
-		SingleLine16x16
+		SingleLine16x16,
+		Vertical
 	};
 
 	[Serializable]

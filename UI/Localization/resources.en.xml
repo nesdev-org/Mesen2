@@ -2898,6 +2898,7 @@ E
 			<Value ID="Normal">Normal</Value>
 			<Value ID="SingleLine8x16">8x16 (same line)</Value>
 			<Value ID="SingleLine16x16">16x16 (same line)</Value>
+			<Value ID="Vertical">Vertical</Value>
 		</Enum>
 		<Enum ID="TileFilter">
 			<Value ID="None">None</Value>
