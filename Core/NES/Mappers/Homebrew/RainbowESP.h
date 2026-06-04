@@ -122,6 +122,11 @@ private:
 		WIFI_GET_MAC_ADDRESS = 59, // 0x3B
 		WIFI_GET_CONFIG = 12,      // 0x0C
 		WIFI_SET_CONFIG = 13,      // 0x0D
+		WIFI_CONNECT = 60,         // 0x3C
+
+		// PINGS CMDS
+		PING_START = 61,          // 0x3D
+		PING_GET_RESULT = 62,     // 0x3E
 
 		// ACCESS POINT CMDS
 		AP_GET_SSID = 14, // 0x0E
@@ -135,7 +140,8 @@ private:
 
 		// SERVER CMDS
 		SERVER_GET_STATUS = 20,             // 0x14
-		SERVER_PING = 21,                   // 0x15
+		SERVER_GET_PING = 21,               // 0x15
+		SERVER_PING_START = 63,             // 0x3F
 		SERVER_SET_PROTOCOL = 22,           // 0x16
 		SERVER_GET_SETTINGS = 23,           // 0x17
 		SERVER_SET_SETTINGS = 24,           // 0x18
@@ -197,6 +203,10 @@ private:
 		MAC_ADDRESS = 28, // 0x1C
 		WIFI_CONFIG = 7,  // 0x07
 
+		// PING CMDS
+		PING_STATUS = 29, // 0x1D
+		PING_RESULT = 30, // 0x1E
+
 		// RND CMDS
 		RND_BYTE = 8, // 0x08
 		RND_WORD = 9, // 0x09
@@ -227,7 +237,7 @@ private:
 	};
 
 	// ESP factory reset result codes
-	enum class esp_factory_reset : uint8_t
+	enum class esp_factory_reset_t : uint8_t
 	{
 		SUCCESS = 0,
 		ERROR_WHILE_SAVING_CONFIG = 1,
@@ -235,6 +245,59 @@ private:
 		ERROR_WHILE_DELETING_WEB = 3
 	};
 
+	// Wi-Fi status
+	enum class wifi_status_t : uint8_t
+	{
+		NOT_CONNECTED,
+		CONNECTING,
+		CONNECTED,
+	};
+
+	// Wi-Fi error
+	enum class wifi_error_t : uint8_t
+	{
+		UNKNOWN = 255,
+		NO_WIFI_ERROR = 0,
+		NO_SSID_AVAIL = 1,
+		CONNECTION_FAILED = 2,
+		CONNECTION_LOST = 3,
+		WRONG_PASSWORD = 4,
+	};
+
+	// ESP Wi-Fi status
+	enum class esp_wifi_status_t : uint8_t
+	{
+		IDLE_STATUS,
+		NO_SSID_AVAIL,
+		SCAN_COMPLETED,
+		CONNECTED,
+		CONNECTION_FAILED,
+		CONNECTION_LOST,
+		WRONG_PASSWORD,
+		DISCONNECTED,
+	};
+
+	// Ping start status
+	enum class ping_start_status_t : uint8_t
+	{
+		STARTED,
+		BUSY,
+		BAD_HOST,
+		START_FAILED,
+		MALFORMED,
+	};
+
+	// Ping result status
+	enum class ping_result_status_t : uint8_t
+	{
+		IDLE,
+		RUNNING,
+		DONE,
+		MALFORMED,
+		START_FAILED,
+	};
+
+	// Server protocols
 	enum class server_protocol_t : uint8_t
 	{
 		TCP = 0,
@@ -243,12 +306,29 @@ private:
 		UDP_POOL = 3,
 	};
 
-	// WIFI_CONFIG 
-	enum class wifi_config_t : uint8_t
+	// Server status
+	enum class server_status_t : uint8_t
 	{
-		WIFI_ENABLE = 1,
-		AP_ENABLE = 2,
-		WEB_SERVER_ENABLE = 4
+		DISCONNECTED,
+		CONNECTED,
+	};
+
+	// Wi-Fi config flags
+	enum class wifi_config_flags_t : uint8_t
+	{
+		WIFI_STATION_ENABLE = 1,
+		ACCESS_POINT_ENABLE = 2,
+		WEB_SERVER_ENABLE = 4,
+	};
+
+	// Network encryption types
+	enum class network_encryption_types_t : uint8_t
+	{
+		WPA_PSK = 2,
+		WPA2_PSK = 4,
+		WEP = 5,
+		OPEN_NETWORK = 7,
+		WPA_WPA2_PSK = 8,
 	};
 
 	// FILE_CONFIG
@@ -262,14 +342,17 @@ private:
 		DESTINATION_SD = 2,
 	};
 
+	// FILE_DELETE result codes
 	enum class file_delete_results_t : uint8_t
 	{
 		SUCCESS,
 		ERROR_WHILE_DELETING_FILE,
 		FILE_NOT_FOUND,
 		INVALID_PATH_OR_FILE,
+		MALFORMED_MESSAGE,
 	};
 
+	// FILE_DOWNLOAD result codes
 	enum class file_download_results_t : uint8_t
 	{
 		SUCCESS,
@@ -277,21 +360,26 @@ private:
 		ERROR_WHILE_DELETING_FILE,
 		UNKNOWN_OR_UNSUPPORTED_PROTOCOL,
 		NETWORK_ERROR,
-		HTTP_STATUS_NOT_IN_2XX,
+		HTTP_STATUS_NOT_OK,
+		MALFORMED_MESSAGE,
+		ERROR_WHILE_OPENING_DESTINATION_FILE,
+		FAILED_TO_CONNECT_TO_URL,
+		TCP_CONNECTION_ACTIVE,
 	};
 
+	// FILE_DOWNLOAD network error codes
 	enum class file_download_network_error_t : uint8_t
 	{
 		CONNECTION_FAILED = 255,
 		SEND_HEADER_FAILED = 254,
-		SEND_PAYLOAD_FILED = 253,
+		SEND_PAYLOAD_FAILED = 253,
 		NOT_CONNECTED = 252,
 		CONNECTION_LOST = 251,
 		NO_STREAM = 250,
 		NO_HTTP_SERVER = 249,
-		OUT_OF_RAM = 248,
-		ENCODING = 247,
-		STREAM_WRITE = 246,
+		NOT_ENOUGH_RAM = 249,
+		TRANSFER_ENCODING_NOT_SUPPORTED = 247,
+		STREAM_WRITE_ERROR = 246,
 		READ_TIMEOUT = 245,
 	};
 

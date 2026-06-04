@@ -292,7 +292,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 		case toesp_cmds_t::ESP_FACTORY_RESET:
 			UDBG("[Rainbow] ESP received command ESP_FACTORY_SETTINGS");
 			UDBG("[Rainbow] ESP_FACTORY_SETTINGS has no use here");
-			this->tx_messages.push_back({ 2,static_cast<uint8_t>(fromesp_cmds_t::ESP_FACTORY_RESET),static_cast<uint8_t>(esp_factory_reset::ERROR_WHILE_SAVING_CONFIG) });
+			this->tx_messages.push_back({ 2,static_cast<uint8_t>(fromesp_cmds_t::ESP_FACTORY_RESET),static_cast<uint8_t>(esp_factory_reset_t::ERROR_WHILE_SAVING_CONFIG) });
 			break;
 
 		case toesp_cmds_t::ESP_RESTART:
@@ -310,7 +310,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 			// WIFI_GET_SSID command is not relevant here, so we'll just use fake data
 		case toesp_cmds_t::WIFI_GET_SSID:
 			UDBG("[Rainbow] ESP received command WIFI_GET_SSID");
-			if((this->wifi_config & static_cast<uint8_t>(wifi_config_t::WIFI_ENABLE)) == static_cast<uint8_t>(wifi_config_t::WIFI_ENABLE)) {
+			if((this->wifi_config & static_cast<uint8_t>(wifi_config_flags_t::WIFI_STATION_ENABLE)) == static_cast<uint8_t>(wifi_config_flags_t::WIFI_STATION_ENABLE)) {
 				this->tx_messages.push_back({ 15, static_cast<uint8_t>(fromesp_cmds_t::SSID), 13, 'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_', 'S', 'S', 'I', 'D' });
 			} else {
 				this->tx_messages.push_back({ 2, static_cast<uint8_t>(fromesp_cmds_t::SSID), 0 });
@@ -322,7 +322,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 		{
 			UDBG("[Rainbow] ESP received command WIFI_GET_IP_ADDRESS");
 
-			if((this->wifi_config & static_cast<uint8_t>(wifi_config_t::WIFI_ENABLE)) != static_cast<uint8_t>(wifi_config_t::WIFI_ENABLE)) {
+			if((this->wifi_config & static_cast<uint8_t>(wifi_config_flags_t::WIFI_STATION_ENABLE)) != static_cast<uint8_t>(wifi_config_flags_t::WIFI_STATION_ENABLE)) {
 				this->tx_messages.push_back({ 2, static_cast<uint8_t>(fromesp_cmds_t::IP_ADDRESS), 0 });
 				break;
 			}
@@ -430,13 +430,29 @@ void BrokeStudioFirmware::processBufferedMessage()
 			UDBG("[Rainbow] ESP received command WIFI_SET_CONFIG");
 			this->wifi_config = this->rx_buffer.at(2);
 			break;
+		case toesp_cmds_t::WIFI_CONNECT:
+			UDBG("[Rainbow] ESP received command WIFI_CONNECT");
+			UDBG("[Rainbow] WIFI_CONNECT has no use here");
+			break;
+
+			// PING CMDS
+		case toesp_cmds_t::PING_START:
+			UDBG("[Rainbow] ESP received command PING_START");
+			UDBG("[Rainbow] Command to implement");
+			this->tx_messages.push_back({ 2, static_cast<uint8_t>(fromesp_cmds_t::PING_STATUS), static_cast<uint8_t>(ping_start_status_t::START_FAILED) });
+			break;
+		case toesp_cmds_t::PING_GET_RESULT:
+			UDBG("[Rainbow] ESP received command PING_GET_RESULT");
+			UDBG("[Rainbow] Command to implement");
+			this->tx_messages.push_back({ 2, static_cast<uint8_t>(fromesp_cmds_t::PING_RESULT), static_cast<uint8_t>(ping_result_status_t::IDLE) });
+			break;
 
 			// AP CMDS
 
 			// AP_GET_SSID command is not relevant here, so we'll just use fake data
 		case toesp_cmds_t::AP_GET_SSID:
 			UDBG("[Rainbow] ESP received command AP_GET_SSID");
-			if((this->wifi_config & static_cast<uint8_t>(wifi_config_t::AP_ENABLE)) == static_cast<uint8_t>(wifi_config_t::AP_ENABLE)) {
+			if((this->wifi_config & static_cast<uint8_t>(wifi_config_flags_t::ACCESS_POINT_ENABLE)) == static_cast<uint8_t>(wifi_config_flags_t::ACCESS_POINT_ENABLE)) {
 				this->tx_messages.push_back({ 18, static_cast<uint8_t>(fromesp_cmds_t::SSID), 16, 'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_', 'A', 'P', '_', 'S', 'S', 'I', 'D' });
 			} else {
 				this->tx_messages.push_back({ 2, static_cast<uint8_t>(fromesp_cmds_t::SSID), 0 });
@@ -447,7 +463,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 		case toesp_cmds_t::AP_GET_IP_ADDRESS:
 		{
 			UDBG("[Rainbow] ESP received command AP_GET_IP_ADDRESS");
-			if((this->wifi_config & static_cast<uint8_t>(wifi_config_t::AP_ENABLE)) != static_cast<uint8_t>(wifi_config_t::AP_ENABLE)) {
+			if((this->wifi_config & static_cast<uint8_t>(wifi_config_flags_t::ACCESS_POINT_ENABLE)) != static_cast<uint8_t>(wifi_config_flags_t::ACCESS_POINT_ENABLE)) {
 				this->tx_messages.push_back({ 2, static_cast<uint8_t>(fromesp_cmds_t::IP_ADDRESS), 0 });
 				break;
 			}
@@ -586,8 +602,8 @@ void BrokeStudioFirmware::processBufferedMessage()
 			});
 			break;
 		}
-		case toesp_cmds_t::SERVER_PING:
-			UDBG("[Rainbow] ESP received command SERVER_PING");
+		case toesp_cmds_t::SERVER_GET_PING:
+			UDBG("[Rainbow] ESP received command SERVER_GET_PING");
 			if(!this->ping_thread.joinable()) {
 				if(this->server_settings_address.empty()) {
 					this->tx_messages.push_back({
@@ -603,6 +619,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 					}
 					//this->ping_thread = thread(&BrokeStudioFirmware::pingRequest, this, n); // TODO: add ping support
 
+					// send back dummy values
 					this->tx_messages.push_back({
 						5,
 						static_cast<uint8_t>(fromesp_cmds_t::SERVER_PING),
@@ -614,6 +631,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 
 				}
 			}
+			break;
+		case toesp_cmds_t::SERVER_PING_START:
+			UDBG("[Rainbow] ESP received command SERVER_PING_START");
+			UDBG("[Rainbow] Command to implement");
+			this->tx_messages.push_back({ 2, static_cast<uint8_t>(fromesp_cmds_t::PING_STATUS), static_cast<uint8_t>(ping_start_status_t::START_FAILED) });
 			break;
 		case toesp_cmds_t::SERVER_SET_PROTOCOL:
 		{
@@ -2288,7 +2310,7 @@ void BrokeStudioFirmware::downloadFile(string const& url, uint8_t path, uint8_t 
 	//TODO asynchronous download using curl_multi_* (and maybe a thread, or regular ticks on rx/tx/getDataReadyIO)
 	/*
 	// Directly fail if the curl handle was not properly initialized or if WiFi is not enabled (wifiConfig bit 0)
-	if ((this->curl_handle == nullptr) || (wifiConfig & wifi_config_t::WIFI_ENABLED == 0)) {
+	if ((this->curl_handle == nullptr) || (wifiConfig & wifi_config_flags_t::WIFI_STATION_ENABLED == 0)) {
 		UDBG("[Rainbow] ESP download failed: no handle");
 		this->tx_messages.push_back({
 			2,
