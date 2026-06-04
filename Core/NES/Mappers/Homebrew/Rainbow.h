@@ -114,7 +114,7 @@ private:
 	uint8_t _oamCode[0x600] = {};
 	bool _oamCodeLocked = false;
 
-	BrokeStudioFirmware* _esp = NULL;
+	unique_ptr<RainbowEsp> _esp;
 	bool _espEnabled = false;
 	bool _wifiIrqEnabled = false;
 	bool _wifiIrqPending = false;

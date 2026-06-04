@@ -71,9 +71,17 @@ namespace
 	std::array<string, NUM_FILE_PATHS> dir_names = { "save", "roms", "user" };
 }
 
-BrokeStudioFirmware::BrokeStudioFirmware(Emulator* emu, const string& fsPath)
+FileStruct* RainbowEsp::GetWorkingFile()
 {
-	UDBG("[Rainbow] BrokeStudioFirmware constructor");
+	if(working_file.fileIndex >= 0 && (size_t)working_file.fileIndex < files.size()) {
+		return &files[(size_t)working_file.fileIndex];
+	}
+	return nullptr;
+}
+
+RainbowEsp::RainbowEsp(Emulator* emu, const string& fsPath)
+{
+	UDBG("[Rainbow] RainbowEsp constructor");
 
 	this->_emu = emu;
 	this->fsPath = fsPath;
@@ -134,11 +142,15 @@ BrokeStudioFirmware::BrokeStudioFirmware(Emulator* emu, const string& fsPath)
 	}
 
 	// Init fake registered networks
-	this->networks = { {
-		{"EMULATOR_SSID", "EMULATOR_PASS", true},
-		{"", "", false},
-		{"", "", false},
-	} };
+	this->networks[0].ssid = "EMULATOR_SSID";
+	this->networks[0].pass = "EMULATOR_PASS";
+	this->networks[0].active = true;
+	this->networks[1].ssid = "";
+	this->networks[1].pass = "";
+	this->networks[1].active = false;
+	this->networks[2].ssid = "";
+	this->networks[2].pass = "";
+	this->networks[2].active = false;
 
 	// load file sytems
 	this->loadFileSystems();
@@ -150,14 +162,14 @@ BrokeStudioFirmware::BrokeStudioFirmware(Emulator* emu, const string& fsPath)
 	this->initDownload();
 }
 
-BrokeStudioFirmware::~BrokeStudioFirmware()
+RainbowEsp::~RainbowEsp()
 {
-	UDBG("[Rainbow] BrokeStudioFirmware destructor");
+	UDBG("[Rainbow] RainbowEsp destructor");
 	this->closeConnection();
 	this->cleanupDownload();
 }
 
-void BrokeStudioFirmware::rx(uint8_t v)
+void RainbowEsp::rx(uint8_t v)
 {
 	UDBG_FLOOD("[Rainbow] ESP rx " + HexUtilities::ToHex(v));
 	if(this->msg_first_byte) {
@@ -172,7 +184,7 @@ void BrokeStudioFirmware::rx(uint8_t v)
 	}
 }
 
-uint8_t BrokeStudioFirmware::tx()
+uint8_t RainbowEsp::tx()
 {
 	// Refresh buffer from network
 	this->receiveDataFromServer();
@@ -195,14 +207,14 @@ uint8_t BrokeStudioFirmware::tx()
 	return last_byte_read;
 }
 
-bool BrokeStudioFirmware::getDataReadyIO()
+bool RainbowEsp::getDataReadyIO()
 {
 	this->receiveDataFromServer();
 	//this->receivePingResult(); // TODO: add ping support
 	return !(this->tx_buffer.empty() && this->tx_messages.empty());
 }
 
-void BrokeStudioFirmware::processBufferedMessage()
+void RainbowEsp::processBufferedMessage()
 {
 	assert(this->rx_buffer.size() >= 2); // Buffer must contain exactly one message, minimal message is two bytes (length + type)
 	uint8_t const message_size = this->rx_buffer.front();
@@ -617,7 +629,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 					if(n == 0) {
 						n = 4;
 					}
-					//this->ping_thread = thread(&BrokeStudioFirmware::pingRequest, this, n); // TODO: add ping support
+					//this->ping_thread = thread(&RainbowEsp::pingRequest, this, n); // TODO: add ping support
 
 					// send back dummy values
 					this->tx_messages.push_back({
@@ -956,7 +968,9 @@ void BrokeStudioFirmware::processBufferedMessage()
 						filename = getAutoFilename(path, file);
 						int i = findFile(file_config.drive, filename);
 						if(i == -1) {
-							FileStruct temp_file = { file_config.drive, filename, vector<uint8_t>() };
+							FileStruct temp_file;
+							temp_file.drive = file_config.drive;
+							temp_file.filename = filename;
 							this->files.push_back(temp_file);
 						}
 					}
@@ -965,14 +979,16 @@ void BrokeStudioFirmware::processBufferedMessage()
 					filename = string(this->rx_buffer.begin() + 4, this->rx_buffer.begin() + 4 + path_length);
 					int i = findFile(file_config.drive, filename);
 					if(i == -1) {
-						FileStruct temp_file = { file_config.drive, filename, vector<uint8_t>() };
+						FileStruct temp_file;
+						temp_file.drive = file_config.drive;
+						temp_file.filename = filename;
 						this->files.push_back(temp_file);
 					}
 				}
 				int i = findFile(file_config.drive, filename);
 				this->working_file.active = true;
 				this->working_file.offset = 0;
-				this->working_file.file = &this->files.at(i);
+				this->working_file.fileIndex = i;
 				this->saveFileSystems();
 			}
 			break;
@@ -980,6 +996,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 		case toesp_cmds_t::FILE_CLOSE:
 			UDBG("[Rainbow] ESP received command FILE_CLOSE");
 			this->working_file.active = false;
+			this->working_file.fileIndex = -1;
 			this->saveFileSystems();
 			break;
 		case toesp_cmds_t::FILE_STATUS:
@@ -1004,7 +1021,18 @@ void BrokeStudioFirmware::processBufferedMessage()
 						static_cast<uint8_t>(this->working_file.auto_file),
 						});
 				} else if(file_config.access_mode == static_cast<uint8_t>(file_config_flags_t::ACCESS_MODE_MANUAL)) {
-					string filename = this->working_file.file->filename;
+					const FileStruct* file = this->GetWorkingFile();
+					if(file == nullptr) {
+						this->working_file.active = false;
+						this->working_file.fileIndex = -1;
+						this->tx_messages.push_back({
+							2,
+							static_cast<uint8_t>(fromesp_cmds_t::FILE_STATUS),
+							0
+						});
+						break;
+					}
+					string filename = file->filename;
 					filename = filename.substr(filename.find_first_of("/") + 1);
 					deque<uint8_t> message({
 						static_cast<uint8_t>(3 + filename.size()),
@@ -1100,6 +1128,14 @@ void BrokeStudioFirmware::processBufferedMessage()
 					});
 				break;
 			} else {
+				if(this->working_file.active) {
+					if(this->working_file.fileIndex == i) {
+						this->working_file.active = false;
+						this->working_file.fileIndex = -1;
+					} else if(this->working_file.fileIndex > i) {
+						this->working_file.fileIndex--;
+					}
+				}
 				this->files.erase(this->files.begin() + i);
 				this->saveFileSystems();
 			}
@@ -1516,7 +1552,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 	this->rx_buffer.clear();
 }
 
-FileConfig BrokeStudioFirmware::parseFileConfig(uint8_t config)
+FileConfig RainbowEsp::parseFileConfig(uint8_t config)
 {
 	return FileConfig({
 		static_cast<uint8_t>(config & static_cast<uint8_t>(file_config_flags_t::ACCESS_MODE_MASK)),
@@ -1524,7 +1560,7 @@ FileConfig BrokeStudioFirmware::parseFileConfig(uint8_t config)
 	});
 }
 
-int BrokeStudioFirmware::findFile(uint8_t drive, string filename)
+int RainbowEsp::findFile(uint8_t drive, string filename)
 {
 	for(size_t i = 0; i < this->files.size(); ++i) {
 		if((this->files.at(i).drive == drive) && (this->files.at(i).filename == filename)) {
@@ -1534,7 +1570,7 @@ int BrokeStudioFirmware::findFile(uint8_t drive, string filename)
 	return -1;
 }
 
-int BrokeStudioFirmware::findPath(uint8_t drive, string path)
+int RainbowEsp::findPath(uint8_t drive, string path)
 {
 	for(size_t i = 0; i < this->files.size(); ++i) {
 		if((this->files.at(i).drive == drive) && (this->files.at(i).filename.substr(0, path.length()) == path)) {
@@ -1544,22 +1580,34 @@ int BrokeStudioFirmware::findPath(uint8_t drive, string path)
 	return -1;
 }
 
-string BrokeStudioFirmware::getAutoFilename(uint8_t path, uint8_t file)
+string RainbowEsp::getAutoFilename(uint8_t path, uint8_t file)
 {
 	return "/" + dir_names[path] + "/file" + std::to_string(file) + ".bin";
 }
 
-void BrokeStudioFirmware::readFile(uint8_t n)
+void RainbowEsp::readFile(uint8_t n)
 {
+	const FileStruct* file = this->GetWorkingFile();
+	if(file == nullptr) {
+		this->working_file.active = false;
+		this->working_file.fileIndex = -1;
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::FILE_DATA),
+			0
+		});
+		return;
+	}
+
 	// Get data range
 	vector<uint8_t>::const_iterator data_begin;
 	vector<uint8_t>::const_iterator data_end;
-	if(this->working_file.offset >= this->working_file.file->data.size()) {
-		data_begin = this->working_file.file->data.end();
+	if(this->working_file.offset >= file->data.size()) {
+		data_begin = file->data.end();
 		data_end = data_begin;
 	} else {
-		data_begin = this->working_file.file->data.begin() + this->working_file.offset;
-		data_end = this->working_file.file->data.begin() + min(static_cast<vector<uint8_t>::size_type>(this->working_file.offset) + n, this->working_file.file->data.size());
+		data_begin = file->data.begin() + this->working_file.offset;
+		data_end = file->data.begin() + min(static_cast<vector<uint8_t>::size_type>(this->working_file.offset) + n, file->data.size());
 	}
 	vector<uint8_t>::size_type const data_size = data_end - data_begin;
 
@@ -1574,49 +1622,63 @@ void BrokeStudioFirmware::readFile(uint8_t n)
 }
 
 template<class I>
-void BrokeStudioFirmware::writeFile(I data_begin, I data_end)
+void RainbowEsp::writeFile(I data_begin, I data_end)
 {
 	if(this->working_file.active == false) {
+		return;
+	}
+
+	FileStruct* file = this->GetWorkingFile();
+	if(file == nullptr) {
+		this->working_file.active = false;
+		this->working_file.fileIndex = -1;
 		return;
 	}
 
 	auto const data_size = data_end - data_begin;
 	uint32_t const offset_end = this->working_file.offset + data_size;
-	if(offset_end > this->working_file.file->data.size()) {
-		this->working_file.file->data.resize(offset_end, 0);
+	if(offset_end > file->data.size()) {
+		file->data.resize(offset_end, 0);
 	}
 
 	for(vector<uint8_t>::size_type i = this->working_file.offset; i < offset_end; ++i) {
-		this->working_file.file->data[i] = *data_begin;
+		file->data[i] = *data_begin;
 		++data_begin;
 	}
 }
 
 template<class I>
-void BrokeStudioFirmware::appendFile(I data_begin, I data_end)
+void RainbowEsp::appendFile(I data_begin, I data_end)
 {
 	if(this->working_file.active == false) {
 		return;
 	}
 
+	FileStruct* file = this->GetWorkingFile();
+	if(file == nullptr) {
+		this->working_file.active = false;
+		this->working_file.fileIndex = -1;
+		return;
+	}
+
 	auto const data_size = data_end - data_begin;
-	size_t file_size = this->working_file.file->data.size();
+	size_t file_size = file->data.size();
 	size_t const offset_end = file_size + data_size;
-	this->working_file.file->data.resize(offset_end, 0);
+	file->data.resize(offset_end, 0);
 
 	for(vector<uint8_t>::size_type i = file_size; i < offset_end; ++i) {
-		this->working_file.file->data[i] = *data_begin;
+		file->data[i] = *data_begin;
 		++data_begin;
 	}
 }
 
-void BrokeStudioFirmware::loadFileSystems()
+void RainbowEsp::loadFileSystems()
 {
 	loadFileSystem(0, this->fsPath + ".esp.fs");
 	loadFileSystem(2, this->fsPath + ".sd.fs");
 }
 
-void BrokeStudioFirmware::loadFileSystem(uint8_t drive, string fsname)
+void RainbowEsp::loadFileSystem(uint8_t drive, string fsname)
 {
 	uint8_t* fileContent = new uint8_t[ESP_FLASH_SIZE];
 
@@ -1664,13 +1726,12 @@ void BrokeStudioFirmware::loadFileSystem(uint8_t drive, string fsname)
 
 			// check file separator
 			if(fileContent[i] == 0xff) {
-				MessageManager::Log("[Rainbow] File system file EOF");
+				MessageManager::Log("[Rainbow] File system EOF");
 				break;
 			} else if(fileContent[i] != 'F' ||
 				fileContent[i + 1] != '>') {
 				MessageManager::Log("[Rainbow] File system file malformed");
-				delete fileContent;
-				return;
+				break;
 			}
 			i++;
 			i++;
@@ -1717,13 +1778,13 @@ void BrokeStudioFirmware::loadFileSystem(uint8_t drive, string fsname)
 	delete fileContent;
 }
 
-void BrokeStudioFirmware::saveFileSystems()
+void RainbowEsp::saveFileSystems()
 {
 	saveFileSystem(0, this->fsPath + ".esp.fs");
 	saveFileSystem(2, this->fsPath + ".sd.fs");
 }
 
-void BrokeStudioFirmware::saveFileSystem(uint8_t drive, string fsname)
+void RainbowEsp::saveFileSystem(uint8_t drive, string fsname)
 {
 	vector<uint8_t> fileContent;
 
@@ -1781,11 +1842,19 @@ void BrokeStudioFirmware::saveFileSystem(uint8_t drive, string fsname)
 	ofs.close();
 }
 
-void BrokeStudioFirmware::clearFiles(uint8_t drive)
+void RainbowEsp::clearFiles(uint8_t drive)
 {
 	unsigned int i = 0;
 	while(i < this->files.size()) {
 		if(this->files.at(i).drive == drive) {
+			if(this->working_file.active) {
+				if(this->working_file.fileIndex == (int32_t)i) {
+					this->working_file.active = false;
+					this->working_file.fileIndex = -1;
+				} else if(this->working_file.fileIndex > (int32_t)i) {
+					this->working_file.fileIndex--;
+				}
+			}
 			this->files.erase(this->files.begin() + i);
 		} else {
 			++i;
@@ -1794,7 +1863,7 @@ void BrokeStudioFirmware::clearFiles(uint8_t drive)
 }
 
 template<class I>
-void BrokeStudioFirmware::sendUdpDatagramToServer(I begin, I end)
+void RainbowEsp::sendUdpDatagramToServer(I begin, I end)
 {
 #if RAINBOW_DEBUG_ESP >= 1
 	UDBG("[Rainbow] " + std::to_string(wall_clock_milli()) + " udp datagram to send");
@@ -1819,13 +1888,7 @@ void BrokeStudioFirmware::sendUdpDatagramToServer(I begin, I end)
 		);
 
 		if(n == -1) {
-#ifdef _WIN32
-			char errmsg[ERR_MSG_SIZE];
-			errno_t r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
-			UDBG("[Rainbow] UDP send failed: " + string(errmsg));
-#else
 			UDBG("[Rainbow] UDP send failed: " + string(strerror(errno)));
-#endif
 		} else if(static_cast<size_t>(n) != message_size) {
 			UDBG("[Rainbow] UDP sent partial message");
 		}
@@ -1833,7 +1896,7 @@ void BrokeStudioFirmware::sendUdpDatagramToServer(I begin, I end)
 }
 
 template<class I>
-void BrokeStudioFirmware::sendUdpDatagramToPool(I begin, I end)
+void RainbowEsp::sendUdpDatagramToPool(I begin, I end)
 {
 #if RAINBOW_DEBUG_ESP >= 1
 	UDBG("[Rainbow] " + std::to_string(wall_clock_milli()) + " udp datagram to send");
@@ -1870,13 +1933,7 @@ void BrokeStudioFirmware::sendUdpDatagramToPool(I begin, I end)
 			);
 
 			if(n == -1) {
-#ifdef _WIN32
-				char errmsg[ERR_MSG_SIZE];
-				errno_t r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
-				UDBG("[Rainbow] UDP send failed: " + string(errmsg));
-#else
 				UDBG("[Rainbow] UDP send failed: " + string(strerror(errno)));
-#endif
 			} else if(static_cast<size_t>(n) != message_size) {
 				UDBG("[Rainbow] UDP sent partial message");
 			}
@@ -1885,7 +1942,7 @@ void BrokeStudioFirmware::sendUdpDatagramToPool(I begin, I end)
 }
 
 template<class I>
-void BrokeStudioFirmware::sendTcpDataToServer(I begin, I end)
+void RainbowEsp::sendTcpDataToServer(I begin, I end)
 {
 #if RAINBOW_DEBUG_ESP >= 1
 	UDBG("[Rainbow] " + std::to_string(wall_clock_milli()) + " tcp data to send");
@@ -1910,20 +1967,14 @@ void BrokeStudioFirmware::sendTcpDataToServer(I begin, I end)
 			0
 		);
 		if(n == -1) {
-#ifdef _WIN32
-			char errmsg[ERR_MSG_SIZE];
-			errno_t r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
-			UDBG("[Rainbow] TCP send failed: " + string(errmsg));
-#else
 			UDBG("[Rainbow] TCP send failed: " + string(strerror(errno)));
-#endif
 		} else if(static_cast<size_t>(n) != message_size) {
 			UDBG("[Rainbow] TCP sent partial message");
 		}
 	}
 }
 
-deque<uint8_t> BrokeStudioFirmware::read_socket(int socket)
+deque<uint8_t> RainbowEsp::read_socket(int socket)
 {
 	fd_set rfds;
 	FD_ZERO(&rfds);
@@ -1935,13 +1986,7 @@ deque<uint8_t> BrokeStudioFirmware::read_socket(int socket)
 
 	int n_readable = ::select(socket + 1, &rfds, NULL, NULL, &tv);
 	if(n_readable == -1) {
-#ifdef _WIN32
-		char errmsg[ERR_MSG_SIZE];
-		errno_t r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
-		UDBG("[Rainbow] failed to check sockets for data: " + string(errmsg));
-#else
 		UDBG("[Rainbow] failed to check sockets for data: " + string(strerror(errno)));
-#endif
 	} else if(n_readable > 0) {
 		if(FD_ISSET(socket, &rfds)) {
 			size_t const MAX_MSG_SIZE = 254;
@@ -1956,13 +2001,7 @@ deque<uint8_t> BrokeStudioFirmware::read_socket(int socket)
 			);
 
 			if(msg_len == -1) {
-#ifdef _WIN32
-				char errmsg[ERR_MSG_SIZE];
-				errno_t r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
-				UDBG("[Rainbow] failed to read socket: " + string(errmsg));
-#else
 				UDBG("[Rainbow] failed to read socket: " + string(strerror(errno)));
-#endif
 			} else if(msg_len <= static_cast<ssize_t>(MAX_MSG_SIZE)) {
 				UDBG("[Rainbow] " + std::to_string(wall_clock_milli()) + " received message of size " + std::to_string(msg_len));
 #if RAINBOW_DEBUG_ESP >= 2
@@ -1975,7 +2014,7 @@ deque<uint8_t> BrokeStudioFirmware::read_socket(int socket)
 				deque<uint8_t> message({
 					static_cast<uint8_t>(msg_len + 1),
 					static_cast<uint8_t>(fromesp_cmds_t::MESSAGE_FROM_SERVER)
-				});
+			});
 				message.insert(message.end(), data.begin(), data.begin() + msg_len);
 				return message;
 			} else {
@@ -1987,7 +2026,7 @@ deque<uint8_t> BrokeStudioFirmware::read_socket(int socket)
 	return deque<uint8_t>();
 }
 
-void BrokeStudioFirmware::receiveDataFromServer()
+void RainbowEsp::receiveDataFromServer()
 {
 	// TCP
 	if(this->tcp_socket != -1) {
@@ -2006,7 +2045,7 @@ void BrokeStudioFirmware::receiveDataFromServer()
 	}
 }
 
-void BrokeStudioFirmware::closeConnection()
+void RainbowEsp::closeConnection()
 {
 	//TODO close UDP socket
 
@@ -2016,14 +2055,9 @@ void BrokeStudioFirmware::closeConnection()
 	}
 }
 
-void BrokeStudioFirmware::openConnection()
+void RainbowEsp::openConnection()
 {
 	this->closeConnection();
-
-#ifdef _WIN32
-	char errmsg[ERR_MSG_SIZE];
-	errno_t r;
-#endif
 
 	if(this->active_protocol == server_protocol_t::TCP) {
 		// Resolve server's hostname
@@ -2036,24 +2070,14 @@ void BrokeStudioFirmware::openConnection()
 		// Create socket
 		this->tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
 		if(this->tcp_socket == -1) {
-#ifdef _WIN32
-			r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
-			UDBG("[Rainbow] unable to create TCP socket: " + string(errmsg));
-#else
 			UDBG("[Rainbow] unable to create TCP socket: " + string(strerror(errno)));
-#endif
 		}
 
 		// Connect to server
 		int connect_res = connect(this->tcp_socket, &this->server_addr, sizeof(sockaddr));
 		if(connect_res == -1) {
-#ifdef _WIN32
-			r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
-			UDBG("[Rainbow] unable to connect to TCP server: " + string(errmsg));
-#else
 			UDBG("[Rainbow] unable to connect to TCP server: " + string(strerror(errno)));
 			this->tcp_socket = -1;
-#endif
 		}
 	} else if(this->active_protocol == server_protocol_t::TCP_SECURED) {
 		// TODO
@@ -2071,12 +2095,7 @@ void BrokeStudioFirmware::openConnection()
 
 		this->udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
 		if(this->udp_socket == -1) {
-#ifdef _WIN32
-			r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
-			UDBG("[Rainbow] unable to connect to UDP server: " + string(errmsg));
-#else
 			UDBG("[Rainbow] unable to connect to UDP server: " + string(strerror(errno)));
-#endif
 		}
 
 		sockaddr_in bind_addr;
@@ -2088,7 +2107,7 @@ void BrokeStudioFirmware::openConnection()
 	}
 }
 
-bool BrokeStudioFirmware::getIpMacAddresses(char* macAddr, char* ipAddr)
+bool RainbowEsp::getIpMacAddresses(char* macAddr, char* ipAddr)
 {
 #ifdef _WIN32
 	WSAData d;
@@ -2150,7 +2169,7 @@ bool BrokeStudioFirmware::getIpMacAddresses(char* macAddr, char* ipAddr)
 
 /*
 // TODO: add ping support
-void BrokeStudioFirmware::pingRequest(uint8_t n)
+void RainbowEsp::pingRequest(uint8_t n)
 {
 	using std::chrono::time_point;
 	using std::chrono::steady_clock;
@@ -2172,12 +2191,12 @@ void BrokeStudioFirmware::pingRequest(uint8_t n)
 			time_point<steady_clock> end = steady_clock::now();
 
 			if(r != 0) {
-				UDBG("[Rainbow] BrokeStudioFirmware ping lost packet\n");
+				UDBG("[Rainbow] RainbowEsp ping lost packet\n");
 				++lost;
 			} else {
 				uint32_t const round_trip_time_ms = duration_cast<milliseconds>(end - begin).count();
 				uint8_t const rtt = (round_trip_time_ms + 2) / 4;
-				UDBG("[Rainbow] BrokeStudioFirmware ping %d ms\n", round_trip_time_ms);
+				UDBG("[Rainbow] RainbowEsp ping %d ms\n", round_trip_time_ms);
 				ping_min = min(ping_min, rtt);
 				ping_max = max(ping_max, rtt);
 				total_ms += round_trip_time_ms;
@@ -2197,11 +2216,11 @@ void BrokeStudioFirmware::pingRequest(uint8_t n)
 	this->ping_max = ping_max;
 	this->ping_lost = lost;
 	this->ping_ready = true;
-	UDBG("[Rainbow] BrokeStudioFirmware ping stored: %d/%d/%d/%d (min/max/avg/lost)\n", this->ping_min, this->ping_max, this->ping_avg, this->ping_lost);
+	UDBG("[Rainbow] RainbowEsp ping stored: %d/%d/%d/%d (min/max/avg/lost)\n", this->ping_min, this->ping_max, this->ping_avg, this->ping_lost);
 }
 
 // TODO: add ping support
-void BrokeStudioFirmware::receivePingResult()
+void RainbowEsp::receivePingResult()
 {
 	if(!this->ping_ready) {
 		return;
@@ -2222,7 +2241,7 @@ void BrokeStudioFirmware::receivePingResult()
 }
 */
 
-std::pair<bool, sockaddr> BrokeStudioFirmware::resolve_address(string address, uint16_t port)
+std::pair<bool, sockaddr> RainbowEsp::resolve_address(string address, uint16_t port)
 {
 	// Resolve IP address for hostname
 	bool result = false;
@@ -2261,7 +2280,7 @@ namespace
 	}
 }
 
-void BrokeStudioFirmware::initDownload()
+void RainbowEsp::initDownload()
 {
 	// disable CURL for now
 	// this->curl_handle = curl_easy_init();
@@ -2271,25 +2290,25 @@ void BrokeStudioFirmware::initDownload()
 }
 //disable CURL for now
 /*
-std::pair<uint8_t, uint8_t> BrokeStudioFirmware::curle_to_net_error(CURLcode curle)
+std::pair<uint8_t, uint8_t> RainbowEsp::curle_to_net_error(CURLcode curle)
 {
 	static std::map<CURLcode, std::pair<uint8_t, uint8_t>> const resolution = {
 		{
 			CURLE_UNSUPPORTED_PROTOCOL, std::pair<uint8_t, uint8_t>(
-				static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::UNKNOWN_OR_UNSUPPORTED_PROTOCOL),
-				static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::CONNECTION_LOST)
+				static_cast<uint8_t>(RainbowEsp::file_download_results_t::UNKNOWN_OR_UNSUPPORTED_PROTOCOL),
+				static_cast<uint8_t>(RainbowEsp::file_download_network_error_t::CONNECTION_LOST)
 			)
 		},
 		{
 			CURLE_WRITE_ERROR, std::pair<uint8_t, uint8_t>(
-				static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
-				static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::STREAM_WRITE)
+				static_cast<uint8_t>(RainbowEsp::file_download_results_t::NETWORK_ERROR),
+				static_cast<uint8_t>(RainbowEsp::file_download_network_error_t::STREAM_WRITE)
 			)
 		},
 		{
 			CURLE_OUT_OF_MEMORY, std::pair<uint8_t, uint8_t>(
-				static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
-				static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::OUT_OF_RAM)
+				static_cast<uint8_t>(RainbowEsp::file_download_results_t::NETWORK_ERROR),
+				static_cast<uint8_t>(RainbowEsp::file_download_network_error_t::OUT_OF_RAM)
 			)
 		},
 	};
@@ -2299,12 +2318,12 @@ std::pair<uint8_t, uint8_t> BrokeStudioFirmware::curle_to_net_error(CURLcode cur
 		return entry->second;
 	}
 	return std::pair<uint8_t, uint8_t>(
-		static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
-		static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::CONNECTION_FAILED)
+		static_cast<uint8_t>(RainbowEsp::file_download_results_t::NETWORK_ERROR),
+		static_cast<uint8_t>(RainbowEsp::file_download_network_error_t::CONNECTION_FAILED)
 	);
 }
 */
-void BrokeStudioFirmware::downloadFile(string const& url, uint8_t path, uint8_t file)
+void RainbowEsp::downloadFile(string const& url, uint8_t path, uint8_t file)
 {
 	UDBG("[Rainbow] ESP download " + string(url.c_str()) + " -> (" + std::to_string((unsigned int)path) + "," + std::to_string((unsigned int)file) + ")");
 	//TODO asynchronous download using curl_multi_* (and maybe a thread, or regular ticks on rx/tx/getDataReadyIO)
@@ -2344,7 +2363,11 @@ void BrokeStudioFirmware::downloadFile(string const& url, uint8_t path, uint8_t 
 			UDBG("[Rainbow] ESP download success");
 			// Store data
 			string filename = this->getAutoFilename(path, file);
-			this->files.push_back(FileStruct({ 0, filename, data }));
+			FileStruct downloadedFile;
+			downloadedFile.drive = 0;
+			downloadedFile.filename = filename;
+			downloadedFile.data = std::move(data);
+			this->files.push_back(downloadedFile);
 			this->saveFileSystems();
 
 			// Write result message
@@ -2357,7 +2380,7 @@ void BrokeStudioFirmware::downloadFile(string const& url, uint8_t path, uint8_t 
 	*/
 }
 
-void BrokeStudioFirmware::cleanupDownload()
+void RainbowEsp::cleanupDownload()
 {
 	// disable CURL for now
 	// curl_easy_cleanup(this->curl_handle);

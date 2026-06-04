@@ -34,7 +34,7 @@ void Rainbow::InitMapper()
 void Rainbow::InitMapper(RomData& romData)
 {
 	string romname = romData.Info.Path + FolderUtilities::GetFilename(romData.Info.Filename, false);
-	_esp = new BrokeStudioFirmware(_emu, romname);
+	_esp.reset(new RainbowEsp(_emu, romname));
 	EspClearMessageReceived();
 }
 
@@ -1141,6 +1141,7 @@ void Rainbow::Serialize(Serializer& s)
 	SV(_chrFlash);
 
 	SV(_audio);
+	SV(_esp);
 
 	SerializeRomDiff(s, _orgPrgRom, &_orgChrRom);
 }

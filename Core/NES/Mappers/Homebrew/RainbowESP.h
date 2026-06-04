@@ -1,5 +1,6 @@
 #pragma once
-#include "pch.h"
+// #include "pch.h"
+#include "Utilities/Serializer.h"
 
 #include "Shared/Emulator.h"
 #include "Shared/BatteryManager.h"
@@ -33,9 +34,6 @@ using std::deque;
 #include <netinet/in.h>
 #endif
 
-//////////////////////////////////////
-// BrokeStudio's ESP firmware implementation
-
 static const uint8_t NO_WORKING_FILE = 0xff;
 static const uint8_t NUM_FILE_PATHS = 3;
 static const uint8_t NUM_FILES = 64;
@@ -53,11 +51,18 @@ static const uint8_t DBG_CFG_DEV_LOG = 0x01;
 static const uint8_t DBG_CFG_SERIAL = 0x02;
 static const uint8_t DBG_CFG_NETWORK = 0x04;
 
-struct NetworkInfo
+struct NetworkInfo : public ISerializable
 {
 	string ssid;
 	string pass;
 	bool active;
+
+	void Serialize(Serializer& s) override
+	{
+		SV(ssid);
+		SV(pass);
+		SV(active);
+	}
 };
 
 struct FileConfig
@@ -66,11 +71,18 @@ struct FileConfig
 	uint8_t drive;
 };
 
-struct FileStruct
+struct FileStruct : public ISerializable
 {
 	uint8_t drive;
 	string filename;
 	vector<uint8_t> data;
+
+	void Serialize(Serializer& s) override
+	{
+		SV(drive);
+		SV(filename);
+		SVVector(data);
+	}
 };
 
 struct WorkingFile
@@ -80,20 +92,26 @@ struct WorkingFile
 	uint8_t auto_path;
 	uint8_t auto_file;
 	uint32_t offset;
-	FileStruct* file;
+	int32_t fileIndex = -1;
 };
 
-struct UPDpoolAddress
+struct UPDpoolAddress : public ISerializable
 {
 	string ipAddress;
 	uint16_t port;
+
+	void Serialize(Serializer& s) override
+	{
+		SV(ipAddress);
+		SV(port);
+	}
 };
 
-class BrokeStudioFirmware
+class RainbowEsp : public ISerializable
 {
 public:
-	BrokeStudioFirmware(Emulator* emu, const string& fsPath);
-	~BrokeStudioFirmware();
+	RainbowEsp(Emulator* emu, const string& fsPath);
+	~RainbowEsp();
 
 	void rx(uint8_t v);
 	uint8_t tx();
@@ -385,6 +403,8 @@ private:
 
 	void processBufferedMessage();
 	FileConfig parseFileConfig(uint8_t config);
+	FileStruct* GetWorkingFile();
+	const FileStruct* GetWorkingFile() const;
 
 	// file system files
 	int findFile(uint8_t drive, string filename);
@@ -428,7 +448,6 @@ private:
 	void downloadFile(string const& url, uint8_t path, uint8_t file);
 	void cleanupDownload();
 
-private:
 	Emulator* _emu = nullptr;
 
 	deque<uint8_t> rx_buffer;
@@ -470,4 +489,109 @@ private:
 	uint8_t last_byte_read = 0;
 
 	//CURL* curl_handle = nullptr;
+
+protected:
+	// NesConsole* _console = nullptr;
+
+	// virtual void ClockAudio() = 0;
+	void Serialize(Serializer& s) override
+	{
+		SV(isEspFlashFilePresent);
+		SV(isSdCardFilePresent);
+
+		SV(active_protocol);
+		SV(default_server_settings_address);
+		SV(default_server_settings_port);
+		SV(server_settings_address);
+		SV(server_settings_port);
+
+		SV(debug_config);
+		SV(wifi_config);
+
+		SV(ping_min);
+		SV(ping_avg);
+		SV(ping_max);
+		SV(ping_lost);
+
+		SV(msg_first_byte);
+		SV(msg_length);
+		SV(last_byte_read);
+
+		{
+			vector<uint8_t> rxBuffer;
+			if(s.IsSaving()) {
+				rxBuffer.assign(rx_buffer.begin(), rx_buffer.end());
+			}
+			SV(rxBuffer);
+			if(!s.IsSaving()) {
+				rx_buffer.assign(rxBuffer.begin(), rxBuffer.end());
+			}
+		}
+
+		{
+			vector<uint8_t> txBuffer;
+			if(s.IsSaving()) {
+				txBuffer.assign(tx_buffer.begin(), tx_buffer.end());
+			}
+			SV(txBuffer);
+			if(!s.IsSaving()) {
+				tx_buffer.assign(txBuffer.begin(), txBuffer.end());
+			}
+		}
+
+		{
+			uint32_t txMessageCount = s.IsSaving() ? (uint32_t)tx_messages.size() : 0;
+			SV(txMessageCount);
+
+			if(s.IsSaving()) {
+				for(uint32_t i = 0; i < txMessageCount; i++) {
+					vector<uint8_t> msg(tx_messages[i].begin(), tx_messages[i].end());
+					SVVectorI(msg);
+				}
+			} else {
+				tx_messages.clear();
+				for(uint32_t i = 0; i < txMessageCount; i++) {
+					vector<uint8_t> msg;
+					SVVectorI(msg);
+					tx_messages.emplace_back(msg.begin(), msg.end());
+				}
+			}
+		}
+
+		{
+			uint32_t fileCount = s.IsSaving() ? (uint32_t)files.size() : 0;
+			SV(fileCount);
+
+			if(!s.IsSaving()) {
+				files.resize(fileCount);
+			}
+
+			for(uint32_t i = 0; i < fileCount; i++) {
+				SVI(files[i]);
+			}
+		}
+
+		SV(working_file.active);
+		SV(working_file.config);
+		SV(working_file.auto_path);
+		SV(working_file.auto_file);
+		SV(working_file.offset);
+		SV(working_file.fileIndex);
+
+		for(int i = 0; i < NUM_NETWORKS; i++) {
+			SVI(networks[i]);
+		}
+
+		for(int i = 0; i < 16; i++) {
+			SVI(ipAddressPool[i]);
+		}
+
+		// Not serialized yet:
+		// - _emu: runtime dependency provided by the mapper/console.
+		// - fsPath: host path used to load/save the backing filesystems.
+		// - ping_ready / ping_thread: transient async state.
+		// - udp_socket / tcp_socket / server_addr: OS socket state must be recreated.
+		// - Any in-flight download/cURL state: runtime-only and not safely restorable.
+	}
 };
+
