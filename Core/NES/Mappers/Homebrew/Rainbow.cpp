@@ -759,7 +759,7 @@ void Rainbow::WriteRegister(uint16_t addr, uint8_t value)
 		case 0x4240: _spriteExtBank = value & 0x07; break;
 		case 0x4241: _oamSlowUpdatePage = value & 0x07; break;
 		case 0x4242: _oamExtUpdatePage = value & 0x07; break;
-		case 0x4243: _oamSpriteTarget = value & 0x3f; break;
+		case 0x4243: _oamSpriteLimit = value & 0x3f; break;
 	}
 
 	if(addr >= 0x4106 && addr <= 0x4107) {
