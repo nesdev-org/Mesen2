@@ -303,22 +303,18 @@ void Rainbow::UpdateInWindowFlag()
 	bool yMatch;
 	bool xMatch;
 
-	uint8_t scanline = _ntFetchCounter >= 41 ? _scanlineCounter + 1 : _scanlineCounter;
-	if(_windowY1 == _windowY2) {
-		yMatch = scanline == _windowY1;
-	} else if(_windowY1 < _windowY2) {
-		yMatch = scanline >= _windowY1 && scanline <= _windowY2;
-	} else if(_windowY1 > _windowY2) {
+	uint8_t scanline = _ntFetchCounter >= 49 ? _scanlineCounter + 1 : _scanlineCounter;
+	if(_windowY1 > _windowY2) {
 		yMatch = scanline <= _windowY2 || scanline >= _windowY1;
+	} else {
+		yMatch = scanline >= _windowY1 && scanline <= _windowY2;
 	}
 
-	uint8_t column = (_ntFetchCounter + 1) % 42;
-	if(_windowX1 == _windowX2) {
-		xMatch = column == _windowX1;
-	} else if(_windowX1 < _windowX2) {
-		xMatch = column >= _windowX1 && column <= _windowX2;
-	} else if(_windowX1 > _windowX2) {
+	uint8_t column = (_ntFetchCounter + 1) % 50;
+	if(_windowX1 > _windowX2) {
 		xMatch = column <= _windowX2 || column >= _windowX1;
+	} else {
+		xMatch = column >= _windowX1 && column <= _windowX2;
 	}
 
 	_inWindow = xMatch && yMatch;
