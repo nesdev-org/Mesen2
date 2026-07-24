@@ -22,6 +22,7 @@ public:
 
 	void ForceParamCount(int paramCount);
 	bool CheckParamCount(int minParamCount = -1);
+	bool CheckSpecificParamCount(int count);
 
 	double ReadDouble();
 	bool ReadBool(bool defaultValue = false);

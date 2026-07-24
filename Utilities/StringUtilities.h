@@ -36,10 +36,8 @@ public:
 		size_t endIndex = str.find_last_not_of("\t\r\n ");
 		if(endIndex == string::npos) {
 			return "";
-		} else if(endIndex > 0) {
-			return str.substr(0, endIndex + 1);
 		}
-		return str;
+		return str.substr(0, endIndex + 1);
 	}
 
 	static string Trim(string str)

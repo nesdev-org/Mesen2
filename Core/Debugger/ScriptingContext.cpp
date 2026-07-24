@@ -116,7 +116,7 @@ string ScriptingContext::GetErrorMessage()
 		errorMsg = lua_tostring(_lua, -1);
 	} else if(lua_istable(_lua, -1)) {
 		//Serialize tables to Lua-formatted string
-		errorMsg = "error: " + SerializeTable();
+		errorMsg = "error: " + LuaApi::SerializeTable(_lua);
 	} else {
 		//Convert all other values to a string
 		luaL_tolstring(_lua, -1, nullptr);
@@ -124,50 +124,6 @@ string ScriptingContext::GetErrorMessage()
 		lua_pop(_lua, 1);
 	}
 	return errorMsg;
-}
-
-string ScriptingContext::SerializeTable()
-{
-	string result = "{ ";
-	bool firstKey = true;
-	lua_pushnil(_lua);
-	while(lua_next(_lua, -2) != 0) {
-		int keyType = lua_type(_lua, -2);
-		if(keyType == LUA_TSTRING || keyType == LUA_TNUMBER) {
-			if(!firstKey) {
-				result += ", ";
-			}
-			firstKey = false;
-			if(keyType == LUA_TSTRING) {
-				size_t len = 0;
-				const char* cstr = lua_tolstring(_lua, -2, &len);
-				result += string(cstr, len);
-			} else {
-				if(lua_isinteger(_lua, -2)) {
-					lua_Integer integer = lua_tointeger(_lua, -2);
-					result += std::to_string(integer);
-				} else {
-					lua_Number number = lua_tonumber(_lua, -2);
-					result += std::to_string(number);
-				}
-			}
-			result += " = ";
-
-			if(lua_type(_lua, -1) == LUA_TSTRING) {
-				result += "\"";
-				result += lua_tostring(_lua, -1);
-				result += "\"";
-			} else if(lua_istable(_lua, -1)) {
-				result += SerializeTable();
-			} else {
-				luaL_tolstring(_lua, -1, nullptr);
-				result += lua_tostring(_lua, -1);
-				lua_pop(_lua, 1);
-			}
-		}
-		lua_pop(_lua, 1);
-	}
-	return result + " }";
 }
 
 void ScriptingContext::ProcessLuaError()

@@ -237,6 +237,12 @@
 	"returnValue": { "type": "Int", "description": "ARGB color" }
 },
 {
+	"name": "getPressedKeys",
+	"category": "Input",
+	"description": "Returns an array containing the name of all keys/buttons currently pressed.",
+	"returnValue": { "type": "Array", "description": "Array of key/button names (strings)" }
+},
+{
 	"name": "getRomInfo",
 	"category": "Miscellaneous",
 	"subcategory": "Others",
@@ -289,9 +295,9 @@
 {
 	"name": "log",
 	"category": "Logging",
-	"description": "Logs the specified string in the script's log window - useful for debugging scripts.",
+	"description": "Displays the provided data (string, number, table/array) in the script window's log.",
 	"parameters": [
-		{ "name": "text", "type": "String", "description": "Text to log" }
+		{ "name": "data", "type": "Any", "description": "String, number or table/array to log" }
 	]
 },
 {
