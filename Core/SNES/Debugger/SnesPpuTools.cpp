@@ -5,7 +5,6 @@
 #include "Shared/SettingTypes.h"
 #include "SNES/SnesPpu.h"
 #include "Shared/ColorUtilities.h"
-#include "Shared/MessageManager.h"
 
 static constexpr uint8_t layerBpp[8][4] = {
 	{ 2, 2, 2, 2 },
@@ -66,7 +65,8 @@ DebugTilemapInfo SnesPpuTools::GetTilemap(GetTilemapOptions options, BaseState& 
 
 	LayerConfig layer = state.Layers[options.Layer];
 
-	std::fill(outBuffer, outBuffer + outputSize.Width * outputSize.Height, palette[0]);
+	uint32_t bgColor = GetTilemapBackgroundColor(options.Background, options.DisplayMode == TilemapDisplayMode::Grayscale ? _grayscaleColorsBpp4[0] : palette[0]);
+	std::fill(outBuffer, outBuffer + outputSize.Width * outputSize.Height, bgColor);
 
 	uint8_t bpp = layerBpp[state.BgMode][options.Layer];
 	if(bpp == 0) {

@@ -49,14 +49,17 @@
 
 		<ScrollViewer DockPanel.Dock="Right" IsVisible="{Binding Config.ShowSettingsPanel}">
 			<StackPanel Margin="3">
-				<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" IsVisible="{Binding IsTilemapInfoVisible}">
+				<Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,Auto" IsVisible="{Binding IsTilemapInfoVisible}">
 					<TextBlock Text="{l:Translate lblDisplayMode}" />
 					<c:EnumComboBox
 						SelectedItem="{Binding Config.DisplayMode}"
 						AvailableValues="{Binding AvailableDisplayModes}"
 						Width="100"
+						Grid.Column="1"
 					/>
-				</StackPanel>
+					<TextBlock Text="{l:Translate lblBackground}" Grid.Row="1" />
+					<c:EnumComboBox SelectedItem="{Binding Config.Background}" Width="100" Grid.Column="1" Grid.Row="1" />
+				</Grid>
 				<CheckBox Content="{l:Translate chkShowGrid}" IsChecked="{Binding Config.ShowGrid}" />
 				<CheckBox Content="{l:Translate chkNesShowAttributeGrid}" IsChecked="{Binding Config.NesShowAttributeGrid}" IsVisible="{Binding IsNes}" />
 				<CheckBox Content="{l:Translate chkNesShowAttributeByteGrid}" IsChecked="{Binding Config.NesShowAttributeByteGrid}" IsVisible="{Binding IsNes}" />

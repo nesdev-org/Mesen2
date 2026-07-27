@@ -44,7 +44,8 @@ DebugTilemapInfo GbaPpuTools::GetTilemap(GetTilemapOptions options, BaseState& b
 		colorMask = 0x0F;
 	}
 
-	std::fill(outBuffer, outBuffer + outputSize.Width * outputSize.Height, palette[0]);
+	uint32_t bgColor = GetTilemapBackgroundColor(options.Background, palette[0]);
+	std::fill(outBuffer, outBuffer + outputSize.Width * outputSize.Height, bgColor);
 
 	DebugTilemapInfo result = {};
 

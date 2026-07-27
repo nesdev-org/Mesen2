@@ -16,8 +16,6 @@ DebugTilemapInfo GbPpuTools::GetTilemap(GetTilemapOptions options, BaseState& ba
 	uint32_t offset = options.Layer == 1 ? 0x1C00 : 0x1800;
 	bool isCgb = state.CgbEnabled;
 
-	std::fill(outBuffer, outBuffer + 256 * 256, 0xFFFFFFFF);
-
 	uint16_t vramMask = isCgb ? 0x3FFF : 0x1FFF;
 
 	uint8_t colorMask = 0xFF;
@@ -25,6 +23,8 @@ DebugTilemapInfo GbPpuTools::GetTilemap(GetTilemapOptions options, BaseState& ba
 		palette = (uint32_t*)_grayscaleColorsBpp2;
 		colorMask = 0x03;
 	}
+
+	uint32_t bgColor = GetTilemapBackgroundColor(options.Background, palette[0]);
 
 	for(int row = 0; row < 32; row++) {
 		uint16_t baseOffset = offset + ((row & 0x1F) << 5);
@@ -54,8 +54,12 @@ DebugTilemapInfo GbPpuTools::GetTilemap(GetTilemapOptions options, BaseState& ba
 				for(int x = 0; x < 8; x++) {
 					uint8_t pixelIndex = hMirror ? (7 - x) : x;
 					uint8_t color = GetTilePixelColor<TileFormat::Bpp2>(vram, vramMask, pixelStart, pixelIndex);
-
-					outBuffer[((row * 8) + y) * 256 + column * 8 + x] = palette[(bgPalette + color) & colorMask];
+					int outIndex = ((row * 8) + y) * 256 + column * 8 + x;
+					if(color != 0 || options.Background == TilemapBackground::Default) {
+						outBuffer[outIndex] = palette[(bgPalette + color) & colorMask];
+					} else {
+						outBuffer[outIndex] = bgColor;
+					}
 				}
 			}
 		}

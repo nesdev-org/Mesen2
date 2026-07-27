@@ -7,13 +7,10 @@
 #include "NES/NesConstants.h"
 #include "NES/NesTypes.h"
 #include "NES/NesDefaultVideoFilter.h"
-#include "NES/Mappers/Homebrew/Rainbow.h"
 #include "Debugger/DebugTypes.h"
 #include "Debugger/MemoryDumper.h"
 #include "Debugger/MemoryAccessCounter.h"
 #include "Shared/SettingTypes.h"
-
-static constexpr uint32_t grayscalePalette[4] = { 0xFF000000, 0xFF808080, 0xFFC0C0C0, 0xFFFFFFFF };
 
 NesPpuTools::NesPpuTools(Debugger* debugger, Emulator* emu, NesConsole* console) : PpuTools(debugger, emu)
 {
@@ -36,6 +33,7 @@ void NesPpuTools::GetPpuToolsState(BaseState& state)
 void NesPpuTools::DrawNametable(uint8_t* ntSource, uint32_t ntBaseAddr, uint8_t ntIndex, GetTilemapOptions options, NesPpuState& state, IExtModeMapperDebug* exMode, ExtModeConfig& extCfg, uint8_t* vram, uint32_t* palette, uint32_t* outBuffer, uint32_t bufferWidth)
 {
 	uint16_t baseAttributeAddr = ntBaseAddr + 960;
+	uint32_t bgColor = GetTilemapBackgroundColor(options.Background, options.DisplayMode == TilemapDisplayMode::Grayscale ? _grayscaleColorsBpp2[0] : palette[0]);
 
 	for(uint8_t row = 0; row < 30; row++) {
 		for(uint8_t column = 0; column < 32; column++) {
@@ -74,8 +72,10 @@ void NesPpuTools::DrawNametable(uint8_t* ntSource, uint32_t ntBaseAddr, uint8_t 
 					uint32_t offset = (row * bufferWidth * 8) + (column << 3) + (y * bufferWidth);
 					for(uint8_t x = 0; x < 8; x++) {
 						uint8_t color = ((lowByte >> (7 - x)) & 0x01) | (((highByte >> (7 - x)) & 0x01) << 1);
-						if(options.DisplayMode == TilemapDisplayMode::Grayscale) {
-							outBuffer[offset + x] = grayscalePalette[color];
+						if(color == 0) {
+							outBuffer[offset + x] = bgColor;
+						} else if(options.DisplayMode == TilemapDisplayMode::Grayscale) {
+							outBuffer[offset + x] = _grayscaleColorsBpp2[color];
 						} else {
 							outBuffer[offset + x] = palette[paletteBaseAddr + color];
 						}

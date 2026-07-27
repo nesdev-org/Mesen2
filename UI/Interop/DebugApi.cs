@@ -1050,6 +1050,15 @@ namespace Mesen.Interop
 		[MarshalAs(UnmanagedType.I1)] public bool ShowPreviousFrameEvents;
 	}
 
+	public enum TilemapBackground
+	{
+		Default,
+		Transparent,
+		Black,
+		White,
+		Magenta
+	}
+
 	public enum TilemapDisplayMode
 	{
 		Default,
@@ -1075,6 +1084,7 @@ namespace Mesen.Interop
 		public TilemapHighlightMode AttributeHighlightMode;
 
 		public TilemapDisplayMode DisplayMode;
+		public TilemapBackground Background;
 
 		public InteropGetTilemapOptions ToInterop()
 		{
@@ -1083,7 +1093,8 @@ namespace Mesen.Interop
 				MasterClock = MasterClock,
 				TileHighlightMode = TileHighlightMode,
 				AttributeHighlightMode = AttributeHighlightMode,
-				DisplayMode = DisplayMode
+				DisplayMode = DisplayMode,
+				Background = Background
 			};
 		}
 	}
@@ -1099,6 +1110,7 @@ namespace Mesen.Interop
 		public TilemapHighlightMode AttributeHighlightMode;
 
 		public TilemapDisplayMode DisplayMode;
+		public TilemapBackground Background;
 	}
 
 	public enum TileBackground

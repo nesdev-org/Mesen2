@@ -243,7 +243,8 @@ protected:
 
 	bool IsTileHidden(MemoryType memType, uint32_t addr, GetTileViewOptions& options);
 
-	uint32_t GetBackgroundColor(TileBackground bgColor, const uint32_t* colors, uint8_t paletteIndex = 0, uint8_t bpp = 0);
+	uint32_t GetTilemapBackgroundColor(TilemapBackground bgColor, uint32_t defaultColor);
+	uint32_t GetTileBackgroundColor(TileBackground bgColor, const uint32_t* colors, uint8_t paletteIndex = 0, uint8_t bpp = 0);
 	uint32_t GetSpriteBackgroundColor(SpriteBackground bgColor, const uint32_t* colors, bool useDarkerColor);
 
 	void GetSetTilePixel(AddressInfo tileAddress, TileFormat format, int32_t x, int32_t y, int32_t& color, bool forGet);

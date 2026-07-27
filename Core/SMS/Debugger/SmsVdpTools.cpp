@@ -81,6 +81,8 @@ DebugTilemapInfo SmsVdpTools::GetTilemap(GetTilemapOptions options, BaseState& b
 	}
 
 	if(state.UseMode4) {
+		uint32_t bgColor = GetTilemapBackgroundColor(options.Background, palette[0]);
+
 		result.ScrollX = 256 - state.HorizontalScroll + (isGameGear ? 48 : 0);
 		result.ScrollY = state.VerticalScroll + (isGameGear ? 24 : 0);
 		result.TilemapAddress = state.EffectiveNametableAddress;
@@ -102,9 +104,8 @@ DebugTilemapInfo SmsVdpTools::GetTilemap(GetTilemapOptions options, BaseState& b
 						uint8_t tileColumn = hMirror ? 7 - (x & 0x07) : (x & 0x07);
 
 						uint8_t color = GetTilePixelColor<TileFormat::SmsBpp4>(vram, 0x3FFF, tileAddr, tileColumn);
-						uint16_t palAddr = color == 0 ? 0 : (paletteOffset + color);
 						uint32_t outPos = (row * 8 + y) * 32 * 8 + column * 8 + x;
-						outBuffer[outPos] = palette[palAddr & colorMask];
+						outBuffer[outPos] = color == 0 ? bgColor : palette[(paletteOffset + color) & colorMask];
 					}
 				}
 			}

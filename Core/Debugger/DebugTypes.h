@@ -171,6 +171,15 @@ enum class TilemapHighlightMode
 	Writes
 };
 
+enum class TilemapBackground
+{
+	Default,
+	Transparent,
+	Black,
+	White,
+	Magenta,
+};
+
 struct GetTilemapOptions
 {
 	uint8_t Layer;
@@ -182,6 +191,7 @@ struct GetTilemapOptions
 	TilemapHighlightMode AttributeHighlightMode;
 
 	TilemapDisplayMode DisplayMode;
+	TilemapBackground Background;
 };
 
 enum class TileFormat

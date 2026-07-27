@@ -1,5 +1,5 @@
-﻿using Mesen.Interop;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Mesen.Interop;
 
 namespace Mesen.Config
 {
@@ -19,6 +19,7 @@ namespace Mesen.Config
 		[ObservableProperty] public partial TilemapHighlightMode TileHighlightMode { get; set; } = TilemapHighlightMode.None;
 		[ObservableProperty] public partial TilemapHighlightMode AttributeHighlightMode { get; set; } = TilemapHighlightMode.None;
 		[ObservableProperty] public partial TilemapDisplayMode DisplayMode { get; set; } = TilemapDisplayMode.Default;
+		[ObservableProperty] public partial TilemapBackground Background { get; set; } = TilemapBackground.Default;
 
 		[ObservableProperty] public partial RefreshTimingConfig RefreshTiming { get; set; } = new();
 

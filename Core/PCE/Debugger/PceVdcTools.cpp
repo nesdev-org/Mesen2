@@ -105,6 +105,8 @@ DebugTilemapInfo PceVdcTools::InternalGetTilemap(GetTilemapOptions options, PceV
 		}
 	}
 
+	uint32_t bgColor = GetTilemapBackgroundColor(options.Background, palette[0]);
+
 	for(uint8_t row = 0; row < state.HvLatch.RowCount; row++) {
 		for(uint8_t column = 0; column < state.HvLatch.ColumnCount; column++) {
 			uint16_t entryAddr = (row * state.HvLatch.ColumnCount + column) * 2;
@@ -116,9 +118,8 @@ DebugTilemapInfo PceVdcTools::InternalGetTilemap(GetTilemapOptions options, PceV
 				uint16_t tileAddr = tileIndex * 32 + y * 2;
 				for(int x = 0; x < 8; x++) {
 					uint8_t color = GetTilePixelColor<format>(vram, 0xFFFF, tileAddr, x);
-					uint16_t palAddr = color == 0 ? 0 : (palIndex * 16 + color);
 					uint32_t outPos = (row * 8 + y) * state.HvLatch.ColumnCount * 8 + column * 8 + x;
-					outBuffer[outPos] = palette[palAddr & colorMask];
+					outBuffer[outPos] = color == 0 ? bgColor : palette[(palIndex * 16 + color) & colorMask];
 				}
 			}
 		}

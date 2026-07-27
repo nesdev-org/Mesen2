@@ -443,7 +443,8 @@ namespace Mesen.Debugger.ViewModels
 				AccessCounters = accessCounters,
 				TileHighlightMode = Config.TileHighlightMode,
 				AttributeHighlightMode = Config.AttributeHighlightMode,
-				DisplayMode = Config.DisplayMode
+				DisplayMode = Config.DisplayMode,
+				Background = Config.Background
 			};
 		}
 

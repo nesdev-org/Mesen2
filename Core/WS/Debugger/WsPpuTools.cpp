@@ -17,14 +17,22 @@ FrameInfo WsPpuTools::GetTilemapSize(GetTilemapOptions options, BaseState& baseS
 	return { 256, 256 };
 }
 
+uint32_t WsPpuTools::GetBgColor(WsPpuState& state, uint8_t* vram)
+{
+	if(state.Mode == WsVideoMode::Monochrome) {
+		uint8_t bgBrightness = state.BwShades[state.BgColor & 0x07] ^ 0x0F;
+		return ColorUtilities::Bgr444ToArgb(bgBrightness | (bgBrightness << 4) | (bgBrightness << 8));
+	} else {
+		return ColorUtilities::Bgr444ToArgb(vram[0xFE00 | (state.BgColor << 1)] | ((vram[0xFE00 | (state.BgColor << 1) | 1] & 0x0F) << 8));
+	}
+}
+
 DebugTilemapInfo WsPpuTools::GetTilemap(GetTilemapOptions options, BaseState& baseState, BaseState& ppuToolsState, uint8_t* vram, uint32_t* palette, uint32_t* outBuffer)
 {
 	WsPpuState& state = (WsPpuState&)baseState;
 
 	uint16_t ramMask = state.Mode == WsVideoMode::Monochrome ? 0x3FFF : 0xFFFF;
 	uint16_t baseAddr = state.BgLayers[options.Layer].MapAddress;
-
-	std::fill(outBuffer, outBuffer + 256 * 256, 0xFFFFFFFF);
 
 	int tileSize = state.Mode >= WsVideoMode::Color4bpp ? 32 : 16;
 	int bpp = state.Mode >= WsVideoMode::Color4bpp ? 4 : 2;
@@ -37,6 +45,9 @@ DebugTilemapInfo WsPpuTools::GetTilemap(GetTilemapOptions options, BaseState& ba
 		palette = (uint32_t*)_grayscaleColorsBpp2;
 		colorMask = 0x03;
 	}
+
+	uint32_t bgColor = GetTilemapBackgroundColor(options.Background, GetBgColor(state, vram));
+	std::fill(outBuffer, outBuffer + 256 * 256, bgColor);
 
 	for(int row = 0; row < 32; row++) {
 		uint16_t baseOffset = baseAddr + row * 64;
@@ -349,7 +360,7 @@ DebugPaletteInfo WsPpuTools::GetPaletteInfo(GetPaletteInfoOptions options)
 		for(int i = 0; i < 64; i++) {
 			info.RawPalette[i] = state.BwPalettes[i];
 			uint8_t brightness = state.BwShades[state.BwPalettes[i]] ^ 0x0F;
-			info.RgbPalette[i] = ColorUtilities::Rgb444ToArgb(brightness | (brightness << 4) | (brightness << 8));
+			info.RgbPalette[i] = ColorUtilities::Bgr444ToArgb(brightness | (brightness << 4) | (brightness << 8));
 		}
 	} else {
 		info.ColorCount = 256;
@@ -364,7 +375,7 @@ DebugPaletteInfo WsPpuTools::GetPaletteInfo(GetPaletteInfoOptions options)
 
 		uint8_t* palette = _debugger->GetMemoryDumper()->GetMemoryBuffer(MemoryType::WsWorkRam);
 
-		info.RawFormat = RawPaletteFormat::Rgb444;
+		info.RawFormat = RawPaletteFormat::Bgr444;
 		for(int i = 0; i < 256; i++) {
 			int addr = 0xFE00 + i * 2;
 			info.RawPalette[i] = palette[addr] | ((palette[addr + 1] & 0x0F) << 8);

@@ -15,6 +15,8 @@ private:
 	void GetSpriteInfo(DebugSpriteInfo& sprite, uint32_t* spritePreview, uint16_t spriteIndex, GetSpritePreviewOptions& options, WsPpuState& state, uint8_t* vram, uint8_t* oamRam, uint32_t* palette);
 	void GetSpritePreview(GetSpritePreviewOptions options, BaseState& state, DebugSpriteInfo* sprites, uint32_t* spritePreviews, uint32_t* palette, uint32_t* outBuffer);
 
+	uint32_t GetBgColor(WsPpuState& state, uint8_t* vram);
+
 public:
 	WsPpuTools(Debugger* debugger, Emulator* emu, WsConsole* console);
 
