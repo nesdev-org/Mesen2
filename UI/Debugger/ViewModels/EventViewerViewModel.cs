@@ -72,6 +72,17 @@ namespace Mesen.Debugger.ViewModels
 
 			FileMenuItems = AddDisposables(new List<object>() {
 				new ContextMenuAction() {
+					ActionType = ActionType.ExportToPng,
+					Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.SaveAsPng),
+					OnClick = () => _picViewer.ExportToPng()
+				},
+				new ContextMenuAction() {
+					ActionType = ActionType.CopyToClipboard,
+					Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.Copy),
+					OnClick = () => _picViewer.CopyToClipboard()
+				},
+				new ContextMenuSeparator(),
+				new ContextMenuAction() {
 					ActionType = ActionType.Exit,
 					OnClick = () => wnd?.Close()
 				}

@@ -94,6 +94,11 @@ public partial class TileEditorViewModel : DisposableViewModel
 				Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.SaveAsPng),
 				OnClick = () => picViewer.ExportToPng()
 			},
+			new ContextMenuAction() {
+				ActionType = ActionType.CopyToClipboard,
+				Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.Copy),
+				OnClick = () => picViewer.CopyToClipboard()
+			},
 			new ContextMenuSeparator(),
 			new ContextMenuAction() {
 				ActionType = ActionType.Exit,

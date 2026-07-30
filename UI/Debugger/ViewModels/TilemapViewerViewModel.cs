@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -62,6 +63,7 @@ namespace Mesen.Debugger.ViewModels
 		private bool _refreshDataOnTabChange;
 		private bool _inGameLoaded;
 		private bool _refreshPending;
+		private PixelRect _previewCropRect;
 
 		[Obsolete("For designer only")]
 		public TilemapViewerViewModel() : this(CpuType.Snes, new(), new(), null) { }
@@ -83,6 +85,11 @@ namespace Mesen.Debugger.ViewModels
 					ActionType = ActionType.ExportToPng,
 					Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.SaveAsPng),
 					OnClick = () => _picViewer.ExportToPng()
+				},
+				new ContextMenuAction() {
+					ActionType = ActionType.CopyToClipboard,
+					Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.Copy),
+					OnClick = () => _picViewer.CopyToClipboard()
 				},
 				new ContextMenuSeparator(),
 				new ContextMenuAction() {
@@ -159,6 +166,11 @@ namespace Mesen.Debugger.ViewModels
 				},
 				new ContextMenuSeparator(),
 				new ContextMenuAction() {
+					ActionType = ActionType.CopyToClipboard,
+					OnClick = () => wnd.Clipboard?.SetBitmapAsync(ViewerBitmap.CropBitmap(_previewCropRect))
+				},
+				new ContextMenuSeparator(),
+				new ContextMenuAction() {
 					ActionType = ActionType.EditTile,
 					Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.TilemapViewer_EditTile),
 					OnClick = () => EditTileGrid(1, 1, wnd)
@@ -203,10 +215,10 @@ namespace Mesen.Debugger.ViewModels
 						}
 					}
 				},
-				new ContextMenuSeparator() { IsVisible = () => CpuType == CpuType.Nes },
+				new ContextMenuSeparator() { IsVisible = () => IsNes },
 				new ContextMenuAction() {
 					ActionType = ActionType.CopyToHdPackFormat,
-					IsVisible = () => CpuType == CpuType.Nes,
+					IsVisible = () => IsNes,
 					IsEnabled = () => HdPackCopyHelper.IsActionAllowed(GetVramMemoryType()),
 					OnClick = () => {
 						DebugTilemapTileInfo? tile = GetSelectedTileInfo();
@@ -217,6 +229,7 @@ namespace Mesen.Debugger.ViewModels
 				}
 			}));
 
+			picViewer.ContextMenu?.Opening += ContextMenu_Opening;
 
 			AddDisposable(this.ObserveProp(nameof(Tabs), () => ShowTabs = Tabs.Count > 1));
 			AddDisposable(this.ObserveProp(nameof(SelectionRect), () => UpdatePreviewPanel()));
@@ -240,6 +253,13 @@ namespace Mesen.Debugger.ViewModels
 
 			DebugShortcutManager.RegisterActions(wnd, FileMenuActions);
 			DebugShortcutManager.RegisterActions(wnd, ViewMenuActions);
+		}
+
+		private void ContextMenu_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
+		{
+			if(GetSelectedTileInfo() == null) {
+				e.Cancel = true;
+			}
 		}
 
 		private void InitNesGridOptions()
@@ -610,6 +630,8 @@ namespace Mesen.Debugger.ViewModels
 
 			TooltipEntries entries = tooltipToUpdate?.Items ?? new();
 			PixelRect cropRect = new PixelRect(p.X / tileInfo.Width * tileInfo.Width, p.Y / tileInfo.Height * tileInfo.Height, tileInfo.Width, tileInfo.Height);
+
+			_previewCropRect = cropRect;
 
 			entries.StartUpdate();
 

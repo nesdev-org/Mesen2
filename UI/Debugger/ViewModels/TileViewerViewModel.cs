@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -72,6 +73,7 @@ namespace Mesen.Debugger.ViewModels
 		private bool _refreshPending;
 		private bool _inGameLoaded;
 		private bool _preventPresetLoad;
+		private PixelRect _previewCropRect;
 
 		[Obsolete("For designer only")]
 		public TileViewerViewModel() : this(CpuType.Snes, new(), new(), null) { }
@@ -93,6 +95,11 @@ namespace Mesen.Debugger.ViewModels
 					ActionType = ActionType.ExportToPng,
 					Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.SaveAsPng),
 					OnClick = () => picViewer.ExportToPng()
+				},
+				new ContextMenuAction() {
+					ActionType = ActionType.CopyToClipboard,
+					Shortcut = () => ConfigManager.Config.Debug.Shortcuts.Get(DebuggerShortcut.Copy),
+					OnClick = () => picViewer.CopyToClipboard()
 				},
 				new ContextMenuSeparator(),
 				new ContextMenuAction() {
@@ -139,6 +146,11 @@ namespace Mesen.Debugger.ViewModels
 			});
 
 			AddDisposables(DebugShortcutManager.CreateContextMenu(picViewer, scrollViewer, new List<object> {
+				new ContextMenuAction() {
+					ActionType = ActionType.CopyToClipboard,
+					OnClick = () => wnd.Clipboard?.SetBitmapAsync(ViewerBitmap.CropBitmap(_previewCropRect))
+				},
+				new ContextMenuSeparator(),
 				new ContextMenuAction() {
 					ActionType = ActionType.EditTile,
 					HintText = () => $"{GridSizeX}px x {GridSizeY}px",
@@ -550,6 +562,7 @@ namespace Mesen.Debugger.ViewModels
 
 			PixelSize tileSize = Config.Format.GetTileSize();
 			PixelRect cropRect = new PixelRect(p.X / tileSize.Width * tileSize.Width, p.Y / tileSize.Height * tileSize.Height, tileSize.Width, tileSize.Height);
+			_previewCropRect = cropRect;
 			entries.AddPicture("Tile", ViewerBitmap, 6, cropRect);
 
 			int address = GetTileAddress(cropRect.TopLeft);
