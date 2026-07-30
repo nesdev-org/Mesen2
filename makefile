@@ -4,7 +4,9 @@
 #The emulation core also requires SDL2.
 #Run "make" to build, "make run" to run
 
-MESENFLAGS=
+DESTDIR ?= /
+PREFIX ?= /usr/local
+INSTALLBINNAME ?= mesen-ce
 
 ifeq ($(USE_GCC),true)
 	CXX := g++
@@ -23,7 +25,8 @@ SDL2INC := $(shell sdl2-config --cflags)
 
 LINKCHECKUNRESOLVED := -Wl,-z,defs
 
-LINKOPTIONS :=
+DEFCFLAGS :=
+DEFLDFLAGS :=
 MESENOS :=
 UNAME_S := $(shell uname -s)
 
@@ -40,7 +43,7 @@ ifeq ($(UNAME_S),Darwin)
 	LINKCHECKUNRESOLVED :=
 endif
 
-MESENFLAGS += -m64
+DEFCFLAGS += -m64
 
 MACHINE := $(shell uname -m)
 ifeq ($(MACHINE),x86_64)
@@ -57,62 +60,75 @@ ifeq ($(MACHINE),aarch64)
 	MESENPLATFORM := $(MESENOS)-arm64
 	ifeq ($(USE_GCC),true)
 		#don't set -m64 on arm64 for gcc (unrecognized option)
-		MESENFLAGS=
+		DEFCFLAGS=
 	endif
 endif
 
 DEBUG ?= 0
 
 ifeq ($(DEBUG),0)
-	MESENFLAGS += -O3
+	DEFCFLAGS += -O3
 	ifneq ($(LTO),false)
-		MESENFLAGS += -DHAVE_LTO
 		ifneq ($(USE_GCC),true)
-			MESENFLAGS += -flto=thin
+			DEFCFLAGS += -flto=thin
 		else
-			MESENFLAGS += -flto=auto
+			DEFCFLAGS += -flto=auto
 		endif
 	endif
 else
-	MESENFLAGS += -O0 -g
+	DEFCFLAGS += -O0 -g
 	# Note: if compiling with a sanitizer, you will likely need to `LD_PRELOAD` the library `libMesenCore.so` will be linked against.
 	ifneq ($(SANITIZER),)
 		ifeq ($(SANITIZER),address)
 			# Currently, `-fsanitize=address` is not supported together with `-fsanitize=thread`
-			MESENFLAGS += -fsanitize=address
+			DEFCFLAGS += -fsanitize=address
 		else ifeq ($(SANITIZER),thread)
 			# Currently, `-fsanitize=address` is not supported together with `-fsanitize=thread`
-			MESENFLAGS += -fsanitize=thread
+			DEFCFLAGS += -fsanitize=thread
 		else
 $(warning Unrecognised $$(SANITIZER) value: $(SANITIZER))
 		endif
 		# `-Wl,-z,defs` is incompatible with the sanitizers in a shared lib, unless the sanitizer libs are linked dynamically; hence `-shared-libsan` (not the default for Clang).
 		# It seems impossible to link dynamically against two sanitizers at the same time, but that might be a Clang limitation.
 		ifneq ($(USE_GCC),true)
-			MESENFLAGS += -shared-libsan
+			DEFCFLAGS += -shared-libsan
 		endif
 	endif
 endif
 
+ifneq ($(STATICLINK),false)
+	DEFLDFLAGS += -static-libgcc -static-libstdc++ -Wl,--export-dynamic,--exclude-libs=libstdc++.a
+endif
+
+# Patch user-provided flags
+
+CFLAGS ?= $(DEFCFLAGS)
+CXXFLAGS ?= $(DEFCFLAGS)
+LDFLAGS ?= $(DEFLDFLAGS)
+
 ifeq ($(PGO),profile)
-	MESENFLAGS += ${PROFILE_GEN_FLAG}
+	CFLAGS += ${PROFILE_GEN_FLAG}
+	CXXFLAGS += ${PROFILE_GEN_FLAG}
 endif
 
 ifeq ($(PGO),optimize)
-	MESENFLAGS += ${PROFILE_USE_FLAG}
-endif
-
-ifneq ($(STATICLINK),false)
-	LINKOPTIONS += -static-libgcc -static-libstdc++ -Wl,--export-dynamic,--exclude-libs=libstdc++.a
+	CFLAGS += ${PROFILE_USE_FLAG}
+	CXXFLAGS += ${PROFILE_USE_FLAG}
 endif
 
 ifeq ($(MESENOS),osx)
-	LINKOPTIONS += -framework Foundation -framework Cocoa -framework GameController -framework CoreHaptics -Wl,-rpath,/opt/local/lib
+	LDFLAGS += -framework Foundation -framework Cocoa -framework GameController -framework CoreHaptics -Wl,-rpath,/opt/local/lib
 endif
 
-CXXFLAGS = -fPIC -Wall --std=c++17 $(MESENFLAGS) $(SDL2INC) -I $(realpath ./) -I $(realpath ./Core) -I $(realpath ./Utilities) -I $(realpath ./Sdl) -I $(realpath ./Linux) -I $(realpath ./MacOS)
+CXXFLAGS += -fPIC -Wall --std=c++17 $(SDL2INC) -I $(realpath ./) -I $(realpath ./Core) -I $(realpath ./Utilities) -I $(realpath ./Sdl) -I $(realpath ./Linux) -I $(realpath ./MacOS)
+CFLAGS += -fPIC -Wall
+
+ifneq ($(findstring flto,$(CXXFLAGS)),)
+	CFLAGS += -DHAVE_LTO
+	CXXFLAGS += -DHAVE_LTO
+endif
+
 OBJCXXFLAGS = $(CXXFLAGS)
-CFLAGS = -fPIC -Wall $(MESENFLAGS)
 
 OBJFOLDER := obj.$(MESENPLATFORM)
 DEBUGFOLDER := bin/$(MESENPLATFORM)/Debug
@@ -196,6 +212,8 @@ ifeq ($(MESENOS),osx)
 	endif
 endif
 
+.PHONY: all ui core pgohelper pgo run clean install
+
 all: ui
 
 ui: InteropDLL/$(OBJFOLDER)/$(SHAREDLIB)
@@ -214,7 +232,7 @@ pgohelper: InteropDLL/$(OBJFOLDER)/$(SHAREDLIB)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
-	
+
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -224,7 +242,7 @@ pgohelper: InteropDLL/$(OBJFOLDER)/$(SHAREDLIB)
 InteropDLL/$(OBJFOLDER)/$(SHAREDLIB): $(SEVENZIPOBJ) $(LUAOBJ) $(UTILOBJ) $(COREOBJ) $(SDLOBJ) $(LIBEVDEVOBJ) $(LINUXOBJ) $(DLLOBJ) $(MACOSOBJ)
 	mkdir -p bin
 	mkdir -p InteropDLL/$(OBJFOLDER)
-	$(CXX) $(CXXFLAGS) $(LINKOPTIONS) $(LINKCHECKUNRESOLVED) -shared -o $(SHAREDLIB) $(DLLOBJ) $(SEVENZIPOBJ) $(LUAOBJ) $(LINUXOBJ) $(MACOSOBJ) $(LIBEVDEVOBJ) $(UTILOBJ) $(SDLOBJ) $(COREOBJ) $(SDL2INC) -pthread $(FSLIB) $(SDL2LIB) $(LIBEVDEVLIB) $(X11LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LINKCHECKUNRESOLVED) -shared -o $(SHAREDLIB) $(DLLOBJ) $(SEVENZIPOBJ) $(LUAOBJ) $(LINUXOBJ) $(MACOSOBJ) $(LIBEVDEVOBJ) $(UTILOBJ) $(SDLOBJ) $(COREOBJ) $(SDL2INC) -pthread $(FSLIB) $(SDL2LIB) $(LIBEVDEVLIB) $(X11LIB)
 	cp $(SHAREDLIB) bin/pgohelperlib.so
 	mv $(SHAREDLIB) InteropDLL/$(OBJFOLDER)
 
@@ -243,3 +261,6 @@ clean:
 	rm -r -f $(LUAOBJ)
 	rm -r -f $(MACOSOBJ)
 	rm -r -f $(DLLOBJ)
+
+install:
+	install -m 0755 $(OUTFOLDER)/$(MESENPLATFORM)/publish/Mesen "$(DESTDIR)$(PREFIX)/bin/$(INSTALLBINNAME)"
