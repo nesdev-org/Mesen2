@@ -173,7 +173,7 @@ void GbDmaController::ProcessHdma()
 
 void GbDmaController::ProcessDmaBlock()
 {
-	bool isInvalidSource = _state.CgbDmaSource >= 0x8000 && _state.CgbDmaSource <= 0x9FFF || _state.CgbDmaSource >= 0xE000;
+	bool isInvalidSource = (_state.CgbDmaSource >= 0x8000 && _state.CgbDmaSource <= 0x9FFF) || _state.CgbDmaSource >= 0xE000;
 	for(int i = 0; i < 16; i++) {
 		uint16_t dst = 0x8000 | ((_state.CgbDmaDest + i) & 0x1FFF);
 

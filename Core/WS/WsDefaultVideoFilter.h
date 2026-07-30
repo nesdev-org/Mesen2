@@ -14,8 +14,6 @@ private:
 	uint32_t _calculatedPalette[0x1000] = {};
 	VideoConfig _videoConfig = {};
 
-	FrameInfo _prevFrameSize = {};
-	uint16_t* _prevFrame = nullptr;
 	bool _adjustColors = false;
 
 	bool _applyNtscFilter = false;

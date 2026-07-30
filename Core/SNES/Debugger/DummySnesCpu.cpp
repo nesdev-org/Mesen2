@@ -10,6 +10,7 @@
 DummySnesCpu::DummySnesCpu(SnesConsole* console, CpuType type)
 {
 	_console = console;
+	_emu = nullptr;
 	_memoryMappings = type == CpuType::Snes ? console->GetMemoryManager()->GetMemoryMappings() : console->GetCartridge()->GetSa1()->GetMemoryMappings();
 	_dmaController = nullptr;
 	_memoryManager = nullptr;

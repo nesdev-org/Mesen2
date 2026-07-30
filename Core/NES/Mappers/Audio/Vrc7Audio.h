@@ -6,7 +6,7 @@
 #include "Shared/Utilities/Emu2413Serializer.h"
 #include "Utilities/Serializer.h"
 
-class Vrc7Audio : public ISerializable
+class Vrc7Audio final : public ISerializable
 {
 private:
 	static constexpr int OpllSampleRate = 49716;

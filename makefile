@@ -14,6 +14,9 @@ ifeq ($(USE_GCC),true)
 else
 	CXX := clang++
 	CC := clang
+	ifeq ($(UNAME_S),Linux)
+		MESENFLAGS += -Werror -Wno-undefined-inline -Wno-return-type-c-linkage
+	endif
 	PROFILE_GEN_FLAG := -fprofile-instr-generate=$(CURDIR)/PGOHelper/pgo.profraw
 	PROFILE_USE_FLAG := -fprofile-instr-use=$(CURDIR)/PGOHelper/pgo.profdata
 endif

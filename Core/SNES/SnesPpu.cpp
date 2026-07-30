@@ -1552,8 +1552,8 @@ bool SnesPpu::ProcessMaskWindow(uint8_t activeWindowCount, int x)
 		case 2:
 			switch(_state.MaskLogic[layerIndex]) {
 				default:
-				case WindowMaskLogic::Or: return _state.Window[0].PixelNeedsMasking<layerIndex>(x) | _state.Window[1].PixelNeedsMasking<layerIndex>(x);
-				case WindowMaskLogic::And: return _state.Window[0].PixelNeedsMasking<layerIndex>(x) & _state.Window[1].PixelNeedsMasking<layerIndex>(x);
+				case WindowMaskLogic::Or: return _state.Window[0].PixelNeedsMasking<layerIndex>(x) || _state.Window[1].PixelNeedsMasking<layerIndex>(x);
+				case WindowMaskLogic::And: return _state.Window[0].PixelNeedsMasking<layerIndex>(x) && _state.Window[1].PixelNeedsMasking<layerIndex>(x);
 				case WindowMaskLogic::Xor: return _state.Window[0].PixelNeedsMasking<layerIndex>(x) ^ _state.Window[1].PixelNeedsMasking<layerIndex>(x);
 				case WindowMaskLogic::Xnor: return !(_state.Window[0].PixelNeedsMasking<layerIndex>(x) ^ _state.Window[1].PixelNeedsMasking<layerIndex>(x));
 			}

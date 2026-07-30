@@ -46,7 +46,7 @@ public:
 	}
 };
 
-class Mmc5Audio : public ISerializable
+class Mmc5Audio final : public ISerializable
 {
 private:
 	NesConsole* _console = nullptr;

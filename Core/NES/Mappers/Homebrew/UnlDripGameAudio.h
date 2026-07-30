@@ -3,7 +3,7 @@
 #include "NES/APU/NesApu.h"
 #include "NES/NesConsole.h"
 
-class UnlDripGameAudio : public ISerializable
+class UnlDripGameAudio final : public ISerializable
 {
 private:
 	NesConsole* _console = nullptr;

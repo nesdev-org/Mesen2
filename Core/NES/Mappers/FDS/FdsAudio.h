@@ -8,7 +8,7 @@
 class NesConsole;
 struct MapperStateEntry;
 
-class FdsAudio : public ISerializable
+class FdsAudio final : public ISerializable
 {
 private:
 	const uint32_t WaveVolumeTable[4] = { 36, 24, 17, 14 };

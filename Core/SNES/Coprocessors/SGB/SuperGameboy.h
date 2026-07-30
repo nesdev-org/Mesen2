@@ -23,7 +23,6 @@ private:
 	BaseCartridge* _cart = nullptr;
 	Spc* _spc = nullptr;
 	Gameboy* _gameboy = nullptr;
-	GbPpu* _ppu = nullptr;
 
 	uint8_t _control = 0;
 	uint64_t _resetClock = 0;

@@ -4,7 +4,7 @@
 #include "NES/APU/NesApu.h"
 #include "Utilities/Serializer.h"
 
-class Namco163Audio : public ISerializable
+class Namco163Audio final : public ISerializable
 {
 public:
 	static constexpr uint32_t AudioRamSize = 0x80;

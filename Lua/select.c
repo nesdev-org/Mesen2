@@ -116,7 +116,12 @@ static int dirty(lua_State *L) {
 
 static void collect_fd(lua_State *L, int tab, int itab,
         fd_set *set, t_socket *max_fd) {
-    int i = 1, n = 0;
+    int i = 1;
+
+#ifdef _WIN32
+    int n = 0;
+#endif
+
     /* nil is the same as an empty table */
     if (lua_isnil(L, tab)) return;
     /* otherwise we need it to be a table */
@@ -136,12 +141,12 @@ static void collect_fd(lua_State *L, int tab, int itab,
 #ifdef _WIN32
             if (n >= FD_SETSIZE)
                 luaL_argerror(L, tab, "too many sockets");
+            n++;
 #else
             if (fd >= FD_SETSIZE)
                 luaL_argerror(L, tab, "descriptor too large for set size");
 #endif
             FD_SET(fd, set);
-            n++;
             /* keep track of the largest descriptor so far */
             if (*max_fd == SOCKET_INVALID || *max_fd < fd)
                 *max_fd = fd;

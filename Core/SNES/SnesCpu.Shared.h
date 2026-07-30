@@ -387,7 +387,7 @@ uint8_t SnesCpu::GetOpCode()
 
 void SnesCpu::IdleOrRead()
 {
-	if(!_state.IrqLock && ((_state.IrqSource != 0 || _state.PrevIrqSource != 0) && !CheckFlag(ProcFlags::IrqDisable)) || (_state.NmiFlagCounter == 1 || _state.NeedNmi)) {
+	if(!_state.IrqLock && (((_state.IrqSource != 0 || _state.PrevIrqSource != 0) && !CheckFlag(ProcFlags::IrqDisable)) || _state.NmiFlagCounter == 1 || _state.NeedNmi)) {
 		//If an IRQ or NMI will be triggered on the next instruction/cycle, the 6-clock idle cycle turns into a dummy read at the current PC
 		ReadCode(_state.PC);
 	} else {

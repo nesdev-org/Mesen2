@@ -4,7 +4,7 @@
 #include "NES/APU/NesApu.h"
 #include "Utilities/Serializer.h"
 
-class Sunsoft5bAudio : public ISerializable
+class Sunsoft5bAudio final : public ISerializable
 {
 private:
 	NesConsole* _console = nullptr;

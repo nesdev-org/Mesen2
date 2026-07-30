@@ -5,7 +5,7 @@
 #include "NES/NesConsole.h"
 #include "Utilities/Serializer.h"
 
-class Vrc6Audio : public ISerializable
+class Vrc6Audio final : public ISerializable
 {
 private:
 	NesConsole* _console = nullptr;

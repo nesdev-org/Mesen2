@@ -731,7 +731,7 @@ template<class T> void NesPpu<T>::LoadSprite(uint8_t spriteY, uint8_t tileIndex,
 
 	//This function is only called on rendering scanlines (0-239) or pre-render (-1). We need to handle the pre-render scanline numbers manually.
 	//These are deliberately truncated to 8 bits to match hardware behavior.
-	const uint8_t scanline8Bit = _scanline >= 0 ? _scanline : (_region == ConsoleRegion::Ntsc ? 261 : 311);
+	const uint8_t scanline8Bit = (uint8_t)(_scanline >= 0 ? _scanline : (_region == ConsoleRegion::Ntsc ? 261 : 311));
 	uint16_t rangeResult = scanline8Bit - spriteY;
 	if(verticalMirror) {
 		rangeResult ^= spriteSizeMask;

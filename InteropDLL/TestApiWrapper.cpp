@@ -135,7 +135,6 @@ extern "C"
 		std::cout << "Test count: " << tests.size() << "\n";
 		std::cout << "Tests to skip: " << skipCount << "\n\n";
 
-		std::atomic<bool> failed = false;
 		std::atomic<int> testNumber = 0;
 		std::atomic<int> failCount = 0;
 		std::atomic<int> passCount = 0;

@@ -8,13 +8,11 @@ class SnesDefaultVideoFilter : public BaseVideoFilter
 {
 private:
 	uint32_t _calculatedPalette[0x8000] = {};
-	uint16_t* _prevFrame = nullptr;
 	VideoConfig _videoConfig = {};
 
 	SnesHighResBlendMode _highResBlendMode = SnesHighResBlendMode::None;
 	SnesColorCorrectionMode _colorCorrection = SnesColorCorrectionMode::None;
 	bool _forceFixedRes = false;
-	bool _needFrameClear = false;
 
 	void InitLookupTable();
 

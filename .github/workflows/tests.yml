@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         platform: [
-          {netversion: 8.x, targetframework: net8.0, aot: false, singleFile: true}
+          {netversion: 10.x, targetframework: net10.0, aot: false, singleFile: true}
         ]
       fail-fast: false
     runs-on: windows-2025-vs2026

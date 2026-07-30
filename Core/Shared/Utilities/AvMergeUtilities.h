@@ -1,19 +1,20 @@
 #include "Shared/RenderedFrame.h"
 
+template<class T>
 struct VideoMergeResult
 {
 	RenderedFrame Frame;
 
 	~VideoMergeResult()
 	{
-		delete[] Frame.FrameBuffer;
+		delete[]((T*)Frame.FrameBuffer);
 	}
 };
 
 class AvMergeUtilities
 {
 public:
-	template<class T> static VideoMergeResult MergeFrames(RenderedFrame& leftFrame, T* rightFrame)
+	template<class T> static VideoMergeResult<T> MergeFrames(RenderedFrame& leftFrame, T* rightFrame)
 	{
 		//Merge both video frames into a single frame with twice the width
 		uint32_t originalWidth = leftFrame.Width;
@@ -36,7 +37,7 @@ public:
 			in2 += originalWidth;
 		}
 
-		return VideoMergeResult { mergedFrame };
+		return VideoMergeResult<T> { mergedFrame };
 	}
 
 	static void MergeAudio(int16_t* inOutA, size_t& sampleCountA, int16_t* inB, size_t& sampleCountB)
