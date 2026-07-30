@@ -91,28 +91,51 @@
 		</DipSwitch>
 	</Game>
 	<Game Name="(Dual) VS Mahjong" PrgCrc32="5734B934,91D1B01B">
-		<DipSwitch />
-		<DipSwitch />
-		<DipSwitch />
-		<DipSwitch />
-		<DipSwitch Localization="Time">
+		<DipSwitch Localization="Rules">
+			<Option>Kansai</Option>
+			<Option>Kantou</Option>
+		</DipSwitch>
+		<DipSwitch Localization="Difficulty">
+			<Option>Easy</Option>
+			<Option>Medium</Option>
+			<Option>Normal</Option>
+			<Option>Hard</Option>
+		</DipSwitch>
+		<DipSwitch Localization="Timer">
+			<Option>On</Option>
+			<Option>Off</Option>
+		</DipSwitch>
+		<DipSwitch Localization="Initial Time">
 			<Option>90</Option>
 			<Option>45</Option>
 			<Option>60</Option>
 			<Option>30</Option>
 		</DipSwitch>
-		<DipSwitch />
-		<DipSwitch />
+		<DipSwitch Localization="Additional Time">
+			<Option>20</Option>
+			<Option>12</Option>
+			<Option>15</Option>
+			<Option>8</Option>
+		</DipSwitch>
 
-		<DipSwitch />
+		<DipSwitch Localization="Service Mode">
+			<Option>Off</Option>
+			<Option>On</Option>
+		</DipSwitch>
 		<DipSwitch Localization="Coinage">
 			<Option>1 Coin = 1 Credit</Option>
 			<Option>2 Coins = 1 Credit</Option>
 			<Option>1 Coin = 2 Credits</Option>
 			<Option>Free Play</Option>
 		</DipSwitch>
-		<DipSwitch />
-		<DipSwitch />
+		<DipSwitch Localization="Mawashi">
+			<Option>Tonton (East-East)</Option>
+			<Option>Tonnan (East-South)</Option>
+		</DipSwitch>
+		<DipSwitch Localization="Dora Indicator">
+			<Option>Genbutsu (Current Tile)</Option>
+			<Option>Next Tile</Option>
+		</DipSwitch>
 		<DipSwitch Localization="Starting Points">
 			<Option>30000</Option>
 			<Option>20000</Option>
