@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "GBA/GbaTypes.h"
 #include "Shared/Emulator.h"
+#include "Shared/EventType.h"
 #include "Utilities/Timer.h"
 #include "Utilities/ISerializable.h"
 
@@ -263,6 +264,7 @@ public:
 				SendFrame();
 			} else if(_state.Scanline > 227) {
 				_state.Scanline = 0;
+				_emu->ProcessEvent(EventType::StartFrame, CpuType::Gba);
 			}
 		}
 		_emu->ProcessPpuCycle<CpuType::Gba>();

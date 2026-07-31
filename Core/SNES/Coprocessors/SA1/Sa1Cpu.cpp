@@ -9,8 +9,10 @@
 #include "Shared/EventType.h"
 
 #define SnesCpu Sa1Cpu
+#define SA1
 #include "SNES/SnesCpu.Instructions.h"
 #include "SNES/SnesCpu.Shared.h"
+#undef SA1
 #undef SnesCpu
 
 Sa1Cpu::Sa1Cpu(Sa1* sa1, Emulator* emu)
@@ -54,6 +56,10 @@ void Sa1Cpu::CheckForInterrupts()
 
 void Sa1Cpu::ProcessHaltedState()
 {
+#ifndef DUMMYCPU
+	_emu->ProcessHaltedCpu<CpuType::Sa1>();
+#endif
+
 	if(_state.StopState == SnesCpuStopState::Stopped) {
 		//STP was executed, CPU no longer executes any code
 		_state.CycleCount++;
@@ -63,6 +69,9 @@ void Sa1Cpu::ProcessHaltedState()
 		Idle();
 		if(over) {
 			_state.StopState = SnesCpuStopState::Running;
+#ifndef DUMMYCPU
+			_emu->ProcessEvent(EventType::HaltEnded, CpuType::Sa1);
+#endif
 			CheckForInterrupts();
 		}
 	}

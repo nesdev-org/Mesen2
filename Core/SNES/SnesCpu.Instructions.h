@@ -1,3 +1,5 @@
+#include "Shared/EventType.h"
+
 /************************
 Add/subtract operations
 *************************/
@@ -1181,6 +1183,14 @@ void SnesCpu::WAI()
 	//Wait for interrupt
 	_state.StopState = SnesCpuStopState::WaitingForIrq;
 	_waiOver = false;
+
+#ifndef DUMMYCPU
+	#ifdef SA1
+	_emu->ProcessEvent(EventType::HaltStarted, CpuType::Sa1);
+	#else
+	_emu->ProcessEvent(EventType::HaltStarted, CpuType::Snes);
+	#endif
+#endif
 }
 
 /****************

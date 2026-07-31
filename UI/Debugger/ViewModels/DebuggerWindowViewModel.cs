@@ -62,6 +62,9 @@ namespace Mesen.Debugger.ViewModels
 		[ObservableProperty] public partial List<ContextMenuAction> SearchMenuItems { get; private set; } = new();
 		[ObservableProperty] public partial List<ContextMenuAction> OptionMenuItems { get; private set; } = new();
 
+		[ObservableProperty] public partial bool ShowCpuUsage { get; private set; }
+		[ObservableProperty] public partial int CpuUsage { get; private set; }
+
 		public CpuType CpuType { get; private set; }
 		private UInt64 _masterClock = 0;
 
@@ -280,6 +283,7 @@ namespace Mesen.Debugger.ViewModels
 				UpdateStatusBar(evt);
 			}
 
+			UpdateCpuUsage();
 			UpdateDisassembly(forBreak);
 			MemoryMappings?.Refresh();
 			BreakpointList.RefreshBreakpointList();
@@ -293,6 +297,7 @@ namespace Mesen.Debugger.ViewModels
 		{
 			ConsoleStatus?.UpdateUiState(true);
 			MemoryMappings?.Refresh();
+			UpdateCpuUsage();
 			UpdateCdlStats();
 			if(refreshWatch) {
 				WatchList.UpdateWatch();
@@ -361,6 +366,13 @@ namespace Mesen.Debugger.ViewModels
 				}
 			}
 			CdlStats = statsString;
+		}
+
+		public void UpdateCpuUsage()
+		{
+			int cpuUsage = DebugApi.GetProfilerCpuUsage(CpuType);
+			ShowCpuUsage = cpuUsage > 0;
+			CpuUsage = Math.Min(cpuUsage - 1, 100);
 		}
 
 		public void UpdateActiveAddress(bool scrollToAddress)

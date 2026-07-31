@@ -3,8 +3,8 @@
 #include "WS/WsConsole.h"
 #include "WS/WsMemoryManager.h"
 #include "Shared/Emulator.h"
+#include "Shared/EventType.h"
 #include "Shared/MessageManager.h"
-#include "Utilities/HexUtilities.h"
 #include "Utilities/Serializer.h"
 
 WsCpuParityTable WsCpu::_parity = {};
@@ -51,7 +51,11 @@ void WsCpu::Exec()
 	}
 
 	if(irqPending) {
-		_state.Halted = false;
+		if(_state.Halted) {
+			_state.Halted = false;
+			_emu->ProcessEvent(EventType::HaltEnded, CpuType::Ws);
+		}
+
 		if(_state.Flags.Irq && _suppressIrqClock != _state.CycleCount) {
 			Interrupt(_memoryManager->GetIrqVector(), true);
 		}
@@ -862,6 +866,10 @@ void WsCpu::Halt()
 	if(_memoryManager->IsPowerOffRequested()) {
 		MessageManager::DisplayMessage("WS", "Power off.");
 		_state.PowerOff = true;
+	} else {
+#ifndef DUMMYCPU
+		_emu->ProcessEvent(EventType::HaltStarted, CpuType::Ws);
+#endif
 	}
 }
 

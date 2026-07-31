@@ -149,6 +149,22 @@
 				Click="OnSettingsClick"
 				Icon="Assets/Settings.png"
 			/>
+			<ProgressBar
+				Value="{Binding CpuUsage}"
+				Width="80"
+				MinWidth="80"
+				Height="15"
+				Margin="0 0 5 0"
+				ShowProgressText="True" 
+				ProgressTextFormat="CPU: {0}%"
+				DockPanel.Dock="Right"
+				Background="#444"
+				IsVisible="{Binding ShowCpuUsage}"
+			>
+				<ProgressBar.Resources>
+					<SolidColorBrush x:Key="SystemControlForegroundBaseHighBrush" Color="#FFF" />
+				</ProgressBar.Resources>
+			</ProgressBar>
 			<StackPanel Orientation="Horizontal">
 				<dc:ActionToolbar Items="{Binding ToolbarItems}" />
 			</StackPanel>

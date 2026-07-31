@@ -12,6 +12,7 @@ enum class EventType
 	StateLoaded,
 	StateSaved,
 	CodeBreak,
-
+	HaltStarted,
+	HaltEnded,
 	LastValue
 };

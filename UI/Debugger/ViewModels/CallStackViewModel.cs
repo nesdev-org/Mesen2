@@ -3,6 +3,7 @@ using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Selection;
 using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Mesen.Config;
 using Mesen.Debugger.Labels;
 using Mesen.Debugger.Utilities;
@@ -10,7 +11,6 @@ using Mesen.Debugger.Windows;
 using Mesen.Interop;
 using Mesen.Utilities;
 using Mesen.ViewModels;
-using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -83,6 +83,9 @@ namespace Mesen.Debugger.ViewModels
 			}
 
 			StackFrameInfo entry = stackFrame.Value;
+			if(entry.Flags == StackFrameFlags.Halt) {
+				return "[halted]";
+			}
 
 			string format = "X" + CpuType.GetAddressSize();
 			CodeLabel? label = entry.AbsTarget.Address >= 0 ? LabelManager.GetLabel(entry.AbsTarget) : null;

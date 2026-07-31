@@ -78,6 +78,9 @@ void SnesCpu::ProcessHaltedState()
 		Idle();
 		if(over) {
 			_state.StopState = SnesCpuStopState::Running;
+#ifndef DUMMYCPU
+			_emu->ProcessEvent(EventType::HaltEnded, CpuType::Snes);
+#endif
 			CheckForInterrupts();
 		}
 	}

@@ -6,6 +6,7 @@
 #include "Debugger/DebugTypes.h"
 
 static constexpr int32_t ResetFunctionIndex = -1;
+static constexpr int32_t HaltFunctionIndex = (uint8_t)MemoryType::None << 24;
 
 Profiler::Profiler(Debugger* debugger, IDebugger* cpuDebugger)
 {
@@ -114,6 +115,10 @@ void Profiler::ResetState()
 	_stackFlags.clear();
 	_cycleCountStack.clear();
 	_currentFunction = ResetFunctionIndex;
+
+	_prevCpuUsage = 0;
+	_prevUsageCycleCount = 0;
+	_prevUsageHaltedCycles = 0;
 }
 
 void Profiler::InternalReset()
@@ -139,5 +144,26 @@ void Profiler::GetProfilerData(ProfiledFunction* profilerData, uint32_t& functio
 		if(functionCount >= 100000) {
 			break;
 		}
+	}
+}
+
+void Profiler::UpdateCpuUsage()
+{
+	DebugBreakHelper helper(_debugger);
+	UpdateCycles();
+
+	auto result = _functions.find(HaltFunctionIndex);
+	if(result != _functions.end()) {
+		uint64_t cycleCount = _cpuDebugger->GetCpuCycleCount(true);
+		uint64_t haltedCycles = result->second.ExclusiveCycles;
+
+		uint64_t elapsed = cycleCount - _prevUsageCycleCount;
+		uint64_t halted = haltedCycles - _prevUsageHaltedCycles;
+
+		_prevCpuUsage = ((double)(elapsed - halted) / elapsed * 100) + 1;
+		_prevUsageCycleCount = cycleCount;
+		_prevUsageHaltedCycles = result->second.ExclusiveCycles;
+	} else {
+		_prevCpuUsage = 0;
 	}
 }

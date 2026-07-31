@@ -6,6 +6,7 @@
 #include "Gameboy/GbMemoryManager.h"
 #include "Gameboy/GbControlManager.h"
 #include "Shared/Emulator.h"
+#include "Shared/EventType.h"
 #include "Utilities/Serializer.h"
 
 void GbCpu::Init(Emulator* emu, Gameboy* gameboy, GbMemoryManager* memoryManager)
@@ -888,6 +889,7 @@ void GbCpu::STOP()
 #ifndef DUMMYCPU
 		//Stop for ~33941 cycles - most likely not accurate, but matches speed_switch_timing_stat test rom
 		_state.HaltCounter = 33942;
+		_emu->ProcessEvent(EventType::HaltStarted, CpuType::Gameboy);
 #endif
 	} else {
 		_state.Stopped = true;
@@ -907,6 +909,10 @@ void GbCpu::HALT()
 		_state.HaltCounter = 1;
 		_state.HaltBug = true;
 	}
+
+#ifndef DUMMYCPU
+	_emu->ProcessEvent(EventType::HaltStarted, CpuType::Gameboy);
+#endif
 }
 
 // cpl              2F         4 -11- A = A xor FF

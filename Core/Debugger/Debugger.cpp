@@ -14,6 +14,7 @@
 #include "Debugger/ScriptManager.h"
 #include "Debugger/ScriptHost.h"
 #include "Debugger/CallstackManager.h"
+#include "Debugger/Profiler.h"
 #include "Debugger/ExpressionEvaluator.h"
 #include "Debugger/BaseEventManager.h"
 #include "Debugger/TraceLogFileSaver.h"
@@ -46,16 +47,12 @@
 #include "WS/WsTypes.h"
 #include "Shared/BaseControlManager.h"
 #include "Shared/EmuSettings.h"
-#include "Shared/Audio/SoundMixer.h"
 #include "Shared/NotificationManager.h"
 #include "Shared/BaseState.h"
 #include "Shared/Emulator.h"
 #include "Shared/Interfaces/IConsole.h"
 #include "Shared/MemoryOperationType.h"
 #include "Shared/EventType.h"
-#include "Utilities/HexUtilities.h"
-#include "Utilities/FolderUtilities.h"
-#include "Utilities/Patches/IpsPatcher.h"
 #include "Utilities/PlatformUtilities.h"
 
 uint64_t ITraceLogger::NextRowId = 0;
@@ -606,6 +603,11 @@ void Debugger::ProcessEvent(EventType type, std::optional<CpuType> cpuTypeOpt)
 			if(evtMgr) {
 				evtMgr->ClearFrameEvents();
 			}
+
+			CallstackManager* manager = GetCallstackManager(evtCpuType);
+			if(manager) {
+				manager->GetProfiler()->UpdateCpuUsage();
+			}
 			break;
 		}
 
@@ -627,6 +629,22 @@ void Debugger::ProcessEvent(EventType type, std::optional<CpuType> cpuTypeOpt)
 				}
 			}
 			break;
+
+		case EventType::HaltStarted: {
+			CallstackManager* manager = GetCallstackManager(evtCpuType);
+			if(manager) {
+				manager->PushHalted();
+			}
+			break;
+		}
+
+		case EventType::HaltEnded: {
+			CallstackManager* manager = GetCallstackManager(evtCpuType);
+			if(manager) {
+				manager->PopHalted();
+			}
+			break;
+		}
 	}
 }
 
@@ -1280,6 +1298,7 @@ template void Debugger::ProcessIdleCycle<CpuType::Pce>();
 
 template void Debugger::ProcessHaltedCpu<CpuType::Snes>();
 template void Debugger::ProcessHaltedCpu<CpuType::Spc>();
+template void Debugger::ProcessHaltedCpu<CpuType::Sa1>();
 template void Debugger::ProcessHaltedCpu<CpuType::Gameboy>();
 template void Debugger::ProcessHaltedCpu<CpuType::Sms>();
 template void Debugger::ProcessHaltedCpu<CpuType::Gba>();

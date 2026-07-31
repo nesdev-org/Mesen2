@@ -11,6 +11,7 @@
 #include "Gameboy/GbControlManager.h"
 #include "Shared/Emulator.h"
 #include "Shared/CheatManager.h"
+#include "Shared/EventType.h"
 #include "Shared/MessageManager.h"
 #include "Utilities/Serializer.h"
 #include "Utilities/HexUtilities.h"
@@ -561,6 +562,7 @@ uint8_t GbMemoryManager::ProcessIrqRequests()
 
 void GbMemoryManager::ProcessHaltEnd()
 {
+	_emu->ProcessEvent(EventType::HaltEnded, CpuType::Gameboy);
 	_dmaController->ProcessHdma();
 }
 

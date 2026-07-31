@@ -5,7 +5,7 @@
 #include "SMS/SmsMemoryManager.h"
 #include "Shared/Emulator.h"
 #include "Shared/MemoryOperationType.h"
-#include "Utilities/HexUtilities.h"
+#include "Shared/EventType.h"
 #include "Utilities/Serializer.h"
 
 SmsCpuParityTable SmsCpu::_parity = {};
@@ -46,7 +46,12 @@ void SmsCpu::Exec()
 	}
 
 	if(_state.NmiPending) {
-		_state.Halted = false;
+		if(_state.Halted) {
+			_state.Halted = false;
+#ifndef DUMMYCPU
+			_emu->ProcessEvent(EventType::HaltEnded, CpuType::Sms);
+#endif
+		}
 		_state.NmiPending = false;
 		_state.IFF1 = false;
 		ExecCycles(4);
@@ -56,7 +61,12 @@ void SmsCpu::Exec()
 		_emu->ProcessInterrupt<CpuType::Sms>(originalPc, _state.PC, true);
 	} else if(_state.IFF1 && _state.ActiveIrqs && opCode != 0xFB) {
 		//Process IRQs if enabled, but not if the previous op was EI (0xFB)
-		_state.Halted = false;
+		if(_state.Halted) {
+			_state.Halted = false;
+#ifndef DUMMYCPU
+			_emu->ProcessEvent(EventType::HaltEnded, CpuType::Sms);
+#endif
+		}
 		_state.IFF1 = false;
 		_state.IFF2 = false;
 		ExecCycles(6);
@@ -1290,6 +1300,10 @@ void SmsCpu::NOP()
 void SmsCpu::HALT()
 {
 	_state.Halted = true;
+
+#ifndef DUMMYCPU
+	_emu->ProcessEvent(EventType::HaltStarted, CpuType::Sms);
+#endif
 }
 
 void SmsCpu::CPL()

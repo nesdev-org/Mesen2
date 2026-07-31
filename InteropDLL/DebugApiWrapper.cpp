@@ -173,6 +173,11 @@ extern "C"
 		WithToolVoid(GetCallstackManager(cpuType), GetProfiler()->Reset());
 	}
 
+	DllExport int32_t __stdcall GetProfilerCpuUsage(CpuType cpuType)
+	{
+		return WithTool(int32_t, GetCallstackManager(cpuType), GetProfiler()->GetCpuUsage());
+	}
+
 	DllExport void __stdcall GetConsoleState(BaseState& state, ConsoleType consoleType)
 	{
 		WithDebugger(void, GetConsoleState(state, consoleType));

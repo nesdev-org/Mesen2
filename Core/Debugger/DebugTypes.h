@@ -279,7 +279,8 @@ enum class StackFrameFlags
 {
 	None = 0,
 	Nmi = 1,
-	Irq = 2
+	Irq = 2,
+	Halt = 4
 };
 
 struct StackFrameInfo

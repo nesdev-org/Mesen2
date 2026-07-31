@@ -234,7 +234,7 @@ namespace Mesen.Debugger.ViewModels
 			string functionName;
 
 			if(func.Address.Address == -1) {
-				functionName = "[Reset]";
+				functionName = "[reset]";
 			} else {
 				CodeLabel? label = LabelManager.GetLabel((UInt32)func.Address.Address, func.Address.Type);
 
@@ -249,6 +249,8 @@ namespace Mesen.Debugger.ViewModels
 				functionName = "[irq] " + functionName;
 			} else if(func.Flags.HasFlag(StackFrameFlags.Nmi)) {
 				functionName = "[nmi] " + functionName;
+			} else if(func.Flags.HasFlag(StackFrameFlags.Halt)) {
+				functionName = "[halted]";
 			}
 
 			return functionName;

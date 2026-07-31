@@ -438,6 +438,7 @@ namespace Mesen.Interop
 			return callstack;
 		}
 
+		[DllImport(DllPath)] public static extern int GetProfilerCpuUsage(CpuType type);
 		[DllImport(DllPath)] public static extern void ResetProfiler(CpuType type);
 		[DllImport(DllPath, EntryPoint = "GetProfilerData")] private static extern void GetProfilerDataWrapper(CpuType type, IntPtr profilerData, ref UInt32 functionCount);
 		public static unsafe int GetProfilerData(CpuType type, ref ProfiledFunction[] profilerData)
@@ -1524,11 +1525,13 @@ namespace Mesen.Interop
 		public StackFrameFlags Flags;
 	};
 
+	[Flags]
 	public enum StackFrameFlags
 	{
 		None = 0,
 		Nmi = 1,
-		Irq = 2
+		Irq = 2,
+		Halt = 4
 	}
 
 	public enum CpuType : byte

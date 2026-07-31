@@ -14,6 +14,7 @@ using Mesen.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -29,6 +30,7 @@ namespace Mesen.Debugger.Windows
 		private int? _scrollToAddress = null;
 		private bool _suppressBringToFront = false;
 		private bool _autoResumePending = false;
+		private Stopwatch _cpuUsageTimer = new();
 
 		[Obsolete("For designer only")]
 		public DebuggerWindow() : this(null, null) { }
@@ -40,6 +42,7 @@ namespace Mesen.Debugger.Windows
 			_model = new DebuggerWindowViewModel(cpuType);
 			_scrollToAddress = scrollToAddress;
 			DataContext = _model;
+			_cpuUsageTimer.Start();
 
 			_model.InitializeMenu(this);
 
@@ -209,6 +212,13 @@ namespace Mesen.Debugger.Windows
 								bool updatingWatchEntry = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is TextBox txt && txt.FindAncestorOfType<WatchListView>() != null;
 								_model.PartialRefresh(!updatingWatchEntry);
 							}
+						});
+					}
+
+					if(_cpuUsageTimer.ElapsedMilliseconds > 100) {
+						_cpuUsageTimer.Restart();
+						Dispatcher.UIThread.Post(() => {
+							_model.UpdateCpuUsage();
 						});
 					}
 					break;

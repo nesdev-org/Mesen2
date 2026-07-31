@@ -11,6 +11,7 @@
 	#include "Shared/Emulator.h"
 	#include "Debugger/DebugTypes.h"
 	#include "Utilities/ISerializable.h"
+	#include "Shared/EventType.h"
 
 class GbaMemoryManager;
 class GbaRomPrefetch;
@@ -214,6 +215,11 @@ public:
 		if(isHaltOver) {
 			_memoryManager->ProcessIdleCycle();
 			_state.Stopped = _state.Frozen;
+	#ifndef DUMMYCPU
+			if(!_state.Stopped) {
+				_emu->ProcessEvent(EventType::HaltEnded, CpuType::Gba);
+			}
+	#endif
 			return false;
 		} else {
 			return true;
@@ -291,6 +297,12 @@ public:
 	{
 		_state.Stopped = true;
 		_state.Frozen = freeze;
+
+	#ifndef DUMMYCPU
+		if(!freeze) {
+			_emu->ProcessEvent(EventType::HaltStarted, CpuType::Gba);
+		}
+	#endif
 	}
 
 	void ClearSequentialFlag() { _state.Pipeline.Mode &= ~GbaAccessMode::Sequential; }
