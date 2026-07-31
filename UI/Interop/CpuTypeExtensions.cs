@@ -132,6 +132,28 @@ namespace Mesen.Interop
 			};
 		}
 
+		public static int GetByteCodeStringLength(this CpuType cpuType)
+		{
+			int size = cpuType.GetByteCodeSize();
+
+			//Return the number of characters used:
+			//Bytes is shown as 00 11 22 33 (3 chars per byte, minus 1)
+			//HexValue is shown as 33221100 (2 chars per byte)
+			return cpuType.GetByteCodeFormat() switch {
+				ByteCodeFormat.Bytes => size * 3 - 1,
+				ByteCodeFormat.HexValue => size * 2,
+				_ => throw new Exception("Invalid byte code format"),
+			};
+		}
+
+		public static ByteCodeFormat GetByteCodeFormat(this CpuType type)
+		{
+			return type switch {
+				CpuType.St018 or CpuType.Gba => ByteCodeFormat.HexValue,
+				_ => ByteCodeFormat.Bytes
+			};
+		}
+
 		public static DebuggerFlags GetDebuggerFlag(this CpuType cpuType)
 		{
 			return cpuType switch {

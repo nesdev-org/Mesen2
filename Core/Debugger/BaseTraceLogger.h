@@ -173,7 +173,7 @@ protected:
 	void WriteByteCode(DisassemblyInfo& info, RowPart& rowPart, string& output)
 	{
 		string byteCode;
-		info.GetByteCode(byteCode);
+		info.GetByteCode(byteCode, _settings->GetDebugConfig().UseLowerCaseDisassembly);
 		if(!rowPart.DisplayInHex) {
 			//Remove $ marks if not in "hex" mode (but still display the bytes as hex)
 			byteCode.erase(std::remove(byteCode.begin(), byteCode.end(), '$'), byteCode.end());

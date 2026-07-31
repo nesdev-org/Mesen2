@@ -15,14 +15,14 @@ namespace Mesen.Debugger.Disassembly
 	public class BaseStyleProvider : ILineStyleProvider
 	{
 		public int AddressSize { get; }
-		public int ByteCodeSize { get; }
+		public int ByteCodeStringLength { get; }
 		public CpuType CpuType { get; }
 
 		public BaseStyleProvider(CpuType cpuType)
 		{
 			CpuType = cpuType;
 			AddressSize = cpuType.GetAddressSize();
-			ByteCodeSize = cpuType.GetByteCodeSize();
+			ByteCodeStringLength = cpuType.GetByteCodeStringLength();
 		}
 
 		private void ConfigureActiveStatement(LineProperties props)

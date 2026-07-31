@@ -556,3 +556,9 @@ struct DebugControllerState
 		return A || B || X || Y || L || R || U || D || Up || Down || Left || Right || Select || Start;
 	}
 };
+
+enum class ByteCodeFormat
+{
+	Bytes,
+	HexValue
+};

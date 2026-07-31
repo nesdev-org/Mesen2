@@ -194,6 +194,12 @@ namespace Mesen.Interop
 		Ws = 6,
 	}
 
+	public enum ByteCodeFormat
+	{
+		Bytes,
+		HexValue
+	}
+
 	public struct InteropDipSwitchInfo
 	{
 		public UInt32 DatabaseId;

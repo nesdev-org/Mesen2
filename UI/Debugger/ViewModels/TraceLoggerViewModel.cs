@@ -716,7 +716,7 @@ namespace Mesen.Debugger.ViewModels
 		}
 
 		public int AddressSize { get; private set; } = 6;
-		public int ByteCodeSize { get; private set; } = 4;
+		public int ByteCodeStringLength { get; private set; } = 4;
 		private LineProperties GetMainCpuStyle() { return new LineProperties() { AddressColor = null, LineBgColor = null }; }
 		private LineProperties GetSecondaryCpuStyle() { return new LineProperties() { AddressColor = Color.FromRgb(30, 145, 30), LineBgColor = Color.FromRgb(230, 245, 230) }; }
 		private LineProperties GetCoprocessorStyle() { return new LineProperties() { AddressColor = Color.FromRgb(30, 30, 145), LineBgColor = Color.FromRgb(230, 230, 245) }; }
@@ -748,8 +748,7 @@ namespace Mesen.Debugger.ViewModels
 		{
 			_consoleType = consoleType;
 			AddressSize = consoleType.GetMainCpuType().GetAddressSize();
-			ByteCodeSize = consoleType.GetMainCpuType().GetByteCodeSize();
+			ByteCodeStringLength = consoleType.GetMainCpuType().GetByteCodeStringLength();
 		}
 	}
-
 }

@@ -59,7 +59,7 @@ public:
 	uint8_t* GetByteCode();
 
 	void GetByteCode(uint8_t copyBuffer[8]);
-	void GetByteCode(string& out);
+	void GetByteCode(string& out, bool lowerCase);
 
 	static uint8_t GetOpSize(uint32_t opCode, uint8_t flags, CpuType type, uint32_t cpuAddress, MemoryType memType, MemoryDumper* memoryDumper);
 	bool IsJumpToSub();

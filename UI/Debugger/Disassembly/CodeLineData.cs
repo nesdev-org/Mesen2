@@ -31,11 +31,18 @@ namespace Mesen.Debugger
 			get
 			{
 				if(OpSize > 0 && _byteCodeString == "") {
+					string format = ConfigManager.Config.Debug.Debugger.UseLowerCaseDisassembly ? "x2" : "X2";
 					string output = "";
-					for(int i = 0; i < OpSize && i < ByteCode.Length; i++) {
-						output += ByteCode[i].ToString("X2") + " ";
+					if(CpuType.GetByteCodeFormat() == ByteCodeFormat.HexValue) {
+						for(int i = OpSize - 1; i >= 0; i--) {
+							output += ByteCode[i].ToString(format);
+						}
+					} else {
+						for(int i = 0; i < OpSize && i < ByteCode.Length; i++) {
+							output += ByteCode[i].ToString(format) + " ";
+						}
 					}
-					_byteCodeString = output;
+					_byteCodeString = output.TrimEnd();
 				}
 
 				return _byteCodeString;
@@ -146,10 +153,10 @@ namespace Mesen.Debugger
 			return "$" + this.Address.ToString("X6") + "  " + this.ByteCodeStr?.PadRight(12) + "  " + this.Text;
 		}
 
-		public string GetByteCode(int byteCodeSize)
+		public string GetByteCode(int byteCodeStrLen)
 		{
-			if(ByteCodeStr.Length > byteCodeSize * 3) {
-				return ByteCodeStr.Substring(0, (byteCodeSize - 1) * 3) + "..";
+			if(ByteCodeStr.Length > byteCodeStrLen) {
+				return ByteCodeStr.Substring(0, byteCodeStrLen - 2) + "..";
 			}
 			return ByteCodeStr;
 		}

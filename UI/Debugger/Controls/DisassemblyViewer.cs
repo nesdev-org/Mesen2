@@ -274,7 +274,7 @@ namespace Mesen.Debugger.Controls
 
 			double symbolMargin = Math.Floor(LetterSize.Width * 2.5);
 			double addressMargin = Math.Floor(LetterSize.Width * addressMaxCharCount) + 9;
-			double byteCodeMargin = Math.Floor(LetterSize.Width * (3 * styleProvider.ByteCodeSize));
+			double byteCodeMargin = Math.Floor(LetterSize.Width * (styleProvider.ByteCodeStringLength + 1));
 			double codeIndent = Math.Floor(LetterSize.Width * 2) + 0.5;
 
 			//Draw margin (symbol + address)
@@ -330,7 +330,7 @@ namespace Mesen.Debugger.Controls
 
 				if(showByteCode) {
 					//Draw byte code
-					text = FormatText(line.GetByteCode(styleProvider.ByteCodeSize), ColorHelper.GetBrush(Colors.Gray));
+					text = FormatText(line.GetByteCode(styleProvider.ByteCodeStringLength), ColorHelper.GetBrush(Colors.Gray));
 					context.DrawText(text, new Point(x + LetterSize.Width / 2, y));
 					x += byteCodeMargin;
 				}
@@ -662,7 +662,7 @@ namespace Mesen.Debugger.Controls
 	public interface ILineStyleProvider
 	{
 		int AddressSize { get; }
-		int ByteCodeSize { get; }
+		int ByteCodeStringLength { get; }
 
 		LineProperties GetLineStyle(CodeLineData lineData, int lineIndex);
 

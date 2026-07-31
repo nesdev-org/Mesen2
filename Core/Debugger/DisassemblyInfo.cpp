@@ -164,13 +164,19 @@ void DisassemblyInfo::GetByteCode(uint8_t copyBuffer[8])
 	memcpy(copyBuffer, _byteCode, _opSize);
 }
 
-void DisassemblyInfo::GetByteCode(string& out)
+void DisassemblyInfo::GetByteCode(string& out, bool lowerCase)
 {
-	FastString str;
-	for(int i = 0; i < _opSize; i++) {
-		str.WriteAll('$', HexUtilities::ToHex(_byteCode[i]));
-		if(i < _opSize - 1) {
-			str.Write(' ');
+	FastString str(lowerCase);
+	if(DebugUtilities::GetByteCodeFormat(_cpuType) == ByteCodeFormat::HexValue) {
+		for(int i = _opSize - 1; i >= 0; i--) {
+			str.WriteAll(HexUtilities::ToHex(_byteCode[i]));
+		}
+	} else {
+		for(int i = 0; i < _opSize; i++) {
+			str.WriteAll('$', HexUtilities::ToHex(_byteCode[i]));
+			if(i < _opSize - 1) {
+				str.Write(' ');
+			}
 		}
 	}
 	out += str.ToString();

@@ -49,6 +49,17 @@ public:
 		throw std::runtime_error("Invalid CPU type");
 	}
 
+	static constexpr ByteCodeFormat GetByteCodeFormat(CpuType type)
+	{
+		switch(type) {
+			case CpuType::St018:
+			case CpuType::Gba:
+				return ByteCodeFormat::HexValue;
+		}
+
+		return ByteCodeFormat::Bytes;
+	}
+
 	static constexpr CpuType ToCpuType(MemoryType type)
 	{
 		switch(type) {
