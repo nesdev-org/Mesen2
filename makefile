@@ -4,6 +4,8 @@
 #The emulation core also requires SDL2.
 #Run "make" to build, "make run" to run
 
+UNAME_S := $(shell uname -s)
+
 MESENFLAGS=
 
 ifeq ($(USE_GCC),true)
@@ -28,7 +30,6 @@ LINKCHECKUNRESOLVED := -Wl,-z,defs
 
 LINKOPTIONS :=
 MESENOS :=
-UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Linux)
 	MESENOS := linux
