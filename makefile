@@ -42,6 +42,7 @@ ifeq ($(UNAME_S),Darwin)
 	LTO := false
 	STATICLINK := false
 	LINKCHECKUNRESOLVED :=
+	MESENFLAGS += -stdlib=libc++
 endif
 
 MESENFLAGS += -m64
