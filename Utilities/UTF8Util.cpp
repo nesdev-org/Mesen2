@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "UTF8Util.h"
-#include <codecvt>
-#include <locale>
+#include <cuchar>
 
 #ifdef _MSC_VER
 	#define WIN32_LEAN_AND_MEAN
@@ -22,26 +21,37 @@ namespace utf8
 		}
 		return ret;
 #else
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-		return conv.from_bytes(str);
+		throw std::runtime_error("utf8::decode is not implemented for this platform");
 #endif
 	}
 
-	std::string utf8::encode(const std::wstring& wstr)
+	string utf8::encode(const std::wstring& wstr)
 	{
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-		return conv.to_bytes(wstr);
-	}
-
-	std::string utf8::encode(const std::u16string& wstr)
-	{
-#ifdef _MSC_VER
-		std::wstring_convert<std::codecvt_utf8_utf16<int16_t>, int16_t> conv;
-		auto p = reinterpret_cast<const int16_t*>(wstr.data());
-		return conv.to_bytes(p, p + wstr.size());
+#ifdef _WIN32
+		return encode(std::u16string((char16_t*)wstr.c_str()));
 #else
-		std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> conv;
-		return conv.to_bytes(wstr);
+		throw std::runtime_error("utf8::encode(wstring) is not implemented for this platform");
 #endif
+	}
+
+	string utf8::encode(const std::u16string& wstr)
+	{
+		std::mbstate_t state {};
+		string result;
+		result.reserve(wstr.size());
+
+		char buffer[10];
+
+		for(char16_t c16 : wstr) {
+			size_t size = std::c16rtomb(buffer, c16, &state);
+			if(size == (size_t)-1) {
+				//Ignore invalid characters
+				continue;
+			} else if(size > 0) {
+				result.append(buffer, size);
+			}
+		}
+
+		return result;
 	}
 }
