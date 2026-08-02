@@ -36,6 +36,10 @@ namespace utf8
 
 	string utf8::encode(const std::u16string& wstr)
 	{
+#ifdef __APPLE__
+		std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> conv;
+		return conv.to_bytes(wstr);
+#else
 		std::mbstate_t state {};
 		string result;
 		result.reserve(wstr.size());
@@ -53,5 +57,6 @@ namespace utf8
 		}
 
 		return result;
+#endif
 	}
 }
