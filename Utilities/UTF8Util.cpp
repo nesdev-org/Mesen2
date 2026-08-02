@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "UTF8Util.h"
-#include <cuchar>
+#ifdef __APPLE__
+	#include <codecvt>
+	#include <locale>
+#else
+	#include <cuchar>
+#endif
 
 #ifdef _MSC_VER
 	#define WIN32_LEAN_AND_MEAN
