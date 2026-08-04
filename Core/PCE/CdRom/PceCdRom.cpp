@@ -312,4 +312,9 @@ void PceCdRom::Serialize(Serializer& s)
 	SV(_adpcm);
 	SV(_audioPlayer);
 	SV(_audioFader);
+
+	if(!s.IsSaving()) {
+		//Update bank F7, which could be ram or unmapped depending on _state.BramLocked
+		_console->GetMemoryManager()->UpdateCdRomBanks();
+	}
 }
