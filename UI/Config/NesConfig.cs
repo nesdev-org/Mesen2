@@ -82,6 +82,8 @@ namespace Mesen.Config
 
 		[ObservableProperty] public partial bool RandomizeMapperPowerOnState { get; set; } = false;
 		[ObservableProperty] public partial bool RandomizeCpuPpuAlignment { get; set; } = false;
+		[ObservableProperty][MinMax(0, 15)] public partial UInt32 CpuAlignmentOffset { get; set; } = 0;
+		[ObservableProperty][MinMax(0, 4)] public partial UInt32 PpuAlignmentOffset { get; set; } = 1;
 		[ObservableProperty] public partial RamState RamPowerOnState { get; set; } = RamState.AllZeros;
 
 		[ObservableProperty][MinMax(0, 1000)] public partial UInt32 PpuExtraScanlinesBeforeNmi { get; set; } = 0;
@@ -202,6 +204,8 @@ namespace Mesen.Config
 
 				RandomizeMapperPowerOnState = RandomizeMapperPowerOnState,
 				RandomizeCpuPpuAlignment = RandomizeCpuPpuAlignment,
+				CpuAlignmentOffset = CpuAlignmentOffset,
+				PpuAlignmentOffset = PpuAlignmentOffset,
 				RamPowerOnState = RamPowerOnState,
 
 				PpuExtraScanlinesAfterNmi = PpuExtraScanlinesAfterNmi,
@@ -339,6 +343,8 @@ namespace Mesen.Config
 
 		[MarshalAs(UnmanagedType.I1)] public bool RandomizeMapperPowerOnState;
 		[MarshalAs(UnmanagedType.I1)] public bool RandomizeCpuPpuAlignment;
+		public UInt32 CpuAlignmentOffset;
+		public UInt32 PpuAlignmentOffset;
 		public RamState RamPowerOnState;
 
 		public UInt32 PpuExtraScanlinesBeforeNmi;

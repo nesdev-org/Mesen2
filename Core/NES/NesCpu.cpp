@@ -142,7 +142,8 @@ void NesCpu::Reset(bool softReset, ConsoleRegion region)
 	_masterClock = 0;
 
 	uint8_t cpuOffset = 0;
-	if(_console->GetNesConfig().RandomizeCpuPpuAlignment) {
+	NesConfig& cfg = _console->GetNesConfig();
+	if(cfg.RandomizeCpuPpuAlignment) {
 		std::random_device rd;
 		std::mt19937 mt(rd());
 		std::uniform_int_distribution<> distPpu(0, ppuDivider - 1);
@@ -154,8 +155,8 @@ void NesCpu::Reset(bool softReset, ConsoleRegion region)
 		string cpuAlignment = " CPU: " + std::to_string(cpuOffset) + "/" + std::to_string(cpuDivider - 1);
 		MessageManager::Log("CPU/PPU alignment -" + ppuAlignment + cpuAlignment);
 	} else {
-		_ppuOffset = 1;
-		cpuOffset = 0;
+		_ppuOffset = cfg.PpuAlignmentOffset % ppuDivider;
+		cpuOffset = cfg.CpuAlignmentOffset % cpuDivider;
 	}
 
 	_masterClock += cpuDivider + cpuOffset;

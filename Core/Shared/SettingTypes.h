@@ -703,6 +703,8 @@ struct NesConfig
 
 	bool RandomizeMapperPowerOnState = false;
 	bool RandomizeCpuPpuAlignment = false;
+	uint32_t CpuAlignmentOffset = 0;
+	uint32_t PpuAlignmentOffset = 1;
 	RamState RamPowerOnState = RamState::Random;
 
 	uint32_t PpuExtraScanlinesBeforeNmi = 0;

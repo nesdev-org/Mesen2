@@ -310,6 +310,14 @@
 
 						<c:CheckBoxWarning IsChecked="{Binding Config.RandomizeMapperPowerOnState}" Text="{l:Translate chkMapperRandomPowerOnState}" />
 						<c:CheckBoxWarning IsChecked="{Binding Config.RandomizeCpuPpuAlignment}" Text="{l:Translate chkRandomizeCpuPpuAlignment}" />
+
+						<Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto" Margin="10 0 0 0" IsEnabled="{Binding Config.RandomizeCpuPpuAlignment, Converter={StaticResource InverseBooleanConverter}}">
+							<TextBlock Grid.Column="0" Grid.Row="0" Text="{l:Translate lblCpuAlignmentOffset}" />
+							<c:MesenNumericUpDown Grid.Column="1" Grid.Row="0" Value="{Binding Config.CpuAlignmentOffset}" Minimum="0" Maximum="15" />
+							<TextBlock Grid.Column="0" Grid.Row="1" Text="{l:Translate lblPpuAlignmentOffset}" />
+							<c:MesenNumericUpDown Grid.Column="1" Grid.Row="1" Value="{Binding Config.PpuAlignmentOffset}" Minimum="0" Maximum="4" />
+						</Grid>
+
 						<c:CheckBoxWarning IsChecked="{Binding Config.EnableOamDecay}" Text="{l:Translate chkEnableOamDecay}" />
 						<c:CheckBoxWarning IsChecked="{Binding Config.EnablePpuOamRowCorruption}" Text="{l:Translate chkEnablePpuOamRowCorruption}" />
 						<c:CheckBoxWarning IsChecked="{Binding Config.EnablePpu2000ScrollGlitch}" Text="{l:Translate chkEnablePpu2000ScrollGlitch}" />

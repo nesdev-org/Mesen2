@@ -52,6 +52,8 @@ void EmuSettings::Serialize(Serializer& s)
 			SV(_nes.RamPowerOnState);
 			SV(_nes.RandomizeMapperPowerOnState);
 			SV(_nes.RandomizeCpuPpuAlignment);
+			SV(_nes.CpuAlignmentOffset);
+			SV(_nes.PpuAlignmentOffset);
 			SV(_nes.DisableOamAddrBug);
 			SV(_nes.DisablePaletteRead);
 			SV(_nes.DisablePpu2004Reads);
