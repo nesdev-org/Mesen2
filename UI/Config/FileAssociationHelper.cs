@@ -1,3 +1,4 @@
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Mesen.Interop;
 using Mesen.Utilities;
@@ -97,7 +98,9 @@ namespace Mesen.Config
 			CreateMimeType("x-mesen-pc2", "pc2", "Pocket Challenge V2 ROM", mimeTypes, cfg.AssociateWsRomFiles);
 
 			//Icon used for shortcuts
-			ImageUtilities.BitmapFromAsset("Assets/MesenIcon.png").Save(Path.Combine(iconFolder, "MesenIcon.png"));
+			using(FileStream file = File.Open(Path.Combine(iconFolder, "MesenIcon.png"), FileMode.OpenOrCreate, FileAccess.Write)) {
+				AssetLoader.Open(new Uri("avares://Mesen/Assets/MesenIcon.png")).CopyTo(file);
+			}
 
 			string desktopFile = Path.Combine(desktopFolder, "mesen.desktop");
 			if(!File.Exists(desktopFile)) {

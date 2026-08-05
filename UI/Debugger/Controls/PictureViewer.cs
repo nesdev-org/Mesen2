@@ -284,7 +284,7 @@ namespace Mesen.Debugger.Controls
 
 				string? filename = await FileDialogHelper.SaveFile(null, initialFilename, wnd, FileDialogHelper.PngExt);
 				if(filename != null) {
-					bitmap.Save(filename);
+					bitmap.Save(filename, PngBitmapEncoderOptions.Default);
 				}
 			}
 		}

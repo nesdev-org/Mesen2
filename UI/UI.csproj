@@ -102,9 +102,6 @@
 	</ItemGroup>
 	<PropertyGroup Label="Avalonia">
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-		<AvaloniaNameGeneratorFilterByPath>NoMatchFilter</AvaloniaNameGeneratorFilterByPath>
-		<AvaloniaNameGeneratorFilterByNamespace>NoMatchFilter</AvaloniaNameGeneratorFilterByNamespace>
-		<AvaloniaNameGeneratorAttachDevTools>False</AvaloniaNameGeneratorAttachDevTools>
 		<AvaloniaNameGeneratorIsEnabled>False</AvaloniaNameGeneratorIsEnabled>
 	</PropertyGroup>
 	<ItemGroup>
@@ -116,16 +113,16 @@
 		<TrimmerRootAssembly Include="Dock.Settings" />
 	</ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="12.0.5" />
+    <PackageReference Include="Avalonia" Version="12.1.1" />
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.0.5" />
-    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.0.5" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.1" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.1.1" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" Condition="'$(OptimizeUi)'!='true'" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.5" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Dock.Avalonia" Version="12.0.0.2" />
-    <PackageReference Include="Dock.Avalonia.Themes.Fluent" Version="12.0.0.2" />
-    <PackageReference Include="Dock.Model.Mvvm" Version="12.0.0.2" />
+    <PackageReference Include="Dock.Avalonia" Version="12.1.0" />
+    <PackageReference Include="Dock.Avalonia.Themes.Fluent" Version="12.1.0" />
+    <PackageReference Include="Dock.Model.Mvvm" Version="12.1.0" />
     <PackageReference Include="Dotnet.Bundle" Version="*" />
     <PackageReference Include="ELFSharp" Version="2.17.3" />
    </ItemGroup>
