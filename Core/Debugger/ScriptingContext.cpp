@@ -12,7 +12,6 @@
 #include "Shared/Emulator.h"
 #include "Shared/EmuSettings.h"
 #include "Shared/EventType.h"
-#include "Shared/SaveStateManager.h"
 #include "Utilities/magic_enum.hpp"
 #include "Utilities/StringUtilities.h"
 
@@ -181,9 +180,34 @@ void ScriptingContext::LuaOpenLibs(lua_State* L, bool allowIoOsAccess)
 void ScriptingContext::Log(string message)
 {
 	auto lock = _logLock.AcquireSafe();
-	_logRows.push_back(message);
-	if(_logRows.size() > 500) {
-		_logRows.pop_front();
+	size_t start = 0;
+
+	if(message.size() <= 200) {
+		_logRows.push_back(message);
+		if(_logRows.size() > 500) {
+			_logRows.pop_front();
+		}
+	} else {
+		//Split large strings into several separate lines
+		//This is needed to prevent performance issues in the UI
+		//when a single line is several thousand characters long.
+		while(start < message.size()) {
+			size_t pos = message.find_first_of(',', start + 200);
+
+			if(pos == string::npos) {
+				pos = message.find_first_of(' ', start + 200);
+				if(pos == string::npos) {
+					pos = std::min<size_t>(message.size() - 1, start + 300);
+				}
+			}
+
+			_logRows.push_back(message.substr(start, pos - start + 1));
+			start = pos + 1;
+
+			if(_logRows.size() > 500) {
+				_logRows.pop_front();
+			}
+		}
 	}
 }
 

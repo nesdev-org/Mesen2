@@ -1,12 +1,7 @@
-﻿using Avalonia;
-using Avalonia.Media;
-using Mesen.Interop;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mesen.Config
 {
@@ -29,7 +24,7 @@ namespace Mesen.Config
 		[ObservableProperty] public partial bool AllowIoOsAccess { get; set; } = false;
 		[ObservableProperty] public partial bool AllowNetworkAccess { get; set; } = false;
 
-		[ObservableProperty] public partial bool ShowLineNumbers { get; set; } = false;
+		[ObservableProperty] public partial bool ShowLineNumbers { get; set; } = true;
 
 		[ObservableProperty] public partial UInt32 ScriptTimeout { get; set; } = 1;
 
