@@ -80,6 +80,14 @@ namespace Mesen.ViewModels
 			}
 		}
 
+		public void AddCheat(CheatCode cheat)
+		{
+			Cheats.Add(cheat);
+			Sort();
+			SaveCheats();
+			ApplyCheats();
+		}
+
 		public void InitActions(Control parent)
 		{
 			List<ContextMenuAction> toolbarActions = GetActions(parent);

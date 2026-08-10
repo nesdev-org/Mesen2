@@ -9,6 +9,7 @@ using Avalonia.Threading;
 using DataBoxControl;
 using Mesen.Config;
 using Mesen.Interop;
+using Mesen.Utilities;
 using Mesen.ViewModels;
 using System;
 using System.ComponentModel;
@@ -36,6 +37,13 @@ namespace Mesen.Windows
 		private void InitializeComponent()
 		{
 			AvaloniaXamlLoader.Load(this);
+		}
+
+		public static void AddCheat(Control parent, CheatCode cheat)
+		{
+			CheatListWindow wnd = ApplicationHelper.GetOrCreateUniqueWindow(parent, () => new CheatListWindow());
+			wnd._model.AddCheat(cheat);
+			wnd.BringToFront();
 		}
 
 		protected override void OnOpened(EventArgs e)

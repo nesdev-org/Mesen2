@@ -3182,6 +3182,7 @@ E
 			<Value ID="EditLabel">编辑标签</Value>
 			<Value ID="EditComment">编辑注释</Value>
 			<Value ID="AddWatch">添加到监视</Value>
+			<Value ID="AddCheat">添加到作弊码</Value>
 			<Value ID="AddBreakpoint">添加断点</Value>
 			<Value ID="AddForbidBreakpoint">添加禁止断点</Value>
 			<Value ID="ToggleForbidBreakpoint">切换禁止断点</Value>
