@@ -18,13 +18,19 @@ bool LuaCallHelper::CheckParamCount(int minParamCount)
 	if(minParamCount >= 0 && _stackSize < _paramCount && _stackSize >= minParamCount) {
 		return true;
 	}
-	return CheckSpecificParamCount(_paramCount);
+	return CheckSpecificParamCount(_paramCount, minParamCount);
 }
 
-bool LuaCallHelper::CheckSpecificParamCount(int count)
+bool LuaCallHelper::CheckSpecificParamCount(int count, int minParamCount)
 {
 	if(_stackSize != count) {
-		string message = string("too ") + (_stackSize < count ? "few" : "many") + " parameters.  expected " + std::to_string(count) + " got " + std::to_string(_stackSize);
+		string message = string("too ") + (_stackSize < count ? "few" : "many") + " parameters. expected ";
+		if(minParamCount >= 0) {
+			message += std::to_string(minParamCount) + " to " + std::to_string(count);
+		} else {
+			message += std::to_string(count);
+		}
+		message += ", got " + std::to_string(_stackSize);
 		luaL_error(_lua, message.c_str());
 		return false;
 	}
@@ -83,6 +89,18 @@ Nullable<int32_t> LuaCallHelper::ReadOptionalInteger()
 	}
 	lua_pop(_lua, 1);
 	return result;
+}
+
+uint32_t LuaCallHelper::ReadIntegerFromIndex(int32_t index)
+{
+	_paramCount++;
+	uint32_t value = 0;
+	if(lua_isinteger(_lua, index)) {
+		value = (uint32_t)lua_tointeger(_lua, index);
+	} else if(lua_isnumber(_lua, -1)) {
+		value = (uint32_t)lua_tonumber(_lua, index);
+	}
+	return value;
 }
 
 uint32_t LuaCallHelper::ReadInteger(uint32_t defaultValue)

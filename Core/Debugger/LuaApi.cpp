@@ -112,6 +112,7 @@ int LuaApi::GetLibrary(lua_State* lua)
 		{ "drawString", LuaApi::DrawString },
 
 		{ "drawPixel", LuaApi::DrawPixel },
+		{ "drawPixels", LuaApi::DrawPixels },
 		{ "drawLine", LuaApi::DrawLine },
 		{ "drawRectangle", LuaApi::DrawRectangle },
 		{ "clearScreen", LuaApi::ClearScreen },
@@ -604,6 +605,39 @@ int LuaApi::DrawPixel(lua_State* lua)
 	return l.ReturnCount();
 }
 
+int LuaApi::DrawPixels(lua_State* lua)
+{
+	LuaCallHelper l(lua);
+	l.ForceParamCount(7);
+	int displayDelay = l.ReadInteger(0);
+	int frameCount = l.ReadInteger(1);
+	l.SkipParam();
+	int x = l.ReadIntegerFromIndex(1);
+	int y = l.ReadIntegerFromIndex(2);
+	int width = l.ReadIntegerFromIndex(3);
+	int height = l.ReadIntegerFromIndex(4);
+	checkminparams(5);
+
+	luaL_checktype(lua, -1, LUA_TTABLE);
+
+	uint32_t* data = new uint32_t[width * height];
+	std::fill(data, data + width * height, 0xFF000000);
+
+	for(int i = 0, len = width * height; i < len; i++) {
+		if(lua_rawgeti(lua, -1, i + 1) != LUA_TNIL) {
+			data[i] = (uint32_t)lua_tointeger(lua, -1);
+		}
+		lua_pop(lua, 1);
+	}
+
+	lua_pop(lua, 5);
+
+	int startFrame = _emu->GetFrameCount() + displayDelay;
+	GetHud()->DrawPixels(data, x, y, width, height, frameCount, startFrame);
+
+	return l.ReturnCount();
+}
+
 int LuaApi::DrawRectangle(lua_State* lua)
 {
 	LuaCallHelper l(lua);
@@ -1001,8 +1035,7 @@ int LuaApi::GetAccessCounters(lua_State* lua)
 	checkparams();
 
 	uint32_t size = _memoryDumper->GetMemorySize(memoryType);
-	vector<AddressCounters> counts;
-	counts.resize(size, {});
+	vector<AddressCounters> counts(size);
 	_debugger->GetMemoryAccessCounter()->GetAccessCounts(0, size, memoryType, counts.data());
 
 	auto getValue = [&](AddressCounters& counter) -> uint64_t {
@@ -1046,8 +1079,7 @@ int LuaApi::GetCdlData(lua_State* lua)
 	}
 
 	uint32_t size = _memoryDumper->GetMemorySize(memoryType);
-	vector<uint8_t> cdlData;
-	cdlData.resize(size, {});
+	vector<uint8_t> cdlData(size);
 	_debugger->GetCdlManager()->GetCdlData(0, size, memoryType, cdlData.data());
 
 	lua_newtable(lua);
@@ -1163,9 +1195,11 @@ int LuaApi::GetState(lua_State* lua)
 	uint32_t frameCount = _emu->GetFrameCount();
 	uint32_t masterClock = _emu->GetMasterClock();
 	uint32_t clockRate = _emu->GetMasterClockRate();
+	double fps = _emu->GetConsole()->GetFps();
 	string consoleType = string(magic_enum::enum_name<ConsoleType>(_emu->GetConsoleType()));
 	string region = string(magic_enum::enum_name<ConsoleRegion>(_emu->GetRegion()));
 
+	SV(fps);
 	SV(clockRate);
 	SV(consoleType);
 	SV(region);

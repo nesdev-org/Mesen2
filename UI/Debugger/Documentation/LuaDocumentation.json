@@ -103,6 +103,20 @@
 	]
 },
 {
+	"name": "drawPixels",
+	"category": "Drawing",
+	"description": "Draws a block of pixels at the specified (x, y) coordinates.",
+	"parameters": [
+		{ "name": "x", "type": "Int", "description": "X position" },
+		{ "name": "y", "type": "Int", "description": "Y position" },
+		{ "name": "width", "type": "Int", "description": "Width" },
+		{ "name": "height", "type": "Int", "description": "Height" },
+		{ "name": "pixelData", "type": "Table", "description": "Array of integers in ARGB format (first pixel at index 1)" },
+		{ "name": "duration", "type": "Int", "description": "Number of frames to display", "defaultValue": "1" },
+		{ "name": "delay", "type": "Int", "description": "Number of frames to wait before drawing", "defaultValue": "0" }
+	]
+},
+{
 	"name": "drawRectangle",
 	"category": "Drawing",
 	"description": "Draws a rectangle between (x, y) to (x+width, y+height) using the specified color for a specific number of frames. If fill is false, only the rectangle's outline will be drawn.",
@@ -138,8 +152,8 @@
 	"subcategory": "AccessCounters",
 	"description": "Returns an array of access counters for the specified memory and operation types.",
 	"parameters": [
-		{ "name": "counterType", "type": "Enum", "enumName": "counterType", "description": "Counter type" },
-		{ "name": "memoryType", "type": "Enum", "enumName": "memType", "description": "Memory type" }
+		{ "name": "memoryType", "type": "Enum", "enumName": "memType", "description": "Memory type" },
+		{ "name": "counterType", "type": "Enum", "enumName": "counterType", "description": "Counter type" }
 	],
 	"returnValue": { "type": "Array", "description": "Array of ints" }
 },

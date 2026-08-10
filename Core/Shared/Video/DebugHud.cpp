@@ -4,9 +4,9 @@
 #include "Shared/Video/DrawCommand.h"
 #include "Shared/Video/DrawLineCommand.h"
 #include "Shared/Video/DrawPixelCommand.h"
+#include "Shared/Video/DrawPixelsCommand.h"
 #include "Shared/Video/DrawRectangleCommand.h"
 #include "Shared/Video/DrawStringCommand.h"
-#include "Shared/Video/DrawScreenBufferCommand.h"
 
 DebugHud::DebugHud()
 {
@@ -77,6 +77,11 @@ bool DebugHud::Draw(uint32_t* argbBuffer, FrameInfo frameInfo, OverscanDimension
 void DebugHud::DrawPixel(int x, int y, int color, int frameCount, int startFrame)
 {
 	AddCommand(unique_ptr<DrawCommand>(new DrawPixelCommand(x, y, color, frameCount, startFrame)));
+}
+
+void DebugHud::DrawPixels(uint32_t* data, int x, int y, int width, int height, int frameCount, int startFrame)
+{
+	AddCommand(unique_ptr<DrawCommand>(new DrawPixelsCommand(data, x, y, width, height, frameCount, startFrame)));
 }
 
 void DebugHud::DrawLine(int x, int y, int x2, int y2, int color, int frameCount, int startFrame)

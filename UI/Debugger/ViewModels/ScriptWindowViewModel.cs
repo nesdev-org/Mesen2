@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Mesen.Debugger.ViewModels
 {
-	public partial class ScriptWindowViewModel : ViewModelBase
+	public partial class ScriptWindowViewModel : DisposableViewModel
 	{
 		public ScriptWindowConfig Config { get; } = ConfigManager.Config.Debug.ScriptWindow;
 
@@ -46,14 +46,14 @@ namespace Mesen.Debugger.ViewModels
 
 		public ScriptWindowViewModel(ScriptStartupBehavior? behavior)
 		{
-			this.ObserveProp(nameof(ScriptName), () => {
+			this.AddDisposable(this.ObserveProp(nameof(ScriptName), () => {
 				string wndTitle = ResourceHelper.GetViewLabel(nameof(ScriptWindow), "wndTitle");
 				if(!string.IsNullOrWhiteSpace(ScriptName)) {
 					WindowTitle = wndTitle + " - " + ScriptName;
 				} else {
 					WindowTitle = wndTitle;
 				}
-			});
+			}));
 
 			switch(behavior ?? Config.ScriptStartupBehavior) {
 				case ScriptStartupBehavior.ShowBlankWindow: break;
@@ -66,15 +66,21 @@ namespace Mesen.Debugger.ViewModels
 			}
 		}
 
+		protected override void DisposeView()
+		{
+			base.DisposeView();
+			_fileWatcher.Dispose();
+		}
+
 		public void InitActions(ScriptWindow wnd)
 		{
 			_wnd = wnd;
 
-			ScriptMenuActions = GetScriptMenuActions();
-			ToolbarActions = GetToolbarActions();
+			ScriptMenuActions = AddDisposables(GetScriptMenuActions());
+			ToolbarActions = AddDisposables(GetToolbarActions());
 
-			FileMenuActions = GetSharedFileActions();
-			FileMenuActions.AddRange(new List<ContextMenuAction>() {
+			FileMenuActions = AddDisposables(GetSharedFileActions());
+			FileMenuActions.AddRange(AddDisposables(new List<ContextMenuAction>() {
 				new ContextMenuAction() {
 					ActionType = ActionType.SaveAs,
 					OnClick = async () => await SaveAs(Path.GetFileName(FilePath))
@@ -105,9 +111,9 @@ namespace Mesen.Debugger.ViewModels
 					ActionType = ActionType.Exit,
 					OnClick = () => _wnd?.Close()
 				}
-			});
+			}));
 
-			HelpMenuActions = new() {
+			HelpMenuActions = AddDisposables(new List<ContextMenuAction>() {
 				new ContextMenuAction() {
 					ActionType = ActionType.HelpApiReference,
 					OnClick = () => {
@@ -117,7 +123,7 @@ namespace Mesen.Debugger.ViewModels
 						}
 					}
 				}
-			};
+			});
 
 			DebugShortcutManager.RegisterActions(_wnd, ScriptMenuActions);
 			DebugShortcutManager.RegisterActions(_wnd, FileMenuActions);
@@ -315,7 +321,7 @@ namespace Mesen.Debugger.ViewModels
 			FilePath = filename;
 			ScriptName = Path.GetFileName(filename);
 
-			_fileWatcher.EnableRaisingEvents = false;
+			_fileWatcher.Dispose();
 
 			_fileWatcher = new(Path.GetDirectoryName(FilePath) ?? "", Path.GetFileName(FilePath));
 			_fileWatcher.Changed += (s, e) => {
@@ -346,10 +352,15 @@ namespace Mesen.Debugger.ViewModels
 		{
 			if(!string.IsNullOrWhiteSpace(FilePath)) {
 				if(_originalText != Code) {
-					if(FileHelper.WriteAllText(FilePath, Code, Encoding.UTF8)) {
-						_originalText = Code;
-					} else {
-						return false;
+					_fileWatcher.EnableRaisingEvents = false;
+					try {
+						if(FileHelper.WriteAllText(FilePath, Code, Encoding.UTF8)) {
+							_originalText = Code;
+						} else {
+							return false;
+						}
+					} finally {
+						_fileWatcher.EnableRaisingEvents = true;
 					}
 				}
 				return true;

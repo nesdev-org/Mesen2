@@ -49,6 +49,7 @@ public:
 
 	static int DrawLine(lua_State* lua);
 	static int DrawPixel(lua_State* lua);
+	static int DrawPixels(lua_State* lua);
 	static int DrawRectangle(lua_State* lua);
 	static int ClearScreen(lua_State* lua);
 

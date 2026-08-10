@@ -3018,6 +3018,9 @@
     <ClInclude Include="Shared\Video\BlendFilter.h">
       <Filter>Shared\Video</Filter>
     </ClInclude>
+    <ClInclude Include="Shared\Video\DrawPixelsCommand.h">
+      <Filter>Shared\Video</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shared\Video\RotateFilter.cpp">
