@@ -22,11 +22,14 @@ public:
 
 	void ForceParamCount(int paramCount);
 	bool CheckParamCount(int minParamCount = -1);
-	bool CheckSpecificParamCount(int count);
+	bool CheckSpecificParamCount(int count, int minParamCount = -1);
+
+	void SkipParam() { _paramCount++; }
 
 	double ReadDouble();
 	bool ReadBool(bool defaultValue = false);
 	uint32_t ReadInteger(uint32_t defaultValue = 0);
+	uint32_t ReadIntegerFromIndex(int32_t index);
 	string ReadString();
 	int GetReference();
 

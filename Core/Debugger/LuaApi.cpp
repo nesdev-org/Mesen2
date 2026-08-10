@@ -112,6 +112,7 @@ int LuaApi::GetLibrary(lua_State* lua)
 		{ "drawString", LuaApi::DrawString },
 
 		{ "drawPixel", LuaApi::DrawPixel },
+		{ "drawPixels", LuaApi::DrawPixels },
 		{ "drawLine", LuaApi::DrawLine },
 		{ "drawRectangle", LuaApi::DrawRectangle },
 		{ "clearScreen", LuaApi::ClearScreen },
@@ -600,6 +601,39 @@ int LuaApi::DrawPixel(lua_State* lua)
 
 	int startFrame = _emu->GetFrameCount() + displayDelay;
 	GetHud()->DrawPixel(x, y, color, frameCount, startFrame);
+
+	return l.ReturnCount();
+}
+
+int LuaApi::DrawPixels(lua_State* lua)
+{
+	LuaCallHelper l(lua);
+	l.ForceParamCount(7);
+	int displayDelay = l.ReadInteger(0);
+	int frameCount = l.ReadInteger(1);
+	l.SkipParam();
+	int x = l.ReadIntegerFromIndex(1);
+	int y = l.ReadIntegerFromIndex(2);
+	int width = l.ReadIntegerFromIndex(3);
+	int height = l.ReadIntegerFromIndex(4);
+	checkminparams(5);
+
+	luaL_checktype(lua, -1, LUA_TTABLE);
+
+	uint32_t* data = new uint32_t[width * height];
+	std::fill(data, data + width * height, 0xFF000000);
+
+	for(int i = 0, len = width * height; i < len; i++) {
+		if(lua_rawgeti(lua, -1, i + 1) != LUA_TNIL) {
+			data[i] = (uint32_t)lua_tointeger(lua, -1);
+		}
+		lua_pop(lua, 1);
+	}
+
+	lua_pop(lua, 5);
+
+	int startFrame = _emu->GetFrameCount() + displayDelay;
+	GetHud()->DrawPixels(data, x, y, width, height, frameCount, startFrame);
 
 	return l.ReturnCount();
 }
