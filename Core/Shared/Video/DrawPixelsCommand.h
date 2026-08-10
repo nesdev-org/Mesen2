@@ -5,7 +5,7 @@
 class DrawPixelsCommand : public DrawCommand
 {
 private:
-	int _x, _y, _height, _width;
+	int _x, _y, _width, _height;
 	uint32_t* _data = nullptr;
 
 protected:
