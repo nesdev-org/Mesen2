@@ -172,8 +172,10 @@
 
 		<Border BorderBrush="Gray" BorderThickness="1">
 			<DataBox
+				x:Name="SearchResults"
 				Items="{Binding ListData}"
 				Selection="{Binding Selection}"
+				CellDoubleClick="OnCellDoubleClick"
 				SortState="{Binding SortState}"
 				SortMode="Multiple"
 				SortCommand="{Binding SortCommand}"

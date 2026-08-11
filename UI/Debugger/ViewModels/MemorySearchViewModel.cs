@@ -250,6 +250,39 @@ public partial class MemorySearchViewModel : DisposableViewModel
 		}
 	}
 
+	public MemoryAddressViewModel? SelectedItem => Selection.SelectedItems.Count == 1 ? Selection.SelectedItem : null;
+
+	public int? GetSelectedAddress()
+	{
+		return SelectedItem?.GetAddress();
+	}
+
+	public AddressInfo? GetSelectedRelativeAddress()
+	{
+		int? address = GetSelectedAddress();
+		if(address == null) {
+			return null;
+		}
+
+		AddressInfo relativeAddress = DebugApi.GetRelativeAddress(new AddressInfo() { Address = address.Value, Type = MemoryType }, MemoryType.ToCpuType());
+		return relativeAddress.Address >= 0 ? relativeAddress : null;
+	}
+
+	public uint? GetSelectedRawValue()
+	{
+		int? address = GetSelectedAddress();
+		if(address == null || address.Value < 0 || (long)address.Value + (int)ValueSize > _memoryState.Length) {
+			return null;
+		}
+
+		uint value = 0;
+		for(int i = 0; i < (int)ValueSize; i++) {
+			value |= (uint)_memoryState[address.Value + i] << (i * 8);
+		}
+
+		return value;
+	}
+
 	public bool IsMatch(int address)
 	{
 		long value = GetValue(address, _memoryState);
@@ -397,6 +430,11 @@ public class MemoryAddressViewModel : INotifyPropertyChanged
 	{
 		_index = index;
 		_search = memorySearch;
+	}
+
+	public int? GetAddress()
+	{
+		return _index >= 0 && _index < _search.AddressLookup.Length ? _search.AddressLookup[_index] : null;
 	}
 
 	static private PropertyChangedEventArgs[] _args = new[] {

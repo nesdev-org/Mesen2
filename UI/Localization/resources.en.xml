@@ -3474,6 +3474,7 @@ E
 			<Value ID="EditLabel">Edit Label</Value>
 			<Value ID="EditComment">Edit Comment</Value>
 			<Value ID="AddWatch">Add to Watch</Value>
+			<Value ID="AddCheat">Add to Cheats</Value>
 			<Value ID="AddBreakpoint">Add Breakpoint</Value>
 			<Value ID="AddForbidBreakpoint">Add Forbid Breakpoint</Value>
 			<Value ID="ToggleForbidBreakpoint">Toggle Forbid Breakpoint</Value>
