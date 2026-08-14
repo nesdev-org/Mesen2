@@ -43,7 +43,6 @@ namespace Mesen.Windows
 		private CommandLineHelper? _cmdLine;
 
 		private bool _testModeEnabled;
-		private bool _needResume = false;
 		private bool _needCloseValidation = true;
 		private bool _isClosing = false;
 
@@ -111,6 +110,7 @@ namespace Mesen.Windows
 			_softwareRenderer = this.GetControl<SoftwareRendererView>("SoftwareRenderer");
 			_audioPlayer = this.GetControl<ContentControl>("AudioPlayer");
 			_mainMenu = this.GetControl<MainMenuView>("MainMenu");
+			_mainMenu.MainMenu.Opened += MainMenu_Opened;
 			ConfigManager.Config.MainWindow.LoadWindowSettings(this);
 
 			Console.CancelKeyPress += Console_CancelKeyPress;
@@ -779,17 +779,26 @@ namespace Mesen.Windows
 			}
 		}
 
+		private void MainMenu_Opened(object? sender, RoutedEventArgs e)
+		{
+			UpdateAutoPause();
+		}
+
 		private void TimerUpdateBackgroundFlag(object? sender, EventArgs e)
 		{
-			Window? activeWindow = ApplicationHelper.GetActiveWindow();
-
-			PreferencesConfig cfg = ConfigManager.Config.Preferences;
-
 			bool focusInMenu = MenuHelper.IsFocusInMenu(_mainMenu.MainMenu);
 			if(focusInMenu && !_focusInMenu) {
 				InputApi.ResetKeyState();
 			}
 			_focusInMenu = focusInMenu;
+
+			UpdateAutoPause();
+		}
+
+		private void UpdateAutoPause()
+		{
+			Window? activeWindow = ApplicationHelper.GetActiveWindow();
+			PreferencesConfig cfg = ConfigManager.Config.Preferences;
 
 			bool needPause = activeWindow == null && cfg.PauseWhenInBackground;
 			if(activeWindow != null) {
@@ -800,7 +809,7 @@ namespace Mesen.Windows
 
 			if(needPause) {
 				if(!EmuApi.IsPaused()) {
-					_needResume = true;
+					_model.MainMenu.AutoPaused = true;
 
 					DebuggerWindow? wnd = DebugWindowManager.GetDebugWindow<DebuggerWindow>(x => x.CpuType == _model.RomInfo.ConsoleType.GetMainCpuType());
 					if(wnd != null) {
@@ -810,11 +819,11 @@ namespace Mesen.Windows
 
 					EmuApi.Pause();
 				}
-			} else if(_needResume) {
+			} else if(_model.MainMenu.AutoPaused) {
 				//Don't resume if the load/save state dialog is opened
 				if(!_model.RecentGames.Visible) {
 					EmuApi.Resume();
-					_needResume = false;
+					_model.MainMenu.AutoPaused = false;
 				}
 			}
 		}

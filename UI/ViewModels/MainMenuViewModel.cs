@@ -42,6 +42,8 @@ namespace Mesen.ViewModels
 		private bool IsVsDualSystemGame => RomInfo.Format == RomFormat.VsDualSystem;
 		private List<RecentItem> RecentItems => ConfigManager.Config.RecentFiles.Items;
 
+		public bool AutoPaused { get; set; } = false;
+
 		private ConfigWindow? _cfgWindow = null;
 		private MainMenuAction _selectControllerAction = new();
 
@@ -210,8 +212,18 @@ namespace Mesen.ViewModels
 		private void InitGameMenu(MainWindow wnd)
 		{
 			GameMenuItems = new List<object>() {
-				new MainMenuAction(EmulatorShortcut.Pause) { ActionType = ActionType.Pause, IsVisible = () => !EmuApi.IsPaused() && (!ConfigManager.Config.Preferences.PauseWhenInMenusAndConfig || !EmuApi.IsRunning()) },
-				new MainMenuAction(EmulatorShortcut.Pause) { ActionType = ActionType.Resume, IsVisible = () => EmuApi.IsPaused() || (ConfigManager.Config.Preferences.PauseWhenInMenusAndConfig && EmuApi.IsRunning()) },
+				new MainMenuAction(EmulatorShortcut.Pause) { ActionType = ActionType.Pause, IsVisible = () => !EmuApi.IsPaused() && !ConfigManager.Config.Preferences.PauseWhenInMenusAndConfig },
+				new MainMenuAction(EmulatorShortcut.Pause) { ActionType = ActionType.Resume, IsVisible = () => EmuApi.IsPaused() && !ConfigManager.Config.Preferences.PauseWhenInMenusAndConfig },
+				new MainMenuAction(EmulatorShortcut.Pause) {
+					ActionType = ActionType.Resume,
+					IsVisible = () => ConfigManager.Config.Preferences.PauseWhenInMenusAndConfig && !AutoPaused,
+					OnClick = () => AutoPaused = true
+				},
+				new MainMenuAction(EmulatorShortcut.Pause) {
+					ActionType = ActionType.Pause,
+					IsVisible = () => ConfigManager.Config.Preferences.PauseWhenInMenusAndConfig && AutoPaused,
+					OnClick = () => AutoPaused = false
+				},
 				new ContextMenuSeparator(),
 				new MainMenuAction(EmulatorShortcut.Reset) { ActionType = ActionType.Reset },
 				new MainMenuAction(EmulatorShortcut.PowerCycle) { ActionType = ActionType.PowerCycle },
