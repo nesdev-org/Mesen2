@@ -695,7 +695,7 @@ protected:
 		entries.push_back(MapperStateEntry("$5101", "CHR Mode", _chrMode, MapperStateValueType::Number8));
 
 		entries.push_back(MapperStateEntry("$5102", "Work RAM Write Protect", _prgRamProtect1, MapperStateValueType::Number8));
-		entries.push_back(MapperStateEntry("$5103", "Work RAM Write Protect", _prgRamProtect1, MapperStateValueType::Number8));
+		entries.push_back(MapperStateEntry("$5103", "Work RAM Write Protect", _prgRamProtect2, MapperStateValueType::Number8));
 		entries.push_back(MapperStateEntry("$5102/3", "Work RAM Write Protected", _prgRamProtect1 != 0x02 || _prgRamProtect2 != 0x01));
 
 		entries.push_back(MapperStateEntry("$5104", "Extended RAM Mode", _extendedRamMode, MapperStateValueType::Number8));
