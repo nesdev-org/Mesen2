@@ -69,9 +69,6 @@
     <ClInclude Include="Audio\HermiteResampler.h">
       <Filter>Audio</Filter>
     </ClInclude>
-    <ClInclude Include="Audio\LowPassFilter.h">
-      <Filter>Audio</Filter>
-    </ClInclude>
     <ClInclude Include="Audio\ReverbFilter.h">
       <Filter>Audio</Filter>
     </ClInclude>
@@ -212,6 +209,12 @@
       <Filter>Audio\ymfm</Filter>
     </ClInclude>
     <ClInclude Include="TimeUtilities.h" />
+    <ClInclude Include="Audio\BiquadFilter.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\BiquadCascadeFilter.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="xBRZ\xbrz.cpp">
@@ -344,6 +347,12 @@
     </ClCompile>
     <ClCompile Include="Audio\ymfm\ymfm_adpcm.cpp">
       <Filter>Audio\ymfm</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\BiquadFilter.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\BiquadCascadeFilter.cpp">
+      <Filter>Audio</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -21,7 +21,7 @@ int16_t HermiteResampler::HermiteInterpolate(double values[4], double mu)
 	return (int16_t)std::clamp(output, -32768.0, 32767.0);
 }
 
-void HermiteResampler::PushSample(double prevValues[4], int16_t sample)
+void HermiteResampler::PushSample(double prevValues[4], double sample)
 {
 	prevValues[0] = prevValues[1];
 	prevValues[1] = prevValues[2];
@@ -36,6 +36,7 @@ void HermiteResampler::Reset()
 		_prevRight[i] = 0.0;
 	}
 	_fraction = 0.0;
+	_lowpassFilter.Reset();
 }
 
 void HermiteResampler::SetVolume(double volume)
@@ -46,6 +47,7 @@ void HermiteResampler::SetVolume(double volume)
 void HermiteResampler::SetSampleRates(double srcRate, double dstRate)
 {
 	_rateRatio = srcRate / dstRate;
+	_lowpassFilter.Init(srcRate, dstRate);
 }
 
 uint32_t HermiteResampler::GetPendingCount()
@@ -111,9 +113,9 @@ uint32_t HermiteResampler::Resample(int16_t* in, uint32_t inSampleCount, int16_t
 				_fraction += _rateRatio;
 			}
 
-			//Move to the next source sample
-			PushSample(_prevLeft, in[i]);
-			PushSample(_prevRight, in[i + 1]);
+			//Move to the next source sample and apply lowpass filter before downsampling to prevent aliasing
+			PushSample(_prevLeft, _lowpassFilter.ProcessLeft(in[i]));
+			PushSample(_prevRight, _lowpassFilter.ProcessRight(in[i + 1]));
 			_fraction -= 1.0;
 		}
 	}

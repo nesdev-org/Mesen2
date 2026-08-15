@@ -188,11 +188,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArchiveReader.h" />
+    <ClInclude Include="Audio\BiquadCascadeFilter.h" />
+    <ClInclude Include="Audio\BiquadFilter.h" />
     <ClInclude Include="Audio\blip_buf.h" />
     <ClInclude Include="Audio\CrossFeedFilter.h" />
     <ClInclude Include="Audio\Equalizer.h" />
     <ClInclude Include="Audio\HermiteResampler.h" />
-    <ClInclude Include="Audio\LowPassFilter.h" />
     <ClInclude Include="Audio\OnePoleLowPassFilter.h" />
     <ClInclude Include="Audio\orfanidis_eq.h" />
     <ClInclude Include="Audio\ReverbFilter.h" />
@@ -272,6 +273,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArchiveReader.cpp" />
+    <ClCompile Include="Audio\BiquadCascadeFilter.cpp" />
+    <ClCompile Include="Audio\BiquadFilter.cpp" />
     <ClCompile Include="Audio\blip_buf.cpp" />
     <ClCompile Include="Audio\CrossFeedFilter.cpp" />
     <ClCompile Include="Audio\Equalizer.cpp" />

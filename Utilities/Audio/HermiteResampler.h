@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "BiquadCascadeFilter.h"
 
 class HermiteResampler
 {
@@ -13,10 +14,12 @@ private:
 	int16_t _left = 0;
 	int16_t _right = 0;
 
+	BiquadCascadeFilter _lowpassFilter;
+
 	vector<int16_t> _pendingSamples;
 
 	__forceinline int16_t HermiteInterpolate(double values[4], double mu);
-	__forceinline void PushSample(double prevValues[4], int16_t sample);
+	__forceinline void PushSample(double prevValues[4], double sample);
 
 	template<bool addMode>
 	void WriteSample(int16_t* out, uint32_t pos, int16_t left, int16_t right);
