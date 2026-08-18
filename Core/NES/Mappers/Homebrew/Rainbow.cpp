@@ -13,6 +13,8 @@
 #include "Utilities/Patches/IpsPatcher.h"
 #include "Utilities/FolderUtilities.h"
 
+#define MAPPER_VERSION 0x21
+
 Rainbow::Rainbow()
 {
 }
@@ -564,7 +566,7 @@ uint8_t Rainbow::ReadRegister(uint16_t addr)
 			return value;
 		}
 
-		case 0x4160: return 0x20;
+		case 0x4160: return MAPPER_VERSION;
 		case 0x4161:
 			return (
 				(uint8_t)_wifiIrqPending |
@@ -917,7 +919,7 @@ vector<MapperStateEntry> Rainbow::GetMapperStateEntries()
 	entries.push_back(MapperStateEntry("$415C/D", "Address", _fpgaRamAddr, MapperStateValueType::Number16));
 	entries.push_back(MapperStateEntry("$415E", "Increment", _fpgaRamInc, MapperStateValueType::Number8));
 
-	entries.push_back(MapperStateEntry("$4160", "Mapper Version", 0x20, MapperStateValueType::Number8));
+	entries.push_back(MapperStateEntry("$4160", "Mapper Version", MAPPER_VERSION, MapperStateValueType::Number8));
 	entries.push_back(MapperStateEntry("$4161.0", "Wi-Fi IRQ Pending", _wifiIrqPending));
 	entries.push_back(MapperStateEntry("$4161.6", "CPU IRQ Pending", _cpuIrqPending));
 	entries.push_back(MapperStateEntry("$4161.7", "Scanline IRQ Pending", _slIrqPending));
