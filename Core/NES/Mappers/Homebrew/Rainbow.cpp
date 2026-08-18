@@ -85,7 +85,7 @@ void Rainbow::Reset(bool softReset)
 	WriteRegister(0x415A, 0x00);
 	WriteRegister(0x416B, 0x00);
 	WriteRegister(0x4190, 0x00);
-	WriteRegister(0x41A9, 0x03);
+	WriteRegister(0x41A9, 0x00);
 	WriteRegister(0x41AA, 0x0F);
 }
 
