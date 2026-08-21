@@ -10,8 +10,8 @@
 #include "Debugger/DisassemblyInfo.h"
 #include "Debugger/Disassembler.h"
 #include "Debugger/CallstackManager.h"
+#include "Debugger/Profiler.h"
 #include "Debugger/BreakpointManager.h"
-#include "Debugger/ExpressionEvaluator.h"
 #include "Debugger/Debugger.h"
 #include "Debugger/MemoryAccessCounter.h"
 #include "Debugger/CodeDataLogger.h"
@@ -33,6 +33,7 @@ GsuDebugger::GsuDebugger(Debugger* debugger) : IDebugger(debugger->GetEmulator()
 
 	_traceLogger.reset(new GsuTraceLogger(debugger, this, console->GetPpu(), _memoryManager));
 
+	_callstackManager.reset(new CallstackManager(debugger, this));
 	_breakpointManager.reset(new BreakpointManager(debugger, this, CpuType::Gsu, debugger->GetEventManager(CpuType::Snes)));
 	_step.reset(new StepRequest());
 }
@@ -57,6 +58,12 @@ void GsuDebugger::ProcessInstruction()
 
 	if(_settings->CheckDebuggerFlag(DebuggerFlags::GsuDebuggerEnabled)) {
 		_disassembler->BuildCache(addressInfo, state.SFR.GetFlagsHigh() & 0x13, CpuType::Gsu);
+	}
+
+	if((_prevProgramCounter & ~0x0F) != (addr & ~0x0F)) {
+		//To get data in the profiler, pretend that the code is split into 16-byte long functions
+		AddressInfo dst = _gsu->GetMemoryMappings()->GetAbsoluteAddress(addr & ~0x0F);
+		_callstackManager->GetProfiler()->RecordSample(dst);
 	}
 
 	_prevOpCode = state.ProgramReadBuffer;
@@ -172,7 +179,7 @@ BreakpointManager* GsuDebugger::GetBreakpointManager()
 
 CallstackManager* GsuDebugger::GetCallstackManager()
 {
-	return nullptr;
+	return _callstackManager.get();
 }
 
 IAssembler* GsuDebugger::GetAssembler()

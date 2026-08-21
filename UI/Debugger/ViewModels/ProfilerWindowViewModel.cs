@@ -109,12 +109,10 @@ namespace Mesen.Debugger.ViewModels
 		{
 			List<ProfilerTab> tabs = new();
 			foreach(CpuType type in EmuApi.GetRomInfo().CpuTypes) {
-				if(type.SupportsCallStack()) {
-					tabs.Add(new ProfilerTab() {
-						TabName = ResourceHelper.GetEnumText(type),
-						CpuType = type
-					});
-				}
+				tabs.Add(new ProfilerTab() {
+					TabName = ResourceHelper.GetEnumText(type),
+					CpuType = type
+				});
 			}
 
 			ProfilerTabs = tabs;

@@ -211,10 +211,10 @@ void Gsu::MERGE()
 		_state.SFR.Overflow = (value & 0xC0C0) != 0;
 		_state.SFR.Sign = (value & 0x8080) != 0;
 		_state.SFR.Zero = (value & 0xF0F0) != 0;
-		ResetFlags();
 	} else {
 		ProcessCommandFx3();
 	}
+	ResetFlags();
 }
 
 void Gsu::SWAP()

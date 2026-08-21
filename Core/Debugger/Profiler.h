@@ -46,6 +46,8 @@ public:
 	void StackFunction(AddressInfo& addr, StackFrameFlags stackFlag);
 	void UnstackFunction();
 
+	void RecordSample(AddressInfo addr);
+
 	void UpdateCpuUsage();
 
 	void Reset();

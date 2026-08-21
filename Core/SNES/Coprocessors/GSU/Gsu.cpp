@@ -8,6 +8,7 @@
 #include "SNES/BaseCartridge.h"
 #include "SNES/RamHandler.h"
 #include "Shared/Emulator.h"
+#include "Shared/EventType.h"
 #include "Shared/EmuSettings.h"
 #include "Shared/MessageManager.h"
 #include "Shared/BatteryManager.h"
@@ -410,6 +411,7 @@ void Gsu::WaitForRomAccess()
 	if(!_state.GsuRomAccess) {
 		_waitForRomAccess = true;
 		_stopped = true;
+		_emu->ProcessEvent(EventType::HaltStarted, CpuType::Gsu);
 	}
 }
 
@@ -418,12 +420,19 @@ void Gsu::WaitForRamAccess()
 	if(!_state.GsuRamAccess) {
 		_waitForRamAccess = true;
 		_stopped = true;
+		_emu->ProcessEvent(EventType::HaltStarted, CpuType::Gsu);
 	}
 }
 
 void Gsu::UpdateRunningState()
 {
+	bool stopped = _stopped;
 	_stopped = !_state.SFR.Running || _waitForRamAccess || _waitForRomAccess;
+	if(_stopped && !stopped) {
+		_emu->ProcessEvent(EventType::HaltEnded, CpuType::Gsu);
+	} else if(stopped && !_stopped) {
+		_emu->ProcessEvent(EventType::HaltStarted, CpuType::Gsu);
+	}
 }
 
 uint8_t Gsu::ReadRomBuffer()

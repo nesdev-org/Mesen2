@@ -101,6 +101,32 @@ void Profiler::UnstackFunction()
 	}
 }
 
+void Profiler::RecordSample(AddressInfo addr)
+{
+	//Used by the GSU to behave as if the current function changes
+	//every time the program counter crosses a 16-byte boundary,
+	//which allows using the profiler with the GSU even though
+	//the GSU doesn't actually ever call "functions"
+	if(addr.Address >= 0) {
+		uint32_t key = addr.Address | ((uint8_t)addr.Type << 24);
+		if(_functions.find(key) == _functions.end()) {
+			_functions[key] = ProfiledFunction();
+			_functions[key].Address = addr;
+		}
+
+		uint64_t masterClock = _cpuDebugger->GetCpuCycleCount(true);
+		uint64_t clockGap = masterClock - _prevMasterClock;
+
+		ProfiledFunction& func = _functions[_currentFunction];
+		func.InclusiveCycles += clockGap;
+		func.ExclusiveCycles += clockGap;
+		func.CallCount++;
+
+		_prevMasterClock = masterClock;
+		_currentFunction = key;
+	}
+}
+
 void Profiler::Reset()
 {
 	DebugBreakHelper helper(_debugger);
