@@ -139,7 +139,7 @@
 
 					<c:OptionSection Header="{l:Translate grpEnhancedAudio}">
 						<StackPanel>
-							<c:CheckBoxWarning IsChecked="{Binding Config.EnableEnhancedAudio}" Text="{l:Translate chkEnableEnhancedAudio}" />
+							<CheckBox IsChecked="{Binding Config.EnableEnhancedAudio}" Content="{l:Translate chkEnableEnhancedAudio}" />
 							<StackPanel Orientation="Horizontal" IsEnabled="{Binding Config.EnableEnhancedAudio}">
 								<TextBlock Text="{l:Translate lblEnhancedAudioVolume}" />
 								<c:MesenNumericUpDown Minimum="0" Maximum="100" Value="{Binding Config.EnhancedAudioVolume}" />
