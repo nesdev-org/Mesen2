@@ -124,10 +124,11 @@ void NesConsole::Serialize(Serializer& s)
 
 	if(!s.IsSaving()) {
 		UpdateRegion(true);
-		if(_enhancedSynth) {
-			//Delay lines/oscillator phases don't belong to the loaded state
-			_enhancedSynth->Reset();
-		}
+		//Note: the enhanced synth is deliberately NOT reset here. Run-ahead
+		//loads a state every frame, so resetting on deserialization would
+		//wipe the synth's envelopes/delay lines 60 times per second. Letting
+		//transient audio state (echo tail, phases) survive a state load is
+		//harmless - it fades naturally within ~250ms.
 	}
 }
 

@@ -101,20 +101,16 @@ double EnhancedSynth::BlepSaw(double phase, double inc)
 
 void EnhancedSynth::Retrigger(Voice& voice, double freq, double vol)
 {
-	//The NES restarts the sequencer on $4003/$400B writes. The synth can't see
-	//the write itself (state is polled), so a new note is inferred from a
-	//volume rise out of silence or a pitch step larger than vibrato depth.
-	//3% pitch threshold (~half a semitone): per-frame slides/vibrato steps stay
-	//below it (Shadow Man's intro slide is ~1.6%/frame), a semitone (~6%) fires.
-	//If deep vibrato ever clicks in-game, raise to 6-8% or drop the pitch trigger.
+	//Reset oscillator phases only on an attack out of silence - the voice is
+	//near-silent there, so the reset is inaudible. Legato pitch changes keep
+	//the phase continuous: resetting mid-note produces a waveform
+	//discontinuity (a click per note), which on fast melodic lines turns
+	//into rhythmic crackle.
 	bool volAttack = vol > 0.001 && voice.LastVol <= 0.001;
-	bool pitchJump = vol > 0.001 && voice.LastFreq > 0 && freq > 0 && std::abs(freq - voice.LastFreq) / voice.LastFreq > 0.03;
-	if(volAttack || pitchJump) {
+	if(volAttack) {
 		voice.Phase = 0;
 		voice.PhaseB = 0;
 		voice.SubPhase = 0;
-		//Dip the smoothed volume so the attack ramp is re-articulated
-		voice.SmoothedVol *= 0.25;
 	}
 	voice.LastFreq = freq;
 	voice.LastVol = vol;
