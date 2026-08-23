@@ -128,6 +128,7 @@ namespace Mesen.Config
 		[ObservableProperty] public partial bool EnableEnhancedAudio { get; set; } = false;
 		[ObservableProperty][MinMax(0, 100)] public partial UInt32 EnhancedAudioVolume { get; set; } = 100;
 		[ObservableProperty][MinMax(0, 100)] public partial UInt32 EnhancedAudioApuMix { get; set; } = 0;
+		[ObservableProperty] public partial EnhancedAudioPreset EnhancedAudioPreset { get; set; } = EnhancedAudioPreset.Synthwave;
 
 		//Misc
 		[ObservableProperty] public partial bool BreakOnCrash { get; set; } = false;
@@ -250,6 +251,7 @@ namespace Mesen.Config
 				EnableEnhancedAudio = EnableEnhancedAudio,
 				EnhancedAudioVolume = EnhancedAudioVolume,
 				EnhancedAudioApuMix = EnhancedAudioApuMix,
+				EnhancedAudioPreset = EnhancedAudioPreset,
 
 				BreakOnCrash = BreakOnCrash,
 
@@ -400,6 +402,7 @@ namespace Mesen.Config
 		[MarshalAs(UnmanagedType.I1)] public bool EnableEnhancedAudio;
 		public UInt32 EnhancedAudioVolume;
 		public UInt32 EnhancedAudioApuMix;
+		public EnhancedAudioPreset EnhancedAudioPreset;
 	}
 
 	public enum StereoFilter
@@ -408,6 +411,14 @@ namespace Mesen.Config
 		Delay = 1,
 		Panning = 2,
 		CombFilter = 3,
+	}
+
+	public enum EnhancedAudioPreset
+	{
+		Synthwave = 0,
+		ChipDeluxe = 1,
+		OrchestralLite = 2,
+		Dry = 3,
 	}
 
 	public enum VsDualOutputOption

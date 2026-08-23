@@ -124,6 +124,10 @@ void NesConsole::Serialize(Serializer& s)
 
 	if(!s.IsSaving()) {
 		UpdateRegion(true);
+		if(_enhancedSynth) {
+			//Delay lines/oscillator phases don't belong to the loaded state
+			_enhancedSynth->Reset();
+		}
 	}
 }
 
@@ -146,6 +150,9 @@ void NesConsole::Reset()
 	_cpu->Reset(true, _region);
 	_controlManager->Reset(true);
 	_mixer->Reset();
+	if(_enhancedSynth) {
+		_enhancedSynth->Reset();
+	}
 	if(_vsSubConsole) {
 		_vsSubConsole->Reset();
 	}

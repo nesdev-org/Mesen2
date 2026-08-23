@@ -332,6 +332,7 @@
 			<Control ID="grpEffects">Effects</Control>
 			<Control ID="grpEnhancedAudio">Enhanced audio (experimental)</Control>
 			<Control ID="chkEnableEnhancedAudio">Play music and sound effects with modern instrument sounds</Control>
+			<Control ID="lblEnhancedAudioPreset">Style: </Control>
 			<Control ID="lblEnhancedAudioVolume">Synth volume: </Control>
 			<Control ID="lblEnhancedAudioApuMix">Original APU mix: </Control>
 			<Control ID="lblStereoEffect">Stereo effect: </Control>
@@ -2563,6 +2564,12 @@ E
 			<Value ID="_44100">44,100 Hz</Value>
 			<Value ID="_48000">48,000 Hz</Value>
 			<Value ID="_96000">96,000 Hz</Value>
+		</Enum>
+		<Enum ID="EnhancedAudioPreset">
+			<Value ID="Synthwave">Synthwave</Value>
+			<Value ID="ChipDeluxe">Chip deluxe</Value>
+			<Value ID="OrchestralLite">Orchestral lite</Value>
+			<Value ID="Dry">Dry (no echo)</Value>
 		</Enum>
 		<Enum ID="StereoFilter">
 			<Value ID="None">None</Value>

@@ -141,7 +141,9 @@
 						<StackPanel>
 							<CheckBox IsChecked="{Binding Config.EnableEnhancedAudio}" Content="{l:Translate chkEnableEnhancedAudio}" />
 							<StackPanel Orientation="Horizontal" IsEnabled="{Binding Config.EnableEnhancedAudio}">
-								<TextBlock Text="{l:Translate lblEnhancedAudioVolume}" />
+								<TextBlock Text="{l:Translate lblEnhancedAudioPreset}" />
+								<c:EnumComboBox SelectedItem="{Binding Config.EnhancedAudioPreset}" Width="120" />
+								<TextBlock Text="{l:Translate lblEnhancedAudioVolume}" Margin="10 0 0 0" />
 								<c:MesenNumericUpDown Minimum="0" Maximum="100" Value="{Binding Config.EnhancedAudioVolume}" />
 								<TextBlock Text="{l:Translate lblEnhancedAudioApuMix}" Margin="10 0 0 0" />
 								<c:MesenNumericUpDown Minimum="0" Maximum="100" Value="{Binding Config.EnhancedAudioApuMix}" />

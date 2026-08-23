@@ -734,6 +734,7 @@ struct NesConfig
 	bool EnableEnhancedAudio = false;
 	uint32_t EnhancedAudioVolume = 100;
 	uint32_t EnhancedAudioApuMix = 0;
+	uint32_t EnhancedAudioPreset = 0;
 };
 
 enum class SmsRevision

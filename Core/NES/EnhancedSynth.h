@@ -5,7 +5,55 @@
 class Emulator;
 class NesConsole;
 
-//Experimental "enhanced audio" synth (M0 spike).
+//Instrument definition for the enhanced audio synth. Three built-in presets
+//are defined in EnhancedSynth.cpp; a user-editable JSON layer can be added
+//on top of this later without changing the synth itself.
+struct EnhancedSynthPreset
+{
+	//Pulse voices
+	double LeadDetune;
+	double HarmDetune;
+	bool FollowDuty;        //pulse width follows the game's duty setting
+	double FixedWidth;      //used when FollowDuty is false
+	double LeadOctaveUpMix;
+	double LeadLpHz;
+	double HarmLpHz;
+	double LeadDrive;
+
+	//Bass (triangle)
+	double BassSine;
+	double BassSaw;
+	double BassSub;
+	double BassLpHz;
+	double BassDrive;
+
+	//Drums (noise)
+	double DrumBodyLoHz;
+	double DrumBodyHiHz;
+	double DrumTopHz;
+	double DrumBodyGain;
+	double ThumpGain;
+	double ThumpDecayS;
+	double ThumpFreqHz;
+
+	//Envelope smoothing
+	double AttackMs;
+	double ReleaseMs;
+
+	//FX
+	double EchoDelayS;
+	double EchoGainL;
+	double EchoGainR;
+	double ReverbWet;
+
+	//Mix
+	double LeadGain;
+	double HarmGain;
+	double BassGain;
+	double DrumGain;
+};
+
+//Experimental "enhanced audio" synth.
 //Re-interprets the APU channel state (frequency/volume/duty) with modern
 //instrument timbres, mixed on top of (or in place of) the original chip
 //output. The APU remains the source of truth: this only *reads* its state.
@@ -51,11 +99,17 @@ private:
 	static double PolyBlep(double t, double dt);
 	static double BlepSaw(double phase, double inc);
 	static void Retrigger(Voice& voice, double freq, double vol);
+	static const EnhancedSynthPreset& GetPreset(uint32_t presetId);
 	double NextNoise();
 
 public:
 	EnhancedSynth(Emulator* emu, NesConsole* console);
 	virtual ~EnhancedSynth();
+
+	//Clears delay lines and voice state. Called when the synth is disabled,
+	//on console reset and after loading a save state, so no stale audio
+	//leaks across those boundaries.
+	void Reset();
 
 	void MixAudio(int16_t* out, uint32_t sampleCount, uint32_t sampleRate) override;
 };
