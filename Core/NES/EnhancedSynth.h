@@ -1,13 +1,15 @@
 #pragma once
 #include "pch.h"
+#include <fstream>
 #include "Shared/Interfaces/IAudioProvider.h"
 
 class Emulator;
 class NesConsole;
 
-//Instrument definition for the enhanced audio synth. Three built-in presets
-//are defined in EnhancedSynth.cpp; a user-editable JSON layer can be added
-//on top of this later without changing the synth itself.
+//Instrument definition for the enhanced audio synth. Built-in defaults are
+//defined in EnhancedSynth.cpp; any field can be overridden per-preset, with
+//no rebuild, via a "EnhancedAudioPresets.cfg" text file in the Mesen home
+//folder (see EnhancedSynth::LoadUserPresets for the format).
 struct EnhancedSynthPreset
 {
 	//Pulse voices
@@ -15,6 +17,7 @@ struct EnhancedSynthPreset
 	double HarmDetune;
 	bool FollowDuty;        //pulse width follows the game's duty setting
 	double FixedWidth;      //used when FollowDuty is false
+	bool LeadAlwaysSaw;     //true: lead is a fixed detuned-saw stack, duty ignored entirely
 	double LeadOctaveUpMix;
 	double LeadLpHz;
 	double HarmLpHz;
@@ -51,6 +54,14 @@ struct EnhancedSynthPreset
 	double HarmGain;
 	double BassGain;
 	double DrumGain;
+
+	//Master bus soft-compressor (approximates the offline normalize+tanh
+	//master); CompThreshold == 0 disables it entirely (zero extra cost).
+	double CompThreshold;
+	double CompRatio;
+	double CompAttackMs;
+	double CompReleaseMs;
+	double CompMakeup;
 };
 
 //Experimental "enhanced audio" synth.
@@ -96,11 +107,32 @@ private:
 	uint32_t _echoPos = 0;
 	uint32_t _revPos = 0;
 
+	//Master bus compressor envelope (linked stereo: one detector for L+R)
+	double _compEnv = 0;
+
+	//Built-in presets (EnhancedSynth.cpp's _presets) with any overrides from
+	//EnhancedAudioPresets.cfg applied on top; reloaded in the constructor and
+	//in Reset(), so toggling "Enable enhanced audio" off/on re-reads the file.
+	EnhancedSynthPreset _userPresets[5];
+
+	//Debug tap (temporary, diagnostic only): enabled by the presence of a
+	//"synthdebug" marker file in the Mesen home folder. Dumps the incoming
+	//buffer, the outgoing buffer and a per-flush state CSV for offline
+	//analysis of stutter/click reports.
+	int _dbgState = -1; //-1 = not checked yet, 0 = off, 1 = on
+	std::ofstream _dbgCsv;
+	std::ofstream _dbgIn;
+	std::ofstream _dbgOut;
+	uint64_t _dbgSampleOffset = 0;
+	uint32_t _dbgFlush = 0;
+
 	static double PolyBlep(double t, double dt);
 	static double BlepSaw(double phase, double inc);
 	static void Retrigger(Voice& voice, double freq, double vol);
-	static const EnhancedSynthPreset& GetPreset(uint32_t presetId);
+	const EnhancedSynthPreset& GetPreset(uint32_t presetId) const;
 	double NextNoise();
+	void InitDebugTap();
+	void LoadUserPresets();
 
 public:
 	EnhancedSynth(Emulator* emu, NesConsole* console);

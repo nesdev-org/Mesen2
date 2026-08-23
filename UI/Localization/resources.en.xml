@@ -2570,6 +2570,7 @@ E
 			<Value ID="ChipDeluxe">Chip deluxe</Value>
 			<Value ID="OrchestralLite">Orchestral lite</Value>
 			<Value ID="Dry">Dry (no echo)</Value>
+			<Value ID="Studio">Studio</Value>
 		</Enum>
 		<Enum ID="StereoFilter">
 			<Value ID="None">None</Value>

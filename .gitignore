@@ -190,3 +190,6 @@ packages/*
 
 TestHelper/*
 UI/Dependencies.zip
+roms/**
+roms/*
+claudei.sh

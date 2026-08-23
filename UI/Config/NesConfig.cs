@@ -419,6 +419,7 @@ namespace Mesen.Config
 		ChipDeluxe = 1,
 		OrchestralLite = 2,
 		Dry = 3,
+		Studio = 4,
 	}
 
 	public enum VsDualOutputOption
