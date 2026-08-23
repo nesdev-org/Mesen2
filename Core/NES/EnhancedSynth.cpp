@@ -280,26 +280,6 @@ void EnhancedSynth::Retrigger(Voice& voice, double freq, double vol)
 	voice.LastVol = vol;
 }
 
-void EnhancedSynth::InitDebugTap()
-{
-	//Temporary diagnostic tap: create an empty file named "synthdebug" in the
-	//Mesen home folder to enable it. Dumps synthdebug_in.raw (int16 stereo,
-	//buffer as received from the emulator), synthdebug_out.raw (int16 stereo,
-	//after the synth was added) and synthdebug_state.csv (per-flush polled
-	//APU state) next to the marker, for offline stutter analysis.
-	string home = FolderUtilities::GetHomeFolder();
-	std::ifstream marker(FolderUtilities::CombinePath(home, "synthdebug"));
-	if(marker) {
-		_dbgCsv.open(FolderUtilities::CombinePath(home, "synthdebug_state.csv"), std::ios::trunc);
-		_dbgIn.open(FolderUtilities::CombinePath(home, "synthdebug_in.raw"), std::ios::trunc | std::ios::binary);
-		_dbgOut.open(FolderUtilities::CombinePath(home, "synthdebug_out.raw"), std::ios::trunc | std::ios::binary);
-		_dbgCsv << "flush,sampleOffset,sampleCount,sampleRate,preset,volume,apuMix,leadFreq,leadVol,harmFreq,harmVol,bassFreq,bassVol,noiseVol,noiseFreq" << std::endl;
-		_dbgState = 1;
-	} else {
-		_dbgState = 0;
-	}
-}
-
 double EnhancedSynth::NextNoise()
 {
 	//xorshift32, mapped to -1..1
@@ -323,13 +303,6 @@ void EnhancedSynth::MixAudio(int16_t* out, uint32_t sampleCount, uint32_t sample
 		return;
 	}
 	_wasActive = true;
-
-	if(_dbgState < 0) {
-		InitDebugTap();
-	}
-	if(_dbgState == 1) {
-		_dbgIn.write((const char*)out, sampleCount * 2 * sizeof(int16_t));
-	}
 
 	const EnhancedSynthPreset& p = GetPreset(cfg.EnhancedAudioPreset);
 
@@ -358,15 +331,6 @@ void EnhancedSynth::MixAudio(int16_t* out, uint32_t sampleCount, uint32_t sample
 	double noiseVol = 0;
 	if(apu.Noise.Enabled && apu.Noise.LengthCounter.Counter > 0) {
 		noiseVol = envVolume(apu.Noise.Envelope);
-	}
-
-	if(_dbgState == 1) {
-		_dbgCsv << _dbgFlush << ',' << _dbgSampleOffset << ',' << sampleCount << ',' << sampleRate << ','
-			<< cfg.EnhancedAudioPreset << ',' << cfg.EnhancedAudioVolume << ',' << cfg.EnhancedAudioApuMix << ','
-			<< leadFreq << ',' << leadVol << ',' << harmFreq << ',' << harmVol << ','
-			<< bassFreq << ',' << bassVol << ',' << noiseVol << ',' << apu.Noise.Frequency << '\n';
-		_dbgFlush++;
-		_dbgSampleOffset += sampleCount;
 	}
 
 	Retrigger(_lead, leadFreq, leadVol);

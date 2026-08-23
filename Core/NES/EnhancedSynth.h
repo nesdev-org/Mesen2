@@ -1,6 +1,5 @@
 #pragma once
 #include "pch.h"
-#include <fstream>
 #include "Shared/Interfaces/IAudioProvider.h"
 
 class Emulator;
@@ -115,23 +114,11 @@ private:
 	//in Reset(), so toggling "Enable enhanced audio" off/on re-reads the file.
 	EnhancedSynthPreset _userPresets[5];
 
-	//Debug tap (temporary, diagnostic only): enabled by the presence of a
-	//"synthdebug" marker file in the Mesen home folder. Dumps the incoming
-	//buffer, the outgoing buffer and a per-flush state CSV for offline
-	//analysis of stutter/click reports.
-	int _dbgState = -1; //-1 = not checked yet, 0 = off, 1 = on
-	std::ofstream _dbgCsv;
-	std::ofstream _dbgIn;
-	std::ofstream _dbgOut;
-	uint64_t _dbgSampleOffset = 0;
-	uint32_t _dbgFlush = 0;
-
 	static double PolyBlep(double t, double dt);
 	static double BlepSaw(double phase, double inc);
 	static void Retrigger(Voice& voice, double freq, double vol);
 	const EnhancedSynthPreset& GetPreset(uint32_t presetId) const;
 	double NextNoise();
-	void InitDebugTap();
 	void LoadUserPresets();
 
 public:
