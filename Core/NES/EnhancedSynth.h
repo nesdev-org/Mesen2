@@ -106,9 +106,9 @@ public:
 	EnhancedSynth(Emulator* emu, NesConsole* console);
 	virtual ~EnhancedSynth();
 
-	//Clears delay lines and voice state. Called when the synth is disabled,
-	//on console reset and after loading a save state, so no stale audio
-	//leaks across those boundaries.
+	//Clears delay lines and voice state. Called when the synth is disabled
+	//and on console reset, so no stale audio leaks across those boundaries.
+	//Deliberately NOT called on state load (run-ahead deserializes per frame).
 	void Reset();
 
 	void MixAudio(int16_t* out, uint32_t sampleCount, uint32_t sampleRate) override;
