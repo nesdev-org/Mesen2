@@ -141,6 +141,13 @@ void NesSoundMixer::UpdateRates(bool forceUpdate)
 	}
 
 	NesConfig& cfg = _console->GetNesConfig();
+
+	//When the enhanced synth is active, the 2A03 channels it replaces are
+	//scaled down to the configured mix level (0 = replaced, 100 = layered).
+	//Applied after the non-linear DAC formula (see GetOutputVolume) so the
+	//DMC and expansion audio levels are not affected by the ducking.
+	_enhancedDuck = cfg.EnableEnhancedAudio ? cfg.EnhancedAudioApuMix / 100.0 : 1.0;
+
 	bool hasPanning = false;
 	for(uint32_t i = 0; i < MaxChannelCount; i++) {
 		_volumes[i] = cfg.ChannelVolumes[i] / 100.0;
@@ -172,6 +179,15 @@ int16_t NesSoundMixer::GetOutputVolume(bool forRightChannel)
 
 	uint16_t squareVolume = (uint16_t)((95.88 * 5000.0) / (8128.0 / squareOutput + 100.0));
 	uint16_t tndVolume = (uint16_t)((159.79 * 5000.0) / (22638.0 / tndOutput + 100.0));
+
+	if(_enhancedDuck < 1.0) {
+		//Enhanced synth active: fade the 2A03 channels it replaces without
+		//disturbing the DMC. The TND group is non-linear, so the ducked value
+		//is interpolated between "DMC alone" and the full group output.
+		double tndDmcVolume = (159.79 * 5000.0) / (22638.0 / GetChannelOutput(AudioChannel::DMC, forRightChannel) + 100.0);
+		squareVolume = (uint16_t)(squareVolume * _enhancedDuck);
+		tndVolume = (uint16_t)(tndDmcVolume + ((double)tndVolume - tndDmcVolume) * _enhancedDuck);
+	}
 
 	return (int16_t)(squareVolume + tndVolume +
 		GetChannelOutput(AudioChannel::FDS, forRightChannel) * 20 +

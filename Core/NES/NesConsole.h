@@ -15,6 +15,7 @@ class NesControlManager;
 class BaseMapper;
 class EmuSettings;
 class NesSoundMixer;
+class EnhancedSynth;
 class BaseVideoFilter;
 class BaseControlManager;
 class HdAudioDevice;
@@ -44,6 +45,7 @@ private:
 	unique_ptr<BaseMapper> _mapper;
 	unique_ptr<NesControlManager> _controlManager;
 	unique_ptr<NesSoundMixer> _mixer;
+	unique_ptr<EnhancedSynth> _enhancedSynth;
 
 	safe_ptr<HdPackData> _hdData;
 	unique_ptr<HdAudioDevice> _hdAudioDevice;

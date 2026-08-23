@@ -6,6 +6,7 @@
 #include "NES/NesCpu.h"
 #include "NES/BaseMapper.h"
 #include "NES/NesSoundMixer.h"
+#include "NES/EnhancedSynth.h"
 #include "NES/NesMemoryManager.h"
 #include "NES/DefaultNesPpu.h"
 #include "NES/NsfPpu.h"
@@ -182,6 +183,7 @@ LoadRomResult NesConsole::LoadRom(VirtualFile& romFile)
 
 		_mapper.swap(mapper);
 		_mixer.reset(new NesSoundMixer(this));
+		_enhancedSynth.reset(new EnhancedSynth(_emu, this));
 		_memoryManager.reset(new NesMemoryManager(this, _mapper.get()));
 		_cpu.reset(new NesCpu(this));
 		_apu.reset(new NesApu(this));

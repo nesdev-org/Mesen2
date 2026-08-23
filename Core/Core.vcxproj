@@ -565,6 +565,7 @@
     <ClInclude Include="NES\NesHeader.h" />
     <ClInclude Include="NES\NesMemoryManager.h" />
     <ClInclude Include="NES\NesPpu.h" />
+    <ClInclude Include="NES\EnhancedSynth.h" />
     <ClInclude Include="NES\NesSoundMixer.h" />
     <ClInclude Include="NES\NesTypes.h" />
     <ClInclude Include="NES\APU\NoiseChannel.h" />
@@ -942,6 +943,7 @@
     <ClCompile Include="NES\NesHeader.cpp" />
     <ClCompile Include="NES\NesMemoryManager.cpp" />
     <ClCompile Include="NES\NesPpu.cpp" />
+    <ClCompile Include="NES\EnhancedSynth.cpp" />
     <ClCompile Include="NES\NesSoundMixer.cpp" />
     <ClCompile Include="Shared\CdReader.cpp" />
     <ClCompile Include="Shared\DebuggerRequest.cpp" />

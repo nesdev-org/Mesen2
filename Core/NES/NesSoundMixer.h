@@ -42,6 +42,7 @@ private:
 	int16_t* _outputBuffer = nullptr;
 	size_t _sampleCount = 0;
 	double _volumes[MaxChannelCount] = {};
+	double _enhancedDuck = 1.0;
 	double _panning[MaxChannelCount] = {};
 
 	uint32_t _sampleRate = 0;

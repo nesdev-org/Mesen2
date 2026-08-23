@@ -730,6 +730,10 @@ struct NesConfig
 	int32_t StereoPanningAngle = 0;
 	int32_t StereoCombFilterDelay = 0;
 	int32_t StereoCombFilterStrength = 0;
+
+	bool EnableEnhancedAudio = false;
+	uint32_t EnhancedAudioVolume = 100;
+	uint32_t EnhancedAudioApuMix = 0;
 };
 
 enum class SmsRevision

@@ -125,6 +125,10 @@ namespace Mesen.Config
 		[ObservableProperty][MinMax(1, 100)] public partial Int32 StereoCombFilterDelay { get; set; } = 5;
 		[ObservableProperty][MinMax(1, 200)] public partial Int32 StereoCombFilterStrength { get; set; } = 100;
 
+		[ObservableProperty] public partial bool EnableEnhancedAudio { get; set; } = false;
+		[ObservableProperty][MinMax(0, 100)] public partial UInt32 EnhancedAudioVolume { get; set; } = 100;
+		[ObservableProperty][MinMax(0, 100)] public partial UInt32 EnhancedAudioApuMix { get; set; } = 0;
+
 		//Misc
 		[ObservableProperty] public partial bool BreakOnCrash { get; set; } = false;
 
@@ -242,6 +246,10 @@ namespace Mesen.Config
 				StereoPanningAngle = StereoPanningAngle,
 				StereoCombFilterDelay = StereoCombFilterDelay,
 				StereoCombFilterStrength = StereoCombFilterStrength,
+
+				EnableEnhancedAudio = EnableEnhancedAudio,
+				EnhancedAudioVolume = EnhancedAudioVolume,
+				EnhancedAudioApuMix = EnhancedAudioApuMix,
 
 				BreakOnCrash = BreakOnCrash,
 
@@ -388,6 +396,10 @@ namespace Mesen.Config
 		public Int32 StereoPanningAngle;
 		public Int32 StereoCombFilterDelay;
 		public Int32 StereoCombFilterStrength;
+
+		[MarshalAs(UnmanagedType.I1)] public bool EnableEnhancedAudio;
+		public UInt32 EnhancedAudioVolume;
+		public UInt32 EnhancedAudioApuMix;
 	}
 
 	public enum StereoFilter

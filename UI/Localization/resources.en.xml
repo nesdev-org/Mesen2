@@ -330,6 +330,10 @@
 			<Control ID="chkReduceDmcPopping">Reduce popping sounds on the DMC channel</Control>
 			<Control ID="chkDisableNoiseModeFlag">Disable noise channel mode flag (mimics oldest Famicom models)</Control>
 			<Control ID="grpEffects">Effects</Control>
+			<Control ID="grpEnhancedAudio">Enhanced audio (experimental)</Control>
+			<Control ID="chkEnableEnhancedAudio">Enable enhanced audio synthesizer (modern instrument timbres driven by the APU)</Control>
+			<Control ID="lblEnhancedAudioVolume">Synth volume: </Control>
+			<Control ID="lblEnhancedAudioApuMix">Original APU mix: </Control>
 			<Control ID="lblStereoEffect">Stereo effect: </Control>
 			<Control ID="lblDelay">Delay: </Control>
 			<Control ID="lblStrength">Strength: </Control>

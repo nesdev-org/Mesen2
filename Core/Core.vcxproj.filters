@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <None Include="Core.ruleset" />
@@ -316,9 +316,15 @@
     <ClInclude Include="NES\NesPpu.h">
       <Filter>NES</Filter>
     </ClInclude>
+    <ClCompile Include="NES\EnhancedSynth.cpp">
+      <Filter>NES</Filter>
+    </ClCompile>
     <ClCompile Include="NES\NesSoundMixer.cpp">
       <Filter>NES</Filter>
     </ClCompile>
+    <ClInclude Include="NES\EnhancedSynth.h">
+      <Filter>NES</Filter>
+    </ClInclude>
     <ClInclude Include="NES\NesSoundMixer.h">
       <Filter>NES</Filter>
     </ClInclude>

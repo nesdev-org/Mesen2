@@ -137,6 +137,18 @@
 						</StackPanel>
 					</c:OptionSection>
 
+					<c:OptionSection Header="{l:Translate grpEnhancedAudio}">
+						<StackPanel>
+							<c:CheckBoxWarning IsChecked="{Binding Config.EnableEnhancedAudio}" Text="{l:Translate chkEnableEnhancedAudio}" />
+							<StackPanel Orientation="Horizontal" IsEnabled="{Binding Config.EnableEnhancedAudio}">
+								<TextBlock Text="{l:Translate lblEnhancedAudioVolume}" />
+								<c:MesenNumericUpDown Minimum="0" Maximum="100" Value="{Binding Config.EnhancedAudioVolume}" />
+								<TextBlock Text="{l:Translate lblEnhancedAudioApuMix}" Margin="10 0 0 0" />
+								<c:MesenNumericUpDown Minimum="0" Maximum="100" Value="{Binding Config.EnhancedAudioApuMix}" />
+							</StackPanel>
+						</StackPanel>
+					</c:OptionSection>
+
 					<c:OptionSection Header="{l:Translate lblVolume}">
 						<Grid ColumnDefinitions="50*,50*" RowDefinitions="Auto">
 							<StackPanel Grid.Column="0" Margin="0 0 4 0">
