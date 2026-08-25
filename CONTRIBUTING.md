@@ -28,6 +28,12 @@ When in doubt, follow the formatting you see elsewhere in the project.
 - Performance: Changes may be rejected if they cause a drop in maximum FPS (press F9 to run at an unlocked framerate and F10 to view the FPS). Where possible, ensure that your changes avoid doing things like adding if statements to hot paths.
 - Warnings: The MesenCE MSVC builds treat warnings as errors. These must be resolved before code can be accepted.
 - Commit messages: Including context and test ROMs with your pull requests allows us to more easily and quickly evaluate the code. If we don't understand a change, it is less likely to be accepted.
-- Usefulness: Changes and features may not be accepted if we determine they're not useful enough or they are out of scope. MesenCE is not intended to cover every niche use case.
 
-**Pull requests may be rejected for a variety of reasons, even if they are functional. Please consult with the team before making any significant changes.**
+## Known pull requests that WON'T be accepted
+- Translations
+- Radical changes to the emulated systems (different audio mixer, unit-specific differences, etc.)
+- Support for different platforms
+
+Basically, if your change is too radical, or too niche, it may not get accepted. As big as it may be, MesenCE is not intended to cover every niche use case, as this requires a lot of time the maintainers may not have, and the result may turn out not to be as useful.
+
+**Pull requests may be rejected for a variety of other reasons, even if they are functional. Please consult with the team before making any significant changes.**
