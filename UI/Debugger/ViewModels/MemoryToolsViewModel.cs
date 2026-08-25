@@ -98,7 +98,12 @@ namespace Mesen.Debugger.ViewModels
 
 			AddDisposable(this.ObserveProp(nameof(TblConverter), () => UpdateDataProvider()));
 
-			AddDisposable(Config.ObserveProp([nameof(Config.MemoryType), nameof(Config.BytesPerRow)], () => {
+			AddDisposable(Config.ObserveProp(nameof(Config.MemoryType), () => {
+				MaxScrollValue = (DebugApi.GetMemorySize(Config.MemoryType) / Config.BytesPerRow) - 1;
+				_editor.SetCursorPosition(_editor.SelectionStart);
+			}));
+
+			AddDisposable(Config.ObserveProp(nameof(Config.BytesPerRow), () => {
 				MaxScrollValue = (DebugApi.GetMemorySize(Config.MemoryType) / Config.BytesPerRow) - 1;
 				_editor.SetCursorPosition(0, false, true);
 			}));
