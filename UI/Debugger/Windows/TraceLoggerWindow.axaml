@@ -30,7 +30,8 @@
 			<Setter Property="Background" Value="#28808080" />
 		</Style>
 		<Style Selector="TabControl:singleitem > TabItem">
-			<Setter Property="IsVisible" Value="False" />
+			<Setter Property="Height" Value="0" />
+			<Setter Property="MinHeight" Value="0" />
 		</Style>
 	</Window.Styles>
 

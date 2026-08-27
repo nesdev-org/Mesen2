@@ -32,9 +32,6 @@
 	</Design.DataContext>
 
 	<Window.Styles>
-		<Style Selector="TabStrip:singleitem">
-			<Setter Property="IsVisible" Value="False" />
-		</Style>
 		<Style Selector="idc|ToolChromeControl">
 			<Setter Property="Margin" Value="0 0 1 0" />
 		</Style>
