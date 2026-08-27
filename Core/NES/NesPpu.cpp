@@ -462,8 +462,8 @@ template<class T> void NesPpu<T>::WriteRam(uint16_t addr, uint8_t value)
 					//"The three unimplemented bits of each sprite's byte 2 do not exist in the PPU and always read back as 0 on PPU revisions that allow reading PPU OAM through OAMDATA ($2004)"
 					value &= 0xE3;
 				}
-				WriteSpriteRam(_spriteRamAddr, value);
 				_emu->ProcessPpuWrite<CpuType::Nes>(_spriteRamAddr, value, MemoryType::NesSpriteRam);
+				WriteSpriteRam(_spriteRamAddr, value);
 				if(_region == ConsoleRegion::Ntsc || _scanline < _palSpriteEvalScanline || ((_cycle & 1) && (_cycle != 339))) {
 					_spriteRamAddr++;
 				}
@@ -1605,8 +1605,9 @@ template<class T> void NesPpu<T>::UpdateState()
 		_ppuMemoryDataWriteStateMachine--;
 		if(_ppuMemoryDataWriteStateMachine == 0) {
 			if((_ppuBusAddress & 0x3FFF) >= 0x3F00) {
-				WritePaletteRam(_ppuBusAddress, _ppuMemoryDataWriteLatch);
-				_emu->ProcessPpuWrite<CpuType::Nes>(_ppuBusAddress, _ppuMemoryDataWriteLatch, MemoryType::NesPpuMemory);
+				uint8_t value = _ppuMemoryDataWriteLatch;
+				_emu->ProcessPpuWrite<CpuType::Nes>(_ppuBusAddress, value, MemoryType::NesPpuMemory);
+				WritePaletteRam(_ppuBusAddress, value);
 			} else {
 				if(_scanline >= 240 || !IsRenderingEnabled()) {
 					_mapper->WriteVram(_ppuBusAddress & 0x3FFF, _ppuMemoryDataWriteLatch);

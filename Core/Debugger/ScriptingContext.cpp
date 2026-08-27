@@ -341,14 +341,18 @@ void ScriptingContext::InternalCallMemoryCallback(AddressInfo relAddr, T& value,
 			continue;
 		}
 
+		int32_t address;
 		if(DebugUtilities::IsRelativeMemory(callback.MemType)) {
 			if(!IsAddressMatch(callback, relAddr)) {
 				continue;
 			}
+			address = relAddr.Address;
 		} else {
-			if(!IsAddressMatch(callback, _debugger->GetAbsoluteAddress(relAddr))) {
+			AddressInfo absAddr = _debugger->GetAbsoluteAddress(relAddr);
+			if(!IsAddressMatch(callback, absAddr)) {
 				continue;
 			}
+			address = absAddr.Address;
 		}
 
 		if(needTimerReset) {
@@ -358,7 +362,7 @@ void ScriptingContext::InternalCallMemoryCallback(AddressInfo relAddr, T& value,
 
 		int top = lua_gettop(_lua);
 		lua_rawgeti(_lua, LUA_REGISTRYINDEX, callback.Reference);
-		lua_pushinteger(_lua, relAddr.Address);
+		lua_pushinteger(_lua, address);
 		lua_pushinteger(_lua, value);
 		if(lua_pcall(_lua, 2, LUA_MULTRET, 0) != 0) {
 			ProcessLuaError();

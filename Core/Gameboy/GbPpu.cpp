@@ -1198,11 +1198,11 @@ void GbPpu::WriteOam(uint8_t addr, uint8_t value, bool forDma)
 	//On the DMG, there is a 4 clock gap (80 to 83) between OAM evaluation & rendering where writing is allowed
 	if(addr < 0xA0) {
 		if(forDma) {
-			_oam[addr] = value;
 			_emu->ProcessPpuWrite<CpuType::Gameboy>(addr, value, MemoryType::GbSpriteRam);
+			_oam[addr] = value;
 		} else if(IsOamWriteAllowed()) {
-			_oam[addr] = value;
 			_emu->ProcessPpuWrite<CpuType::Gameboy>(addr, value, MemoryType::GbSpriteRam);
+			_oam[addr] = value;
 		} else {
 			_emu->BreakIfDebugging(CpuType::Gameboy, BreakSource::GbInvalidOamAccess);
 		}

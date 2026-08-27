@@ -331,7 +331,7 @@
 	"parameters": [
 		{ "name": "address", "type": "Int", "description": "Address to read from" },
 		{ "name": "memoryType", "type": "Enum", "enumName": "memType", "description": "Memory type to read from" },
-		{ "name": "signed", "type": "Bool", "description": "When true, the return value is an 8-bit signed value." }
+		{ "name": "signed", "type": "Bool", "description": "When true, the return value is an 8-bit signed value.", "defaultValue": "false" }
 	],
 	"returnValue": { "type": "Int", "description": "An 8-bit (signed or unsigned) value." }
 },
@@ -342,7 +342,7 @@
 	"parameters": [
 		{ "name": "address", "type": "Int", "description": "Address to read from" },
 		{ "name": "memoryType", "type": "Enum", "enumName": "memType", "description": "Memory type to read from" },
-		{ "name": "signed", "type": "Bool", "description": "When true, the return value is a 16-bit signed value." }
+		{ "name": "signed", "type": "Bool", "description": "When true, the return value is a 16-bit signed value.", "defaultValue": "false" }
 	],
 	"returnValue": { "type": "Int", "description": "A 16-bit (signed or unsigned) value." }
 },
@@ -353,7 +353,7 @@
 	"parameters": [
 		{ "name": "address", "type": "Int", "description": "Address to read from" },
 		{ "name": "memoryType", "type": "Enum", "enumName": "memType", "description": "Memory type to read from" },
-		{ "name": "signed", "type": "Bool", "description": "When true, the return value is a 32-bit signed value." }
+		{ "name": "signed", "type": "Bool", "description": "When true, the return value is a 32-bit signed value.", "defaultValue": "false" }
 	],
 	"returnValue": { "type": "Int", "description": "A 32-bit (signed or unsigned) value." }
 },
