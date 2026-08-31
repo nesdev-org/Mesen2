@@ -996,7 +996,7 @@ template<class T> void NesPpu<T>::ProcessScanlineImpl()
 			}
 			//Increment OAM2ADDR during the first 4 dots of each set of 8. There is special behavior where the first set of 8 skips the
 			//first increment (because OAM2ADDR is being cleared), and an extra increment is done after the last set of 8.
-			_secondaryOamAddr += !((_cycle - 1) & 4);
+			_secondaryOamAddr += (_secondaryOamAddr < 0x20) & !((_cycle - 1) & 4);
 		}
 		if(_cycle == 257) {
 			_spriteIndex = 0;
@@ -1013,7 +1013,7 @@ template<class T> void NesPpu<T>::ProcessScanlineImpl()
 		if(_prevRenderingEnabled) {
 			if(_cycle == 321) {
 				//Do the final increment, which follows the last set of 8 sprite fetch dots.
-				_secondaryOamAddr++;
+				_secondaryOamAddr += _secondaryOamAddr < 0x20;
 			} else if(_prevRenderingEnabled && (_cycle == 328 || _cycle == 336)) {
 				IncHorizontalScrolling();
 			}
@@ -1028,6 +1028,8 @@ template<class T> void NesPpu<T>::ProcessScanlineImpl()
 		_activeSpriteShifters = 0;
 
 		if(IsRenderingEnabled()) {
+			_secondaryOamAddr = 0;
+
 			_tile.TileAddr = ReadVram(GetNameTableAddr());
 
 			//Set sprite shifters to "count" mode (only if rendering is enabled)
@@ -1119,7 +1121,7 @@ template<class T> void NesPpu<T>::ProcessSpriteEvaluation()
 		_oamCopybuffer = 0xFF;
 		_secondarySpriteRam[_secondaryOamAddr & 0x1F] = 0xFF;
 
-		_secondaryOamAddr += !(_cycle & 1);
+		_secondaryOamAddr += (_secondaryOamAddr < 0x20) & !(_cycle & 1);
 	} else {
 		if(_cycle & 0x01) {
 			if(_cycle == 65) {
