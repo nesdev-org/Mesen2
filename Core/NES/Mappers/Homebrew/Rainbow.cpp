@@ -269,10 +269,12 @@ void Rainbow::ProcessCpuClock()
 
 	_audio->Clock();
 
-	if(_cpuIrqCounter && --_cpuIrqCounter == 0) {
-		_cpuIrqCounter = _cpuIrqReloadValue;
-		_cpuIrqPending = true;
-		UpdateIrqStatus();
+	if(_cpuIrqEnabled && _cpuIrqCounter != 0) {
+		if(--_cpuIrqCounter == 0) {
+			_cpuIrqCounter = _cpuIrqReloadValue;
+			_cpuIrqPending = true;
+			UpdateIrqStatus();
+		}
 	}
 
 	if(_ppuIdleCounter) {
@@ -673,6 +675,7 @@ void Rainbow::WriteRegister(uint16_t addr, uint8_t value)
 			_cpuIrqEnabled = value & 0x01;
 			_cpuIrqEnableAfterAck = value & 0x02;
 			_cpuIrqAckOn4011 = value & 0x04;
+			_cpuIrqPending = false;
 			if(_cpuIrqEnabled) {
 				_cpuIrqCounter = _cpuIrqReloadValue;
 			}
