@@ -92,9 +92,9 @@ uint8_t GbaControlManager::ReadInputPort(uint32_t addr)
 {
 	if(addr & 0x02) {
 		if(addr & 0x01) {
-			return BitUtilities::GetBits<0>(_state.KeyControl);
-		} else {
 			return BitUtilities::GetBits<8>(_state.KeyControl);
+		} else {
+			return BitUtilities::GetBits<0>(_state.KeyControl);
 		}
 	} else {
 		SetInputReadFlag();
