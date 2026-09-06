@@ -15,7 +15,8 @@ private:
 	}
 
 public:
-	Mmc5Square(NesConsole* console) : SquareChannel(AudioChannel::MMC5, console, false)
+	Mmc5Square(NesConsole* console)
+		: SquareChannel(AudioChannel::MMC5, console, false)
 	{
 		_currentOutput = 0;
 		_isMmc5Square = true;
@@ -59,7 +60,8 @@ private:
 
 	bool _pcmReadMode = false;
 	bool _pcmIrqEnabled = false;
-	uint8_t _pcmOutput = 0;
+	bool _pcmIrqPending = false;
+	uint8_t _pcmOutput;
 
 protected:
 	void Serialize(Serializer& s) override
@@ -70,6 +72,7 @@ protected:
 		SV(_lastOutput);
 		SV(_pcmReadMode);
 		SV(_pcmIrqEnabled);
+		SV(_pcmIrqPending);
 		SV(_pcmOutput);
 	}
 
@@ -104,7 +107,8 @@ public:
 		_square2.ReloadLengthCounter();
 	}
 
-	Mmc5Audio(NesConsole* console) : _square1(console), _square2(console)
+	Mmc5Audio(NesConsole* console)
+		: _square1(console), _square2(console)
 	{
 		_console = console;
 		_apu = console->GetApu();
@@ -117,10 +121,15 @@ public:
 	}
 
 	__forceinline bool GetPcmReadMode() { return _pcmReadMode; }
+	__forceinline bool GetPcmIRQLine() { return _pcmIrqEnabled && _pcmIrqPending; }
 
-	void HandlePcmRead(uint16_t addr, uint8_t value)
+	//$5011 write
+	//+ "Write-by-read writes to this register in PCM read-mode."
+	void DacWrite(uint8_t value)
 	{
-		if((addr & 0xC000) == 0x8000 && value) {
+		if(value == 0) {
+			_pcmIrqPending = true;
+		} else {
 			_pcmOutput = value;
 		}
 	}
@@ -129,8 +138,12 @@ public:
 	{
 		switch(addr) {
 			case 0x5010:
-				//TODO: PCM IRQ
-				return 0;
+				if(_pcmIrqPending) {
+					_pcmIrqPending = false;
+					return 0x80;
+				} else {
+					return 0x00;
+				}
 
 			case 0x5015:
 				uint8_t status = 0;
@@ -160,16 +173,13 @@ public:
 				break;
 
 			case 0x5010:
-				//TODO: PCM IRQs
 				_pcmReadMode = (value & 0x01) == 0x01;
 				_pcmIrqEnabled = (value & 0x80) == 0x80;
 				break;
 
 			case 0x5011:
 				if(!_pcmReadMode) {
-					if(value != 0) {
-						_pcmOutput = value;
-					}
+					DacWrite(value);
 				}
 				break;
 
@@ -234,6 +244,7 @@ public:
 		entries.push_back(MapperStateEntry("$5010-$5011", "PCM"));
 		entries.push_back(MapperStateEntry("$5010.0", "PCM Read Mode", _pcmReadMode));
 		entries.push_back(MapperStateEntry("$5010.7", "PCM IRQ Enabled", _pcmIrqEnabled));
+		entries.push_back(MapperStateEntry("$5010.7", "PCM IRQ Pending", _pcmIrqPending));
 		entries.push_back(MapperStateEntry("$5011", "PCM Output", _pcmOutput, MapperStateValueType::Number8));
 	}
 };
