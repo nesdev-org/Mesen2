@@ -372,9 +372,20 @@ void GbaDmaController::WriteRegister(uint32_t addr, uint8_t value)
 			ch.Repeat = (value & 0x02);
 			ch.WordTransfer = (value & 0x04);
 			ch.DrqMode = (value & 0x08);
-			ch.Trigger = (GbaDmaTrigger)((value >> 4) & 0x03);
 			ch.IrqEnabled = (value & 0x40);
 			bool enabled  = (value & 0x80);
+
+			if(ch.Enabled && !enabled && ch.Pending && !ch.Active && chIndex < 3 && ch.Trigger == GbaDmaTrigger::Special) {
+				int64_t gap = ch.StartClock - _memoryManager->GetMasterClock();
+				if(gap == 0 || gap == 1) {
+					//FIFO DMA channel was disabled after being triggered, right before it could start.
+					//This appears to somehow cause the system to freeze.
+					_cpu->SetStopFlag(true);
+				}
+			}
+
+			ch.Trigger = (GbaDmaTrigger)((value >> 4) & 0x03);
+		
 			if(ch.Enabled != enabled && enabled) {
 				ch.Enabled = true;
 				ch.LenLatch = ch.Length;
