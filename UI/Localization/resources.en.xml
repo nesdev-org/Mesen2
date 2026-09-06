@@ -347,6 +347,8 @@
 			<Control ID="lblRamPowerOnState">Default power on state for RAM: </Control>
 			<Control ID="chkMapperRandomPowerOnState">Randomize power-on state for mappers</Control>
 			<Control ID="chkRandomizeCpuPpuAlignment">Randomize power-on/reset CPU/PPU alignment</Control>
+			<Control ID="lblCpuAlignmentOffset">CPU power-on/reset alignment offset: </Control>
+			<Control ID="lblPpuAlignmentOffset">PPU power-on/reset alignment offset: </Control>
 			<Control ID="chkEnableOamDecay">Enable PPU OAM decay</Control>
 			<Control ID="chkEnablePpuOamRowCorruption">Enable PPU $2003/rendering-toggle OAM corruption</Control>
 			<Control ID="chkEnablePpu2006ScrollGlitch">Enable PPU $2006 scroll glitch emulation</Control>

@@ -33,6 +33,7 @@
 		<u:FontNameConverter x:Key="FontNameConverter" />
 		<u:NullTextConverter x:Key="NullTextConverter" />
 		<u:EnumMatchConverter x:Key="EnumMatchConverter" />
+		<u:InverseBooleanConverter x:Key="InverseBooleanConverter" />
 		
 		<VisualBrush x:Key="ViewerBgBrush" TileMode="Tile" Stretch="None" AlignmentX="Left" AlignmentY="Top" SourceRect="0,0,5,5" DestinationRect="0,0,5,5">
 			<VisualBrush.Visual>
