@@ -1240,8 +1240,8 @@ void SnesPpu::RenderTilemapMode7()
 	int16_t yStep = _state.Mode7.Matrix[2];
 	if(_state.Mode7.HorizontalMirroring) {
 		//Calculate the value at the end of the scanline, and then start going backwards
-		xValue += xStep * _drawEndX;
-		yValue += yStep * _drawEndX;
+		xValue += xStep * 255;
+		yValue += yStep * 255;
 		xStep = -xStep;
 		yStep = -yStep;
 	}
