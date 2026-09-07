@@ -215,6 +215,15 @@
     <ClInclude Include="Audio\BiquadCascadeFilter.h">
       <Filter>Audio</Filter>
     </ClInclude>
+    <ClInclude Include="Video\librashader_ld.h">
+      <Filter>Video</Filter>
+    </ClInclude>
+    <ClInclude Include="Video\librashader.h">
+      <Filter>Video</Filter>
+    </ClInclude>
+    <ClInclude Include="Video\LibrashaderUtilities.h">
+      <Filter>Video</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="xBRZ\xbrz.cpp">

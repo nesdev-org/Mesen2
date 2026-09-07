@@ -66,6 +66,9 @@
 
 					<Color x:Key="ButtonBackgroundDisabled">#333</Color>
 					<Color x:Key="RepeatButtonBackgroundDisabled">#333</Color>
+					<SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#222" />
+					<Color x:Key="ComboBoxBackgroundDisabled">#333</Color>
+					<SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="#222" />
 
 					<Color x:Key="MesenGridBackground">#00000000</Color>
 					<Color x:Key="MesenMenuBackground">#00000000</Color>

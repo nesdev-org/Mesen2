@@ -48,6 +48,37 @@ namespace Mesen.Interop
 		{
 			return Utf8Utilities.CallStringApi(GetAudioDevicesWrapper).Split(new String[1] { "||" }, StringSplitOptions.RemoveEmptyEntries).ToList();
 		}
+
+		[DllImport(DllPath)] public static extern void SetShaderConfig(InteropShaderConfig config);
+
+		[DllImport(DllPath, EntryPoint = "CheckShaderSupport")][return: MarshalAs(UnmanagedType.I1)] public static extern bool CheckShaderSupportWrapper();
+		private static bool? _shadersSupported = null;
+
+		public static bool CheckShaderSupport()
+		{
+			if(_shadersSupported == null) {
+				_shadersSupported = CheckShaderSupportWrapper();
+				if(_shadersSupported == false) {
+					EmuApi.WriteLogEntry("[librashader] Could not load librashader (missing file, or wrong version)");
+				}
+			}
+			return _shadersSupported.Value;
+		}
+
+		[DllImport(DllPath)] private static extern UInt32 GetShaderParams(string shaderFile, IntPtr shaderParams);
+		public static unsafe InteropShaderParam[] GetShaderParams(string shaderFile)
+		{
+			UInt32 paramCount = ConfigApi.GetShaderParams(shaderFile, IntPtr.Zero);
+			if(paramCount == 0) {
+				return Array.Empty<InteropShaderParam>();
+			}
+
+			InteropShaderParam[] shaderParams = new InteropShaderParam[paramCount];
+			fixed(InteropShaderParam* ptr = shaderParams) {
+				ConfigApi.GetShaderParams(shaderFile, (IntPtr)ptr);
+			}
+			return shaderParams;
+		}
 	}
 
 	public enum EmulationFlags : UInt32
@@ -97,4 +128,51 @@ namespace Mesen.Interop
 		public UInt32 Key3;
 	}
 
+	public struct InteropShaderConfig
+	{
+		public UInt32 ConfigVersion;
+		[MarshalAs(UnmanagedType.LPStr)] public string ShaderFile;
+		public IntPtr Params;
+		public UInt32 ParamCount;
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public unsafe struct InteropShaderParamValue
+	{
+		public fixed byte Name[200];
+		public double Value;
+
+		public string GetName()
+		{
+			fixed(byte* ptr = Name) {
+				return Utf8Utilities.PtrToStringUtf8(ptr, 200);
+			}
+		}
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	public unsafe struct InteropShaderParam
+	{
+		public fixed byte Name[200];
+		public fixed byte Description[200];
+
+		public double Min;
+		public double Max;
+		public double Initial;
+		public double Step;
+
+		public string GetName()
+		{
+			fixed(byte* ptr = Name) {
+				return Utf8Utilities.PtrToStringUtf8(ptr, 200);
+			}
+		}
+
+		public string GetDescription()
+		{
+			fixed(byte* ptr = Description) {
+				return Utf8Utilities.PtrToStringUtf8(ptr, 200);
+			}
+		}
+	}
 }

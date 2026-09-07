@@ -35,6 +35,9 @@ void EmuSettings::CopySettings(EmuSettings& src)
 	SetPcEngineConfig(src._pce);
 	SetSmsConfig(src._sms);
 	SetGbaConfig(src._gba);
+	SetWsConfig(src._ws);
+
+	_shader = src._shader;
 }
 
 void EmuSettings::Serialize(Serializer& s)
@@ -195,10 +198,43 @@ VideoConfig& EmuSettings::GetVideoConfig()
 	return _video;
 }
 
+void EmuSettings::SetShaderConfig(InteropShaderConfig& config)
+{
+	ShaderConfig cfg;
+	cfg.ConfigVersion = config.ConfigVersion;
+	cfg.ShaderFile = config.ShaderFile;
+
+	for(uint32_t i = 0; i < config.ParamCount; i++) {
+		cfg.Params.push_back(config.Params[i]);
+	}
+
+	auto lock = _shaderCfgLock.AcquireSafe();
+	_shader = cfg;
+}
+
+ShaderConfig EmuSettings::GetShaderConfig()
+{
+	ShaderConfig cfg;
+	{
+		auto lock = _shaderCfgLock.AcquireSafe();
+		cfg = _shader;
+	}
+	return cfg;
+}
+
+bool EmuSettings::NeedsShaderUpdate(uint32_t version)
+{
+	return version != _shader.ConfigVersion;
+}
+
 void EmuSettings::SetAudioConfig(AudioConfig& config)
 {
+	bool needAudioReset = config.AudioBackend != _audio.AudioBackend;
 	_audio = config;
 	ProcessString(_audioDevice, &_audio.AudioDevice);
+	if(needAudioReset) {
+		_emu->InitAudio();
+	}
 }
 
 AudioConfig& EmuSettings::GetAudioConfig()

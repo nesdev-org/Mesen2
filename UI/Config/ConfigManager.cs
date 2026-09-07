@@ -242,6 +242,8 @@ namespace Mesen.Config
 		public static string WaveFolder { get { return GetFolder(DefaultWaveFolder, Config.Preferences.WaveFolder, Config.Preferences.OverrideWaveFolder); } }
 
 		public static string CheatFolder { get { return GetFolder(Path.Combine(ConfigManager.HomeFolder, "Cheats"), null, false); } }
+		public static string ShaderFolder { get { return GetFolder(Path.Combine(ConfigManager.HomeFolder, "Shaders"), null, false); } }
+		public static string ShaderConfigFolder { get { return GetFolder(Path.Combine(ConfigManager.HomeFolder, "ShaderConfig"), null, false); } }
 		public static string GameConfigFolder { get { return GetFolder(Path.Combine(ConfigManager.HomeFolder, "GameConfig"), null, false); } }
 		public static string SatellaviewFolder { get { return GetFolder(Path.Combine(ConfigManager.HomeFolder, "Satellaview"), null, false); } }
 

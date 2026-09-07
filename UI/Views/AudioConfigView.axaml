@@ -38,47 +38,55 @@
 					<c:OptionSection Header="{l:Translate tpgGeneral}">
 						<CheckBox Content="{l:Translate chkEnableAudio}" IsChecked="{Binding Config.EnableAudio}" />
 
-						<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
-							<TextBlock Grid.Row="0" Grid.Column="0" Text="{l:Translate lblAudioDevice}" />
+						<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+							<TextBlock Grid.Row="0" Grid.Column="0" Text="{l:Translate lblAudioDriver}" IsVisible="{Binding IsWindows}" />
+							<c:EnumComboBox
+								Grid.Row="0"
+								Grid.Column="1"
+								SelectedItem="{Binding Config.AudioBackend}"
+								AvailableValues="{Binding AvailableBackends}"
+								HorizontalAlignment="Left"
+								MinWidth="150"
+								IsVisible="{Binding IsWindows}"
+							/>
+
+							<TextBlock Grid.Row="1" Grid.Column="0" Text="{l:Translate lblAudioDevice}" />
 							<ComboBox
 								Name="AudioDevice"
-								Grid.Row="0"
+								Grid.Row="1"
 								Grid.Column="1"
 								ItemsSource="{Binding AudioDevices}"
 								SelectedItem="{Binding Config.AudioDevice}"
 								Width="200"
 							/>
 
-							<TextBlock Grid.Row="1" Grid.Column="0" Text="{l:Translate lblSampleRate}" />
+							<TextBlock Grid.Row="2" Grid.Column="0" Text="{l:Translate lblSampleRate}" />
 							<c:EnumComboBox
-								Grid.Row="1"
+								Grid.Row="2"
 								Grid.Column="1"
 								SelectedItem="{Binding Config.SampleRate}"
 								HorizontalAlignment="Left"
 								Width="100"
 							/>
 
-							<TextBlock Grid.Row="2" Grid.Column="0" Text="{l:Translate lblAudioLatency}" />
-							<StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+							<TextBlock Grid.Row="3" Grid.Column="0" Text="{l:Translate lblAudioLatency}" />
+							<StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
 								<c:MesenNumericUpDown
 									Minimum="15"
 									Maximum="300"
 									Value="{Binding Config.AudioLatency}"
 								/>
 								<TextBlock Text="{l:Translate lblLatencyMs}" VerticalAlignment="Center" Margin="5" />
-								<TextBlock
+								<c:HelpTooltip
+									IsWarning="{Binding IsLatencyWarning}"
 									Text="{l:Translate lblLatencyWarning}"
-									IsVisible="{Binding ShowLatencyWarning}"
-									Foreground="{DynamicResource ErrorBrush}"
-									VerticalAlignment="Center"
-									Margin="5"
 								/>
 							</StackPanel>
 
-							<TextBlock Grid.Row="3" Grid.Column="0" Text="{l:Translate lblVolume}" Margin="0 -8 0 0" />
+							<TextBlock Grid.Row="4" Grid.Column="0" Text="{l:Translate lblVolume}" Margin="0 -8 0 0" />
 							<c:MesenSlider
 								Margin="0 -8 0 0"
-								Grid.Row="3"
+								Grid.Row="4"
 								Grid.Column="1"
 								Minimum="0"
 								Maximum="100"

@@ -3,15 +3,18 @@
 #include <thread>
 #include <stdint.h>
 
-#include <X11/Xlib.h>
-#include <X11/cursorfont.h>
-
-#include "LinuxMouseManager.h"
+#include "Linux/LinuxMouseManager.h"
+#include "Linux/include/X11Lib.h"
 #include "Core/Shared/MessageManager.h"
 
 LinuxMouseManager::LinuxMouseManager(void* windowHandle)
 {
 	_mainWindow = (Window)windowHandle;
+
+	if(!LoadX11()) {
+		MessageManager::DisplayMessage("Mouse", "Could not load X11 library.");
+		return;
+	}
 
 	_display = XOpenDisplay(nullptr);
 	_defaultScreen = XDefaultScreen(_display);
@@ -32,6 +35,10 @@ LinuxMouseManager::~LinuxMouseManager()
 
 SystemMouseState LinuxMouseManager::GetSystemMouseState(void* rendererHandle)
 {
+	if(!_display) {
+		return {};
+	}
+
 	SystemMouseState state = {};
 
 	Window root = 0;
@@ -75,6 +82,10 @@ SystemMouseState LinuxMouseManager::GetSystemMouseState(void* rendererHandle)
 
 bool LinuxMouseManager::CaptureMouse(int32_t x, int32_t y, int32_t width, int32_t height, void* rendererHandle)
 {
+	if(!_display) {
+		return false;
+	}
+
 	if(rendererHandle == nullptr) {
 		//Due to the mouse position constantly being set to the center of the window and the cursor being hidden
 		//actually capturing the cursor when using the software renderer is not strictly needed
@@ -102,18 +113,30 @@ bool LinuxMouseManager::CaptureMouse(int32_t x, int32_t y, int32_t width, int32_
 
 void LinuxMouseManager::ReleaseMouse()
 {
+	if(!_display) {
+		return;
+	}
+
 	XUngrabPointer(_display, 0);
 	XFlush(_display);
 }
 
 void LinuxMouseManager::SetSystemMousePosition(int32_t x, int32_t y)
 {
+	if(!_display) {
+		return;
+	}
+
 	XWarpPointer(_display, 0, _rootWindow, 0, 0, 0, 0, x, y);
 	XFlush(_display);
 }
 
 void LinuxMouseManager::SetCursorImage(CursorImage cursor)
 {
+	if(!_display) {
+		return;
+	}
+
 	switch(cursor) {
 		case CursorImage::Hidden: XDefineCursor(_display, _mainWindow, _hiddenCursor); break;
 		case CursorImage::Arrow: XDefineCursor(_display, _mainWindow, _defaultCursor); break;

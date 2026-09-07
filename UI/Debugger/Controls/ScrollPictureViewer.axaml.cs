@@ -25,12 +25,12 @@ namespace Mesen.Debugger.Controls
 		public static readonly StyledProperty<int> GridSizeYProperty = AvaloniaProperty.Register<ScrollPictureViewer, int>(nameof(GridSizeY), 8);
 		public static readonly StyledProperty<bool> ShowGridProperty = AvaloniaProperty.Register<ScrollPictureViewer, bool>(nameof(ShowGrid), false);
 
-		public static readonly StyledProperty<int> LeftClipSizeProperty = AvaloniaProperty.Register<PictureViewer, int>(nameof(LeftClipSize), 0);
-		public static readonly StyledProperty<int> RightClipSizeProperty = AvaloniaProperty.Register<PictureViewer, int>(nameof(RightClipSize), 0);
-		public static readonly StyledProperty<int> TopClipSizeProperty = AvaloniaProperty.Register<PictureViewer, int>(nameof(TopClipSize), 0);
-		public static readonly StyledProperty<int> BottomClipSizeProperty = AvaloniaProperty.Register<PictureViewer, int>(nameof(BottomClipSize), 0);
+		public static readonly StyledProperty<int> LeftClipSizeProperty = AvaloniaProperty.Register<ScrollPictureViewer, int>(nameof(LeftClipSize), 0);
+		public static readonly StyledProperty<int> RightClipSizeProperty = AvaloniaProperty.Register<ScrollPictureViewer, int>(nameof(RightClipSize), 0);
+		public static readonly StyledProperty<int> TopClipSizeProperty = AvaloniaProperty.Register<ScrollPictureViewer, int>(nameof(TopClipSize), 0);
+		public static readonly StyledProperty<int> BottomClipSizeProperty = AvaloniaProperty.Register<ScrollPictureViewer, int>(nameof(BottomClipSize), 0);
 
-		public static readonly StyledProperty<List<GridDefinition>?> CustomGridsProperty = AvaloniaProperty.Register<PictureViewer, List<GridDefinition>?>(nameof(CustomGrids), null);
+		public static readonly StyledProperty<List<GridDefinition>?> CustomGridsProperty = AvaloniaProperty.Register<ScrollPictureViewer, List<GridDefinition>?>(nameof(CustomGrids), null);
 
 		public static readonly StyledProperty<bool> AllowSelectionProperty = AvaloniaProperty.Register<ScrollPictureViewer, bool>(nameof(AllowSelection), true);
 		public static readonly StyledProperty<bool> AllowClickDragProperty = AvaloniaProperty.Register<ScrollPictureViewer, bool>(nameof(AllowClickDrag), true);
@@ -45,7 +45,7 @@ namespace Mesen.Debugger.Controls
 
 		public static readonly StyledProperty<ScrollBarVisibility> ScrollBarVisibilityProperty = AvaloniaProperty.Register<ScrollPictureViewer, ScrollBarVisibility>(nameof(ScrollBarVisibility), ScrollBarVisibility.Auto);
 
-		public static readonly StyledProperty<List<PictureViewerLine>?> OverlayLinesProperty = AvaloniaProperty.Register<PictureViewer, List<PictureViewerLine>?>(nameof(OverlayLines), null);
+		public static readonly StyledProperty<List<PictureViewerLine>?> OverlayLinesProperty = AvaloniaProperty.Register<ScrollPictureViewer, List<PictureViewerLine>?>(nameof(OverlayLines), null);
 
 		public Vector ScrollOffset
 		{

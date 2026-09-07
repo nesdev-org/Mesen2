@@ -13,18 +13,16 @@ using Mesen.Utilities;
 using Mesen.Windows;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Mesen.ViewModels
 {
-	public partial class MainMenuViewModel : ViewModelBase
+	public partial class MainMenuViewModel : DisposableViewModel
 	{
 		public MainWindowViewModel MainWindow { get; set; }
 
@@ -46,6 +44,7 @@ namespace Mesen.ViewModels
 
 		private ConfigWindow? _cfgWindow = null;
 		private MainMenuAction _selectControllerAction = new();
+		private FileSystemWatcher? _fileWatcher;
 
 		[Obsolete("For designer only")]
 		public MainMenuViewModel() : this(new MainWindowViewModel()) { }
@@ -53,6 +52,12 @@ namespace Mesen.ViewModels
 		public MainMenuViewModel(MainWindowViewModel windowModel)
 		{
 			MainWindow = windowModel;
+		}
+
+		protected override void DisposeView()
+		{
+			base.DisposeView();
+			_fileWatcher?.Dispose();
 		}
 
 		private void OpenConfig(MainWindow wnd, ConfigWindowTab tab)
@@ -306,6 +311,54 @@ namespace Mesen.ViewModels
 			};
 		}
 
+		private MainMenuAction GetShaderMenu(MainWindow wnd)
+		{
+			return ShaderMenuHelper.GetShaderMenu(
+				wnd,
+				() => {
+					ConsoleOverrideConfig? overrides = ConsoleOverrideConfig.GetActiveOverride();
+					if(overrides?.OverrideShader == true) {
+						return overrides.ShaderFile;
+					}
+					return ConfigManager.Config.Video.ShaderFile;
+				}, v => {
+					ConsoleOverrideConfig? overrides = ConsoleOverrideConfig.GetActiveOverride();
+					if(overrides?.OverrideShader == true) {
+						overrides.ShaderFile = v;
+					} else {
+						ConfigManager.Config.Video.ShaderFile = v;
+					}
+				},
+				true
+			);
+		}
+
+		private MainMenuAction? InitShaderMenu(MainWindow wnd)
+		{
+			MainMenuAction shaderMenu = GetShaderMenu(wnd);
+
+			Action refreshFilterList = ((Action)(() => {
+				Dispatcher.UIThread.Post(() => {
+					if(shaderMenu.SubActions != null) {
+						foreach(object action in shaderMenu.SubActions) {
+							(action as BaseMenuAction)?.Dispose();
+						}
+					}
+					shaderMenu.SubActions = GetShaderMenu(wnd).SubActions;
+				});
+			})).Debounce();
+
+			//Auto-refresh menu when files are added/deleted in the "Shaders" folder
+			_fileWatcher = new(ConfigManager.ShaderFolder, "*.slangp");
+			_fileWatcher.IncludeSubdirectories = true;
+			_fileWatcher.Renamed += (s, e) => refreshFilterList();
+			_fileWatcher.Created += (s, e) => refreshFilterList();
+			_fileWatcher.Deleted += (s, e) => refreshFilterList();
+			_fileWatcher.Changed += (s, e) => refreshFilterList();
+			_fileWatcher.EnableRaisingEvents = true;
+			return shaderMenu;
+		}
+
 		private void InitOptionsMenu(MainWindow wnd)
 		{
 			OptionsMenuItems = new List<object>() {
@@ -397,7 +450,7 @@ namespace Mesen.ViewModels
 								ConfigManager.Config.Video.ApplyConfig();
 							}
 						}
-					}
+					},
 				},
 
 				new MainMenuAction() {
@@ -518,6 +571,11 @@ namespace Mesen.ViewModels
 					OnClick = () => OpenConfig(wnd, ConfigWindowTab.Preferences)
 				}
 			};
+
+			MainMenuAction? shaderMenu = InitShaderMenu(wnd);
+			if(shaderMenu != null) {
+				OptionsMenuItems.Insert(3, shaderMenu);
+			}
 		}
 
 		private MainMenuAction GetAspectRatioMenuItem(VideoAspectRatio aspectRatio)

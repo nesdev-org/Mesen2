@@ -194,13 +194,34 @@ namespace Mesen.Windows
 				}
 			}
 
+			uint realWidth = (uint)Math.Round(width * dpiScale);
+			uint realHeight = (uint)Math.Round(height * dpiScale);
+
+			//Make sure the height & width are always a multiple of 2 pixels
+			//This prevents issues with shaders, where a vertical or horizontal
+			//line artifact can appear in the middle of the frame if odd.
+			if((realWidth & 0x01) != 0) {
+				realWidth++;
+			}
+			if((realHeight & 0x01) != 0) {
+				realHeight++;
+			}
+
+			width = Math.Round(realWidth / dpiScale, 8, MidpointRounding.ToZero) + 0.00001;
+			height = Math.Round(realHeight / dpiScale, 8, MidpointRounding.ToZero) + 0.00001;
+
 			_model.RendererSize = new Size(
-				Math.Round(width * dpiScale),
-				Math.Round(height * dpiScale)
+				realWidth,
+				realHeight
 			);
 
 			_renderer.Width = width;
 			_renderer.Height = height;
+
+			//Position the renderer in the center
+			Canvas.SetTop(_renderer, finalSize.Height > _renderer.Height ? (finalSize.Height - _renderer.Height) / 2 : 0);
+			Canvas.SetLeft(_renderer, finalSize.Width > _renderer.Width ? (finalSize.Width - _renderer.Width) / 2 : 0);
+
 			_model.SoftwareRenderer.Width = width;
 			_model.SoftwareRenderer.Height = height;
 		}

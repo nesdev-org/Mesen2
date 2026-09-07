@@ -18,6 +18,20 @@ SdlSoundManager::~SdlSoundManager()
 	Release();
 }
 
+SdlSoundManager* SdlSoundManager::Create(Emulator* emu)
+{
+	static bool firstLoad = true;
+	if(!LoadSdl()) {
+		if(firstLoad) {
+			MessageManager::Log("[Audio] Could not load SDL2.");
+		}
+		firstLoad = false;
+		return nullptr;
+	}
+
+	return new SdlSoundManager(emu);
+}
+
 void SdlSoundManager::FillAudioBuffer(void* userData, uint8_t* stream, int len)
 {
 	SdlSoundManager* soundManager = (SdlSoundManager*)userData;
@@ -59,7 +73,7 @@ bool SdlSoundManager::InitializeAudio(uint32_t sampleRate, bool isStereo)
 	memset(_buffer, 0, _bufferSize);
 
 	SDL_AudioSpec audioSpec;
-	SDL_memset(&audioSpec, 0, sizeof(audioSpec));
+	memset(&audioSpec, 0, sizeof(audioSpec));
 	audioSpec.freq = sampleRate;
 	audioSpec.format = AUDIO_S16SYS; //16-bit samples
 	audioSpec.channels = isStereo ? 2 : 1;

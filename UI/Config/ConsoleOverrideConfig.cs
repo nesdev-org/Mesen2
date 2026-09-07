@@ -1,6 +1,6 @@
-﻿using Mesen.Interop;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Mesen.Interop;
 using Mesen.ViewModels;
-using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +13,9 @@ public partial class ConsoleOverrideConfig : BaseConfig<GameConfig>
 {
 	[ObservableProperty] public partial bool OverrideVideoFilter { get; set; } = false;
 	[ObservableProperty] public partial VideoFilterType VideoFilter { get; set; } = VideoFilterType.None;
+
+	[ObservableProperty] public partial bool OverrideShader { get; set; } = false;
+	[ObservableProperty] public partial string ShaderFile { get; set; } = "";
 
 	[ObservableProperty] public partial bool OverrideAspectRatio { get; set; } = false;
 	[ObservableProperty] public partial VideoAspectRatio AspectRatio { get; set; } = VideoAspectRatio.NoStretching;

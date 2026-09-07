@@ -5,7 +5,6 @@ using Avalonia.Markup.Xaml;
 using Mesen.Controls;
 using Mesen.Interop;
 using Mesen.Utilities;
-using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 
 namespace Mesen.Debugger.Windows
@@ -14,9 +13,9 @@ namespace Mesen.Debugger.Windows
 	{
 		private static int _lastValue = 0;
 
-		public static readonly StyledProperty<int> ValueProperty = AvaloniaProperty.Register<BreakInWindow, int>(nameof(Value));
-		public static readonly StyledProperty<int?> MinProperty = AvaloniaProperty.Register<BreakInWindow, int?>(nameof(Min));
-		public static readonly StyledProperty<int?> MaxProperty = AvaloniaProperty.Register<BreakInWindow, int?>(nameof(Max));
+		public static readonly StyledProperty<int> ValueProperty = AvaloniaProperty.Register<BreakOnWindow, int>(nameof(Value));
+		public static readonly StyledProperty<int?> MinProperty = AvaloniaProperty.Register<BreakOnWindow, int?>(nameof(Min));
+		public static readonly StyledProperty<int?> MaxProperty = AvaloniaProperty.Register<BreakOnWindow, int?>(nameof(Max));
 
 		public int Value
 		{

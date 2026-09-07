@@ -40,6 +40,7 @@ namespace Mesen.Utilities
 		public const string NesExt = "nes";
 		public const string SufamiTurboExt = "st";
 		public const string SpcExt = "spc";
+		public const string ShaderExt = "slangp";
 
 		public static async Task<string?> OpenFile(string? initialFolder, Window? parent, params string[] extensions)
 		{

@@ -2,6 +2,8 @@ Windows/DirectXTK/*
 Lua/*
 SevenZip/*
 Linux/libevdev/*
+Linux/include/glad/*
+Linux/include/*
 MacOS/*
 Utilities/HQX/*
 Utilities/KreedSaiEagle/*
@@ -15,6 +17,7 @@ Utilities/Audio/stb_vorbis.*
 Utilities/magic_enum.hpp
 Utilities/Video/gif.h
 Utilities/Video/ZmbvCodec.*
+Utilities/Video/librashader*
 Utilities/kissfft.h
 Utilities/miniz.*
 Utilities/spng.*

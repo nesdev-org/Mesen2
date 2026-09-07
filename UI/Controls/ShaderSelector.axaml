@@ -1,0 +1,19 @@
+<UserControl 
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:c="using:Mesen.Controls"
+	xmlns:l="using:Mesen.Localization"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="50"
+	x:Name="root"
+	HorizontalAlignment="Stretch"
+	x:Class="Mesen.Controls.ShaderSelector"
+>
+	<Button DataContext="{Binding, ElementName=root}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="0" MinHeight="21" Click="BtnSettings_OnClick">
+		<DockPanel>
+			<Image DockPanel.Dock="Right" Name="IconImage" Margin="4 1 6 0" Stretch="None" Source="/Assets/Settings.png" VerticalAlignment="Center" />
+			<TextBlock Text="{Binding DisplayValue}" VerticalAlignment="Center" Margin="1 0 0 1"  />
+		</DockPanel>
+	</Button>
+</UserControl>

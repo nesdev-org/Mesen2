@@ -1,20 +1,23 @@
 #include "Common.h"
 #include "Core/Shared/Emulator.h"
 #include "Core/Shared/Interfaces/IAudioDevice.h"
-#include "Core/Shared/BaseControlManager.h"
-#include "Core/Shared/BaseControlDevice.h"
 #include "Core/Shared/EmuSettings.h"
 #include "Core/Shared/SettingTypes.h"
 #include "Utilities/StringUtilities.h"
+#include "Utilities/Video/LibrashaderUtilities.h"
 
 extern unique_ptr<Emulator> _emu;
-extern unique_ptr<IAudioDevice> _soundManager;
 
 extern "C"
 {
 	DllExport void __stdcall SetVideoConfig(VideoConfig config)
 	{
 		_emu->GetSettings()->SetVideoConfig(config);
+	}
+
+	DllExport void __stdcall SetShaderConfig(InteropShaderConfig config)
+	{
+		_emu->GetSettings()->SetShaderConfig(config);
 	}
 
 	DllExport void __stdcall SetAudioConfig(AudioConfig config)
@@ -105,7 +108,8 @@ extern "C"
 
 	DllExport void __stdcall GetAudioDevices(char* outDeviceList, uint32_t maxLength)
 	{
-		StringUtilities::CopyToBuffer(_soundManager ? _soundManager->GetAvailableDevices() : "", outDeviceList, maxLength);
+		shared_ptr<IAudioDevice> soundManager = _emu->GetSoundManager();
+		StringUtilities::CopyToBuffer(soundManager ? soundManager->GetAvailableDevices() : "", outDeviceList, maxLength);
 	}
 
 	DllExport void __stdcall SetEmulationFlag(EmulationFlags flag, bool enabled)
@@ -116,5 +120,21 @@ extern "C"
 	DllExport void __stdcall SetDebuggerFlag(DebuggerFlags flag, bool enabled)
 	{
 		_emu->GetSettings()->SetDebuggerFlag(flag, enabled);
+	}
+
+	DllExport bool __stdcall CheckShaderSupport()
+	{
+		return LibrashaderUtilities::CheckShaderSupport();
+	}
+
+	DllExport uint32_t __stdcall GetShaderParams(const char* shaderFile, ShaderParamDefinition* params)
+	{
+		if(params) {
+			vector<ShaderParamDefinition> paramList = LibrashaderUtilities::GetShaderParams(shaderFile);
+			std::copy(paramList.begin(), paramList.end(), params);
+			return (uint32_t)paramList.size();
+		} else {
+			return LibrashaderUtilities::GetShaderParamCount(shaderFile);
+		}
 	}
 }
