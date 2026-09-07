@@ -92,22 +92,30 @@ string WasapiSoundManager::GetAvailableDevices()
 
 void WasapiSoundManager::SetAudioDevice(string deviceName)
 {
-	if(_audioDeviceName != deviceName) {
-		if(deviceName == "Default") {
-			_audioDeviceName = deviceName;
+	if(_audioDeviceName == deviceName) {
+		return;
+	}
+
+	_audioDeviceName = deviceName;
+	if(deviceName == "Default") {
+		_audioDeviceId = "";
+		_needReset = true;
+	} else {
+		bool found = false;
+		for(SoundDeviceInfo& device : GetAvailableDeviceInfo()) {
+			if(device.Description == deviceName) {
+				found = true;
+				if(_audioDeviceId != device.Id) {
+					_audioDeviceId = device.Id;
+					_needReset = true;
+				}
+				break;
+			}
+		}
+
+		if(!found) {
 			_audioDeviceId = "";
 			_needReset = true;
-		} else {
-			for(SoundDeviceInfo& device : GetAvailableDeviceInfo()) {
-				if(device.Description == deviceName) {
-					_audioDeviceName = deviceName;
-					if(_audioDeviceId != device.Id) {
-						_audioDeviceId = device.Id;
-						_needReset = true;
-					}
-					break;
-				}
-			}
 		}
 	}
 }
@@ -243,9 +251,6 @@ void WasapiSoundManager::Play()
 
 void WasapiSoundManager::ProcessEndOfFrame()
 {
-	AudioConfig cfg = _emu->GetSettings()->GetAudioConfig();
-	SetAudioDevice(cfg.AudioDevice);
-
 	if(_audioClient) {
 		UINT32 paddingFrames = 0;
 		HRESULT hr = _audioClient->GetCurrentPadding(&paddingFrames);
@@ -257,19 +262,15 @@ void WasapiSoundManager::ProcessEndOfFrame()
 		} else {
 			LogError("IAudioClient::GetCurrentPadding failed.", hr);
 		}
-
-		uint32_t emulationSpeed = _emu->GetSettings()->GetEmulationSpeed();
-		if(_averageLatency > 0 && emulationSpeed <= 100 && emulationSpeed > 0 && std::abs(_averageLatency - cfg.AudioLatency) > 50) {
-			//Latency is way off (over 50ms gap), stop audio & start again
-			Stop();
-		}
 	}
 
-	if(_needReset) {
-		Release();
-		if(!Initialize(_sampleRate, _isStereo)) {
-			Release();
-		}
+	AudioConfig& cfg = _emu->GetSettings()->GetAudioConfig();
+	SetAudioDevice(cfg.AudioDevice);
+
+	uint32_t emulationSpeed = _emu->GetSettings()->GetEmulationSpeed();
+	if(_averageLatency > 0 && emulationSpeed <= 100 && emulationSpeed > 0 && std::abs(_averageLatency - cfg.AudioLatency) > 50) {
+		//Latency is way off (over 50ms gap), stop audio & start again
+		Stop();
 	}
 }
 

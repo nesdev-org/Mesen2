@@ -125,7 +125,7 @@ vector<string> SdlSoundManager::GetAvailableDeviceInfo()
 
 void SdlSoundManager::SetAudioDevice(string deviceName)
 {
-	if(deviceName.compare(_deviceName) != 0) {
+	if(deviceName != _deviceName) {
 		_deviceName = deviceName;
 		_needReset = true;
 	}
@@ -200,6 +200,9 @@ void SdlSoundManager::Stop()
 void SdlSoundManager::ProcessEndOfFrame()
 {
 	ProcessLatency(_readPosition, _writePosition);
+
+	AudioConfig& cfg = _emu->GetSettings()->GetAudioConfig();
+	SetAudioDevice(cfg.AudioDevice);
 
 	uint32_t emulationSpeed = _emu->GetSettings()->GetEmulationSpeed();
 	if(_averageLatency > 0 && emulationSpeed <= 100 && emulationSpeed > 0 && std::abs(_averageLatency - _emu->GetSettings()->GetAudioConfig().AudioLatency) > 50) {

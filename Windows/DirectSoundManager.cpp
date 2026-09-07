@@ -15,7 +15,7 @@ DirectSoundManager::DirectSoundManager(Emulator* emu, HWND hwnd)
 
 	memset(&_audioDeviceID, 0, sizeof(_audioDeviceID));
 
-	if(InitializeDirectSound(44100, true)) {
+	if(InitializeDirectSound(48000, true)) {
 		_emu->GetSoundMixer()->RegisterAudioDevice(this);
 	} else {
 		MessageManager::DisplayMessage("Error", "CouldNotInitializeAudioSystem");
@@ -64,17 +64,26 @@ string DirectSoundManager::GetAvailableDevices()
 
 void DirectSoundManager::SetAudioDevice(string deviceName)
 {
-	if(_audioDeviceName != deviceName) {
-		for(SoundDeviceInfo device : GetAvailableDeviceInfo()) {
-			if(device.description == deviceName) {
-				_audioDeviceName = deviceName;
-				if(memcmp(&_audioDeviceID, &device.guid, 16) != 0) {
-					memcpy(&_audioDeviceID, &device.guid, 16);
-					_needReset = true;
-				}
-				break;
+	if(_audioDeviceName == deviceName) {
+		return;
+	}
+
+	bool found = false;
+	_audioDeviceName = deviceName;
+	for(SoundDeviceInfo device : GetAvailableDeviceInfo()) {
+		if(device.description == deviceName) {
+			found = true;
+			if(memcmp(&_audioDeviceID, &device.guid, 16) != 0) {
+				memcpy(&_audioDeviceID, &device.guid, 16);
+				_needReset = true;
 			}
+			break;
 		}
+	}
+
+	if(!found) {
+		memset(&_audioDeviceID, 0, sizeof(_audioDeviceID));
+		_needReset = true;
 	}
 }
 
@@ -278,7 +287,7 @@ void DirectSoundManager::ProcessEndOfFrame()
 
 	ProcessLatency(currentPlayCursor, _lastWriteOffset);
 
-	AudioConfig cfg = _emu->GetSettings()->GetAudioConfig();
+	AudioConfig& cfg = _emu->GetSettings()->GetAudioConfig();
 	SetAudioDevice(cfg.AudioDevice);
 
 	if(_averageLatency > 0 && emulationSpeed <= 100 && emulationSpeed > 0 && std::abs(_averageLatency - cfg.AudioLatency) > 50) {
