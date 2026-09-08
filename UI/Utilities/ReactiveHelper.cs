@@ -88,6 +88,7 @@ namespace Mesen.Utilities
 		public static IDisposable RegisterRecursiveObserver(ObservableObject target, PropertyChangedEventHandler handler)
 		{
 			Dictionary<string, ObservableObject> observableObjects = new();
+			Dictionary<ObservableObject, IDisposable> disposables = new();
 			Dictionary<string, PropertyInfo> props = new();
 
 			foreach(PropertyInfo prop in GetProperties(target)) {
@@ -96,24 +97,28 @@ namespace Mesen.Utilities
 					if(value is ObservableObject propValue) {
 						observableObjects[prop.Name] = propValue;
 						props[prop.Name] = prop;
-						ReactiveHelper.RegisterRecursiveObserver(propValue, handler);
+						disposables[propValue] = ReactiveHelper.RegisterRecursiveObserver(propValue, handler);
 					} else if(value is IList list) {
 						foreach(object listValue in list) {
 							if(listValue is ObservableObject) {
-								ReactiveHelper.RegisterRecursiveObserver((ObservableObject)listValue, handler);
+								disposables[(ObservableObject)listValue] = ReactiveHelper.RegisterRecursiveObserver((ObservableObject)listValue, handler);
 							}
 						}
 					}
 				}
 			}
 
-			target.PropertyChanged += (s, e) => {
+			PropertyChangedEventHandler? evtHandler = null;
+
+			evtHandler = (s, e) => {
 				handler(s, e);
 
 				//Reset change handlers if an object is replaced with another object
 				if(e.PropertyName != null && observableObjects.TryGetValue(e.PropertyName, out ObservableObject? obj)) {
 					//Remove handlers on the old object
-					ReactiveHelper.UnregisterRecursiveObserver(obj, handler);
+					if(disposables.TryGetValue(obj, out IDisposable? disposable)) {
+						disposable.Dispose();
+					}
 
 					if(props.TryGetValue(e.PropertyName, out PropertyInfo? prop)) {
 						object? value = prop.GetValue(target);
@@ -121,33 +126,15 @@ namespace Mesen.Utilities
 							observableObjects[prop.Name] = propValue;
 
 							//Register change handlers on the new object
-							ReactiveHelper.RegisterRecursiveObserver(propValue, handler);
+							disposables[propValue] = ReactiveHelper.RegisterRecursiveObserver(propValue, handler!);
 						}
 					}
 				}
 			};
 
-			return new RecursiveObserver(target, handler);
-		}
+			target.PropertyChanged += evtHandler;
 
-		public static void UnregisterRecursiveObserver(ObservableObject target, PropertyChangedEventHandler handler)
-		{
-			foreach(PropertyInfo prop in GetProperties(target)) {
-				if(prop.GetCustomAttribute<ObservablePropertyAttribute>() != null) {
-					object? value = prop.GetValue(target);
-					if(value is ObservableObject propValue) {
-						ReactiveHelper.UnregisterRecursiveObserver(propValue, handler);
-					} else if(value is IList list) {
-						foreach(object listValue in list) {
-							if(listValue is ObservableObject) {
-								ReactiveHelper.UnregisterRecursiveObserver((ObservableObject)listValue, handler);
-							}
-						}
-					}
-				}
-			}
-
-			target.PropertyChanged -= handler;
+			return new RecursiveObserver(target, evtHandler, disposables.Values);
 		}
 	}
 
@@ -155,16 +142,21 @@ namespace Mesen.Utilities
 	{
 		private ObservableObject _target;
 		private PropertyChangedEventHandler _handler;
+		private IEnumerable<IDisposable> _disposables;
 
-		public RecursiveObserver(ObservableObject target, PropertyChangedEventHandler handler)
+		public RecursiveObserver(ObservableObject target, PropertyChangedEventHandler handler, IEnumerable<IDisposable> disposables)
 		{
 			_target = target;
 			_handler = handler;
+			_disposables = disposables;
 		}
 
 		public void Dispose()
 		{
-			ReactiveHelper.UnregisterRecursiveObserver(_target, _handler);
+			_target.PropertyChanged -= _handler;
+			foreach(IDisposable disposable in _disposables) {
+				disposable.Dispose();
+			}
 		}
 	}
 
