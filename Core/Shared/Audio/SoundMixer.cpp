@@ -47,20 +47,22 @@ void SoundMixer::UnregisterAudioProvider(IAudioProvider* provider)
 
 AudioStatistics SoundMixer::GetStatistics()
 {
-	if(_audioDevice) {
-		return _audioDevice->GetStatistics();
+	shared_ptr<IAudioDevice> soundManager = _emu->GetSoundManager();
+	if(soundManager) {
+		return soundManager->GetStatistics();
 	} else {
-		return AudioStatistics();
+		return {};
 	}
 }
 
 void SoundMixer::StopAudio(bool clearBuffer)
 {
-	if(_audioDevice) {
+	shared_ptr<IAudioDevice> soundManager = _emu->GetSoundManager();
+	if(soundManager) {
 		if(clearBuffer) {
-			_audioDevice->Stop();
+			soundManager->Stop();
 		} else {
-			_audioDevice->Pause();
+			soundManager->Pause();
 		}
 	}
 }

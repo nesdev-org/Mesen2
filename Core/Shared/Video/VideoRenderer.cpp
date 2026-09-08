@@ -126,6 +126,10 @@ void VideoRenderer::RenderThread()
 			}
 		}
 	}
+
+	if(_renderer) {
+		_renderer->OnRendererThreadStopped();
+	}
 }
 
 FrameInfo VideoRenderer::GetEmuHudSize(FrameInfo baseFrameSize)

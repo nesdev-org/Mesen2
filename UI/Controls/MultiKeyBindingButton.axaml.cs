@@ -15,7 +15,7 @@ namespace Mesen.Controls
 	{
 		protected override Type StyleKeyOverride => typeof(Button);
 
-		public static readonly StyledProperty<KeyCombination> KeyBindingProperty = AvaloniaProperty.Register<KeyBindingButton, KeyCombination>(nameof(KeyBinding), new KeyCombination(), false, Avalonia.Data.BindingMode.TwoWay);
+		public static readonly StyledProperty<KeyCombination> KeyBindingProperty = AvaloniaProperty.Register<MultiKeyBindingButton, KeyCombination>(nameof(KeyBinding), new KeyCombination(), false, Avalonia.Data.BindingMode.TwoWay);
 
 		public KeyCombination KeyBinding
 		{

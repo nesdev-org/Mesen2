@@ -122,9 +122,40 @@ struct VideoConfig
 	bool DisableHighPrecisionFramePacing = false;
 };
 
+struct ShaderParam
+{
+	char Name[200];
+	double Value;
+};
+
+struct InteropShaderConfig
+{
+	uint32_t ConfigVersion = 0;
+	const char* ShaderFile = nullptr;
+	ShaderParam* Params = nullptr;
+	uint32_t ParamCount = 0;
+};
+
+struct ShaderConfig
+{
+	uint32_t ConfigVersion = 0;
+	string ShaderFile;
+	vector<ShaderParam> Params;
+};
+
+enum class AudioBackendType
+{
+	Default,
+	Wasapi,
+	DirectSound,
+	Sdl2,
+};
+
 struct AudioConfig
 {
+	AudioBackendType AudioBackend = AudioBackendType::Default;
 	const char* AudioDevice = nullptr;
+
 	bool EnableAudio = true;
 	bool DisableDynamicSampleRate = false;
 
@@ -897,7 +928,7 @@ struct DebugConfig
 	bool GbaBreakOnNopLoad = false;
 	bool GbaBreakOnInvalidOpCode = false;
 	bool GbaBreakOnUnalignedMemAccess = false;
-	GbaDisassemblyMode GbaDisMode;
+	GbaDisassemblyMode GbaDisMode = {};
 
 	bool WsBreakOnInvalidOpCode = false;
 

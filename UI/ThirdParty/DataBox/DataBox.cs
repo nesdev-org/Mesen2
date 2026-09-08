@@ -56,13 +56,13 @@ public class DataBox : TemplatedControl
 		  AvaloniaProperty.Register<DataBox, SortMode>(nameof(SortMode), SortMode.None);
 
 	public static readonly StyledProperty<ICommand?> SortCommandProperty =
-		 AvaloniaProperty.Register<DataBoxColumn, ICommand?>(nameof(SortCommand));
+		 AvaloniaProperty.Register<DataBox, ICommand?>(nameof(SortCommand));
 
 	public static readonly StyledProperty<SortState> SortStateProperty =
-		 AvaloniaProperty.Register<DataBoxColumn, SortState>(nameof(SortState));
+		 AvaloniaProperty.Register<DataBox, SortState>(nameof(SortState));
 
 	public static readonly StyledProperty<List<int>> ColumnWidthsProperty =
-		 AvaloniaProperty.Register<DataBoxColumn, List<int>>(nameof(ColumnWidths));
+		 AvaloniaProperty.Register<DataBox, List<int>>(nameof(ColumnWidths));
 
 	public static readonly StyledProperty<bool> CanUserResizeColumnsProperty =
 		  AvaloniaProperty.Register<DataBox, bool>(nameof(CanUserResizeColumns));

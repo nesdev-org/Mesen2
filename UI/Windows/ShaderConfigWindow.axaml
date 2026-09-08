@@ -1,0 +1,86 @@
+<Window
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:m="clr-namespace:Mesen"
+	xmlns:v="using:Mesen.Views"
+	xmlns:vm="using:Mesen.ViewModels"
+	xmlns:c="using:Mesen.Controls"
+	xmlns:i="using:Mesen.Interop"
+	xmlns:l="using:Mesen.Localization"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d"
+	x:Class="Mesen.Windows.ShaderConfigWindow"
+	x:DataType="vm:ShaderConfigViewModel"
+	Width="350" Height="450"
+	Name="root"
+	Title="{l:Translate wndTitle}"
+>
+	<Design.DataContext>
+		<vm:ShaderConfigViewModel />
+	</Design.DataContext>
+
+	<Window.Styles>
+		<Style Selector="Grid">
+			<Setter Property="Background" Value="Transparent" />
+		</Style>
+		<Style Selector="Panel.Row">
+			<Setter Property="Background" Value="{DynamicResource MesenGridBackground}" />
+		</Style>
+		<Style Selector="Panel.Row:pointerover">
+			<Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
+		</Style>
+	</Window.Styles>
+	
+	<DockPanel>
+		<DockPanel DockPanel.Dock="Bottom" Margin="3">
+			<Button DockPanel.Dock="Left" MinWidth="70" HorizontalContentAlignment="Center" Click="Reset_OnClick" Content="{l:Translate btnReset}" />
+
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+				<Button MinWidth="70" HorizontalContentAlignment="Center" IsDefault="true" Click="Ok_OnClick" Content="{l:Translate btnOk}" />
+				<Button MinWidth="70" HorizontalContentAlignment="Center" IsCancel="True" Click="Cancel_OnClick" Content="{l:Translate btnCancel}" />
+			</StackPanel>
+		</DockPanel>
+
+		<ScrollViewer>
+			<ItemsControl ItemsSource="{Binding Config.Params}" Margin="0 0 0 5">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<VirtualizingStackPanel />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Panel Classes="Row">
+							<Grid ColumnDefinitions="1*, Auto" RowDefinitions="Auto" Margin="5 0 5 0">
+								<Panel MinHeight="25">
+									<TextBlock Text="{Binding Description}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+								</Panel>
+								<Panel Grid.Column="1" IsVisible="{Binding !IsLabel}">
+									<c:MesenNumericUpDown
+										MinWidth="70"
+										IsVisible="{Binding !IsBoolean}"
+										FormatString="{Binding FormatString}"
+										Maximum="{Binding Max}"
+										Minimum="{Binding Min}"
+										Increment="{Binding Step}"
+										Value="{Binding Value}"
+										VerticalAlignment="Center"
+										ForceIncrementMultiple="True"
+									/>
+									<CheckBox
+										IsVisible="{Binding IsBoolean}"
+										IsChecked="{Binding BoolValue}"
+										MinWidth="74"
+										Margin="0 2 0 2"
+										VerticalAlignment="Center"
+									/>
+								</Panel>
+							</Grid>
+						</Panel>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+	</DockPanel>
+</Window>

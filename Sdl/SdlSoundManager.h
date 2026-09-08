@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "SDL.h"
+#include "Sdl/include/Sdl2.h"
 #include "Core/Shared/Audio/BaseSoundManager.h"
 
 class Emulator;
@@ -9,6 +9,8 @@ class SdlSoundManager : public BaseSoundManager
 public:
 	SdlSoundManager(Emulator* emu);
 	~SdlSoundManager();
+
+	static SdlSoundManager* Create(Emulator* emu);
 
 	void PlayBuffer(int16_t* soundBuffer, uint32_t bufferSize, uint32_t sampleRate, bool isStereo);
 	void Pause();

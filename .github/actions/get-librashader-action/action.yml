@@ -1,0 +1,32 @@
+name: 'Get librashader binary and add it to dependencies folder'
+inputs:
+  url:
+    required: true
+  file:
+    required: true
+  dest:
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download, extract, and copy file
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+
+        $zipPath = "librashader.zip"
+        $extractDir = "librashader"
+
+        Invoke-WebRequest -Uri "https://nightly.link/SourMesen/librashader/workflows/build/Mesen/${{ inputs.url }}" -OutFile $zipPath -MaximumRedirection 10
+        Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
+
+        $targetFile = Get-ChildItem -Path $extractDir -File -Filter "${{ inputs.file }}" | Select-Object -First 1
+
+        if ($null -eq $targetFile) {
+            Write-Error "File '${{ inputs.file }}' was not found inside the ZIP archive."
+        }
+
+        Copy-Item -Path $targetFile.FullName -Destination "${{ inputs.dest }}" -Force
+
+        Write-Host "Successfully copied '${{ inputs.file }}' to '${{ inputs.dest }}'."

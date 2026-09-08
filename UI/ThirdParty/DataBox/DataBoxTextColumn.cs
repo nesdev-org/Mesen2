@@ -9,7 +9,7 @@ namespace DataBoxControl;
 public class DataBoxTextColumn : DataBoxBoundColumn
 {
 	public static readonly StyledProperty<bool> ShowToolTipProperty =
-	  AvaloniaProperty.Register<DataBoxBoundColumn, bool>(nameof(ShowToolTip), false);
+	  AvaloniaProperty.Register<DataBoxTextColumn, bool>(nameof(ShowToolTip), false);
 
 	public bool ShowToolTip
 	{

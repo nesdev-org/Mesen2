@@ -5,9 +5,6 @@
 #include "Core/Shared/HistoryViewer.h"
 #include "Core/Shared/Interfaces/IRenderingDevice.h"
 #include "Core/Shared/Interfaces/IAudioDevice.h"
-#include "Core/Shared/Video/VideoRenderer.h"
-#include "Core/Shared/Audio/SoundMixer.h"
-#include "Core/Shared/Movies/MovieManager.h"
 #include "Shared/Video/SoftwareRenderer.h"
 #include "InteropNotificationListeners.h"
 
@@ -17,7 +14,7 @@
 #elif __APPLE__
 	#include "Sdl/SdlSoundManager.h"
 #else
-	#include "Sdl/SdlRenderer.h"
+	#include "Linux/LinuxOglRenderer.h"
 	#include "Sdl/SdlSoundManager.h"
 #endif
 
@@ -70,16 +67,14 @@ extern "C"
 #elif __APPLE__
 			_historyRenderer.reset(new SoftwareRenderer(_historyPlayer.get()));
 #else
-			_historyRenderer.reset(new SdlRenderer(_historyPlayer.get(), viewerHandle));
+			_historyRenderer.reset(new LinuxOglRenderer(_historyPlayer.get(), viewerHandle));
 #endif
 		}
 
 #ifdef _WIN32
-		_historySoundManager.reset(new SoundManager(_historyPlayer.get(), (HWND)windowHandle));
-#elif __APPLE__
-		_historySoundManager.reset(new SdlSoundManager(_historyPlayer.get()));
+		_historySoundManager.reset(SoundManager::Create(_historyPlayer.get(), (HWND)windowHandle));
 #else
-		_historySoundManager.reset(new SdlSoundManager(_historyPlayer.get()));
+		_historySoundManager.reset(SdlSoundManager::Create(_historyPlayer.get()));
 #endif
 	}
 

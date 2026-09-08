@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <assert.h>
 #include "Shared/Emulator.h"
 #include "Shared/NotificationManager.h"
 #include "Shared/Audio/SoundMixer.h"
@@ -46,7 +45,6 @@
 #include "Utilities/VirtualFile.h"
 #include "Utilities/PlatformUtilities.h"
 #include "Utilities/FolderUtilities.h"
-#include "Shared/MemoryOperationType.h"
 #include "Shared/EventType.h"
 
 Emulator::Emulator()
@@ -96,6 +94,33 @@ void Emulator::Initialize(bool enableShortcuts)
 	_videoRenderer->StartThread();
 }
 
+void Emulator::SetAudioVideoInitCallback(std::function<IAudioDevice*(void)> initAudio, std::function<IRenderingDevice*(void)> initVideo)
+{
+	_initVideo = initVideo;
+	_initAudio = initAudio;
+
+	InitVideo();
+	InitAudio();
+}
+
+void Emulator::InitVideo()
+{
+	if(_initVideo) {
+		auto lock = AcquireLock();
+		_renderer.reset();
+		_renderer.reset(_initVideo());
+	}
+}
+
+void Emulator::InitAudio()
+{
+	if(_initAudio) {
+		auto lock = AcquireLock();
+		_soundManager.reset();
+		_soundManager.reset(_initAudio());
+	}
+}
+
 void Emulator::Release()
 {
 	Stop(true);
@@ -106,6 +131,9 @@ void Emulator::Release()
 	_videoDecoder->StopThread();
 	_videoRenderer->StopThread();
 	_shortcutKeyHandler.reset();
+
+	_soundManager.reset();
+	_renderer.reset();
 }
 
 void Emulator::Run()

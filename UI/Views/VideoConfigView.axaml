@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:system="using:System"
 	xmlns:vm="using:Mesen.ViewModels"
 	xmlns:c="using:Mesen.Controls"
 	xmlns:cfg="using:Mesen.Config"
@@ -18,7 +19,7 @@
 	</Design.DataContext>
 
 	<UserControl.DataTemplates>
-		<DataTemplate DataType="{x:Type x:UInt32}">
+		<DataTemplate DataType="{x:Type system:UInt32}">
 			<StackPanel Orientation="Horizontal">
 				<TextBlock Text="{Binding}" />
 				<TextBlock Text=" Hz" />
@@ -107,7 +108,7 @@
 		</TabItem>
 		<TabItem Header="{l:Translate tpgPicture}">
 			<ScrollViewer AllowAutoHide="False" HorizontalScrollBarVisibility="Auto" Padding="0 0 2 0">
-				<Grid ColumnDefinitions="1*,1*" RowDefinitions="Auto,*" Margin="0 2 0 0" MinWidth="350">
+				<Grid ColumnDefinitions="1*,1*" RowDefinitions="Auto,Auto,*" Margin="0 2 0 0" MinWidth="350">
 					<c:GroupBox Grid.Column="0" Header="{l:Translate lblPictureSettings}" Margin="0 0 1 0">
 						<StackPanel>
 							<c:MesenSlider Value="{Binding Config.Brightness}" Text="{l:Translate trkBrightness}" Margin="5 3" Minimum="-100" Maximum="100"  />
@@ -126,7 +127,19 @@
 						</StackPanel>
 					</c:GroupBox>
 
-					<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" VerticalAlignment="Top">
+					<c:GroupBox Grid.Column="0" Grid.Row="1" Header="{l:Translate lblShaderSettings}" Margin="0 0 1 0" IsVisible="{Binding ShowShaderConfig}">
+						<DockPanel>
+							<TextBlock Text="Shader: " DockPanel.Dock="Left" VerticalAlignment="Center" />
+							<c:ShaderSelector
+								Grid.Row="1"
+								Grid.Column="1"
+								ShaderFile="{Binding Config.ShaderFile}"
+								HorizontalAlignment="Stretch"
+							/>
+						</DockPanel>
+					</c:GroupBox>
+
+					<StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" VerticalAlignment="Top">
 						<Button Content="{l:Translate btnSelectPreset}" Click="BtnPreset_OnClick">
 							<Button.ContextMenu>
 								<ContextMenu Placement="BottomEdgeAlignedLeft">
@@ -141,7 +154,7 @@
 						<Button Content="{l:Translate btnReset}" Command="{Binding ResetPictureSettingsCommand}" />
 					</StackPanel>
 
-					<c:GroupBox Grid.Column="1" Grid.RowSpan="2" Header="{l:Translate lblFilterSettings}" Margin="1 0 0 0">
+					<c:GroupBox Grid.Column="1" Grid.RowSpan="3" Header="{l:Translate lblFilterSettings}" Margin="1 0 0 0">
 						<StackPanel>
 							<StackPanel.Styles>
 								<Style Selector="c|MesenSlider">

@@ -61,5 +61,6 @@ public:
 	virtual void Render(RenderSurfaceInfo& emuHud, RenderSurfaceInfo& scriptHud) = 0;
 	virtual void Reset() = 0;
 	virtual void OnRendererThreadStarted() {}
+	virtual void OnRendererThreadStopped() {}
 	virtual void SetFullscreenMode(FullscreenSettings settings) = 0;
 };

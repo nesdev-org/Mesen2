@@ -116,9 +116,10 @@
 					<Color x:Key="CheckBoxCheckGlyphForegroundUncheckedDisabled">#000</Color>
 
 					<Color x:Key="ButtonBackground">#E1E1E1</Color>
-					<Color x:Key="ButtonBackgroundDisabled">#BBB</Color>
+					<Color x:Key="ButtonBackgroundDisabled">#33000000</Color>
 					<Color x:Key="RepeatButtonBackgroundDisabled">#BBB</Color>
 					<Color x:Key="ButtonBorderBrush">#ADADAD</Color>
+					<Color x:Key="ButtonBorderBrushDisabled">#33000000</Color>
 					<Color x:Key="ButtonBackgroundPointerOver">#E5F1FB</Color>
 					<Color x:Key="ButtonBorderBrushPointerOver">#0078D7</Color>
 					<Color x:Key="ButtonBackgroundPressed">#CCE4F7</Color>

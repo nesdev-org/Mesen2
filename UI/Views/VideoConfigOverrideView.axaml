@@ -19,7 +19,7 @@
 	</Design.DataContext>
 
 	<c:OptionSection Header="{Binding Header, ElementName=root}" Margin="0">
-		<Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto">
+		<Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto">
 			<CheckBox
 				IsChecked="{Binding OverrideVideoFilter}"
 				Content="{l:Translate chkOverrideVideoFilter}"
@@ -35,10 +35,27 @@
 
 			<CheckBox
 				Grid.Row="1"
+				IsChecked="{Binding OverrideShader}"
+				Content="{l:Translate chkOverrideShader}"
+				IsVisible="{Binding ShowShaderConfig, ElementName=root}"
+			/>
+			<c:ShaderSelector
+				Grid.Row="1"
+				Grid.Column="1"
+				Width="160"
+				ShaderFile="{Binding ShaderFile}"
+				ConsoleOverrideConfig="{Binding}"
+				HorizontalAlignment="Stretch"
+				IsEnabled="{Binding OverrideShader}"
+				IsVisible="{Binding ShowShaderConfig, ElementName=root}"
+			/>
+
+			<CheckBox
+				Grid.Row="2"
 				IsChecked="{Binding OverrideAspectRatio}"
 				Content="{l:Translate chkOverrideAspectRatio}"
 			/>
-			<StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+			<StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
 				<c:EnumComboBox SelectedItem="{Binding AspectRatio}" Width="160" IsEnabled="{Binding OverrideAspectRatio}" />
 				<StackPanel Orientation="Horizontal" IsVisible="{Binding AspectRatio, Converter={StaticResource EnumMatchConverter}, ConverterParameter={x:Static cfg:VideoAspectRatio.Custom}}">
 					<TextBlock Text="{l:Translate lblCustomRatio}" VerticalAlignment="Center" Margin="5 0 0 0" />

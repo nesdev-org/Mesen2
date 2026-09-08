@@ -263,6 +263,9 @@
     <ClInclude Include="Video\gif.h" />
     <ClInclude Include="Video\GifRecorder.h" />
     <ClInclude Include="Video\IVideoRecorder.h" />
+    <ClInclude Include="Video\librashader.h" />
+    <ClInclude Include="Video\LibrashaderUtilities.h" />
+    <ClInclude Include="Video\librashader_ld.h" />
     <ClInclude Include="Video\RawCodec.h" />
     <ClInclude Include="Video\ZmbvCodec.h" />
     <ClInclude Include="VirtualFile.h" />

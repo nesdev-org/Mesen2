@@ -36,6 +36,20 @@ namespace Mesen.Utilities
 			return Encoding.UTF8.GetString(array);
 		}
 
+		public unsafe static string PtrToStringUtf8(byte* ptr, int maxSize)
+		{
+			int len = 0;
+			while(ptr[len] != 0 && len < maxSize) {
+				len++;
+			}
+
+			if(len == 0) {
+				return "";
+			}
+
+			return Encoding.UTF8.GetString(ptr, len);
+		}
+
 		public delegate void StringApiDelegate(IntPtr ptr, Int32 size);
 		public unsafe static string CallStringApi(StringApiDelegate callback, int maxLength = 100000)
 		{

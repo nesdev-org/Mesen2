@@ -56,13 +56,13 @@ namespace Mesen.Views
 		private void OnToggleShuffleClick(object sender, RoutedEventArgs e)
 		{
 			ConfigManager.Config.AudioPlayer.Shuffle = !ConfigManager.Config.AudioPlayer.Shuffle;
-			ConfigManager.Config.ApplyConfig();
+			ConfigManager.Config.AudioPlayer.ApplyConfig();
 		}
 
 		private void OnToggleRepeatClick(object sender, RoutedEventArgs e)
 		{
 			ConfigManager.Config.AudioPlayer.Repeat = !ConfigManager.Config.AudioPlayer.Repeat;
-			ConfigManager.Config.ApplyConfig();
+			ConfigManager.Config.AudioPlayer.ApplyConfig();
 		}
 	}
 }

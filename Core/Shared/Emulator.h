@@ -41,6 +41,9 @@ class IInputProvider;
 struct RomInfo;
 struct TimingInfo;
 
+class IAudioDevice;
+class IRenderingDevice;
+
 enum class MemoryOperationType;
 enum class MemoryType;
 enum class EventType;
@@ -73,6 +76,9 @@ private:
 	safe_ptr<Debugger> _debugger;
 	shared_ptr<SystemActionManager> _systemActionManager;
 	shared_ptr<ShortcutKeyHandler> _shortcutKeyHandler;
+
+	safe_ptr<IRenderingDevice> _renderer;
+	safe_ptr<IAudioDevice> _soundManager;
 
 	const unique_ptr<EmuSettings> _settings;
 	const unique_ptr<DebugHud> _debugHud;
@@ -131,6 +137,9 @@ private:
 	//consoles at the same time.
 	bool _isDebuggerDisabled = false;
 
+	std::function<IAudioDevice*(void)> _initAudio;
+	std::function<IRenderingDevice*(void)> _initVideo;
+
 	void WaitForLock();
 	void WaitForPauseEnd();
 
@@ -157,6 +166,15 @@ public:
 	~Emulator();
 
 	void Initialize(bool enableShortcuts = true);
+
+	void SetAudioVideoInitCallback(std::function<IAudioDevice*(void)> initAudio, std::function<IRenderingDevice*(void)> initVideo);
+
+	void InitVideo();
+	void InitAudio();
+
+	shared_ptr<IAudioDevice> GetSoundManager() { return _soundManager.lock(); }
+	shared_ptr<IRenderingDevice> GetRenderer() { return _renderer.lock(); }
+
 	void Release();
 
 	void Run();

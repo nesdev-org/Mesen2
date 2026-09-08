@@ -18,6 +18,20 @@ SdlSoundManager::~SdlSoundManager()
 	Release();
 }
 
+SdlSoundManager* SdlSoundManager::Create(Emulator* emu)
+{
+	static bool firstLoad = true;
+	if(!LoadSdl()) {
+		if(firstLoad) {
+			MessageManager::Log("[Audio] Could not load SDL2.");
+		}
+		firstLoad = false;
+		return nullptr;
+	}
+
+	return new SdlSoundManager(emu);
+}
+
 void SdlSoundManager::FillAudioBuffer(void* userData, uint8_t* stream, int len)
 {
 	SdlSoundManager* soundManager = (SdlSoundManager*)userData;
@@ -59,7 +73,7 @@ bool SdlSoundManager::InitializeAudio(uint32_t sampleRate, bool isStereo)
 	memset(_buffer, 0, _bufferSize);
 
 	SDL_AudioSpec audioSpec;
-	SDL_memset(&audioSpec, 0, sizeof(audioSpec));
+	memset(&audioSpec, 0, sizeof(audioSpec));
 	audioSpec.freq = sampleRate;
 	audioSpec.format = AUDIO_S16SYS; //16-bit samples
 	audioSpec.channels = isStereo ? 2 : 1;
@@ -111,7 +125,7 @@ vector<string> SdlSoundManager::GetAvailableDeviceInfo()
 
 void SdlSoundManager::SetAudioDevice(string deviceName)
 {
-	if(deviceName.compare(_deviceName) != 0) {
+	if(deviceName != _deviceName) {
 		_deviceName = deviceName;
 		_needReset = true;
 	}
@@ -186,6 +200,9 @@ void SdlSoundManager::Stop()
 void SdlSoundManager::ProcessEndOfFrame()
 {
 	ProcessLatency(_readPosition, _writePosition);
+
+	AudioConfig& cfg = _emu->GetSettings()->GetAudioConfig();
+	SetAudioDevice(cfg.AudioDevice);
 
 	uint32_t emulationSpeed = _emu->GetSettings()->GetEmulationSpeed();
 	if(_averageLatency > 0 && emulationSpeed <= 100 && emulationSpeed > 0 && std::abs(_averageLatency - _emu->GetSettings()->GetAudioConfig().AudioLatency) > 50) {

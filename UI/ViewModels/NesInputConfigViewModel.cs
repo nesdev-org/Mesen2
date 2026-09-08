@@ -119,6 +119,12 @@ namespace Mesen.ViewModels
 			Config = config;
 			MainWindow = MainWindowViewModel.Instance;
 
+			ShortcutKeys = new List<ShortcutKeyInfo>();
+
+			if(Design.IsDesignMode) {
+				return;
+			}
+
 			AddDisposable(ReactiveHelper.RegisterObserver([Config.Port1, Config.Port2], nameof(ControllerConfig.Type), () => {
 				HasFourScore = Config.Port1.Type == ControllerType.FourScore || Config.Port2.Type == ControllerType.FourScore;
 				if(HasFourScore) {
@@ -154,12 +160,6 @@ namespace Mesen.ViewModels
 			Dictionary<EmulatorShortcut, ShortcutKeyInfo> shortcuts = new Dictionary<EmulatorShortcut, ShortcutKeyInfo>();
 			foreach(ShortcutKeyInfo shortcut in preferences.ShortcutKeys) {
 				shortcuts[shortcut.Shortcut] = shortcut;
-			}
-
-			ShortcutKeys = new List<ShortcutKeyInfo>();
-
-			if(Design.IsDesignMode) {
-				return;
 			}
 
 			for(int i = 0; i < displayOrder.Length; i++) {

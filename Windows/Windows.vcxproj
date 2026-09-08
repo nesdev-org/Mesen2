@@ -172,40 +172,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DirectInputManager.h" />
-    <ClInclude Include="DirectXTK\BufferHelpers.h" />
-    <ClInclude Include="DirectXTK\CommonStates.h" />
-    <ClInclude Include="DirectXTK\DirectXHelpers.h" />
-    <ClInclude Include="DirectXTK\SpriteBatch.h" />
-    <ClInclude Include="DirectXTK\VertexTypes.h" />
-    <ClInclude Include="DirectXTK\AlignedNew.h" />
-    <ClInclude Include="DirectXTK\DemandCreate.h" />
-    <ClInclude Include="DirectXTK\common.h" />
-    <ClInclude Include="DirectXTK\PlatformHelpers.h" />
-    <ClInclude Include="DirectXTK\SharedResourcePool.h" />
+    <ClInclude Include="DirectSoundManager.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="XInputManager.h" />
     <ClInclude Include="WindowsKeyManager.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="WasapiSoundManager.h" />
     <ClInclude Include="WindowsMouseManager.h" />
     <ClInclude Include="Common.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectInputManager.cpp" />
-    <ClCompile Include="DirectXTK\BufferHelpers.cpp" />
-    <ClCompile Include="DirectXTK\CommonStates.cpp" />
-    <ClCompile Include="DirectXTK\SpriteBatch.cpp" />
-    <ClCompile Include="DirectXTK\VertexTypes.cpp" />
+    <ClCompile Include="DirectSoundManager.cpp" />
     <ClCompile Include="XInputManager.cpp" />
     <ClCompile Include="WindowsKeyManager.cpp">
       <DeploymentContent>false</DeploymentContent>
     </ClCompile>
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="WasapiSoundManager.cpp" />
     <ClCompile Include="WindowsMouseManager.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DirectXTK\SpriteEffect_SpritePixelShader.inc" />
-    <None Include="DirectXTK\SpriteEffect_SpriteVertexShader.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

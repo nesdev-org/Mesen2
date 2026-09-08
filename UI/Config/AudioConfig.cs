@@ -11,13 +11,14 @@ namespace Mesen.Config
 {
 	public partial class AudioConfig : BaseConfig<AudioConfig>
 	{
+		[ObservableProperty] public partial AudioBackendType AudioBackend { get; set; } = AudioBackendType.Default;
 		[ObservableProperty] public partial string AudioDevice { get; set; } = "";
 		[ObservableProperty] public partial bool EnableAudio { get; set; } = true;
 		[ObservableProperty] public partial bool DisableDynamicSampleRate { get; set; } = false;
 
 		[ObservableProperty][MinMax(0, 100)] public partial UInt32 MasterVolume { get; set; } = 100;
 		[ObservableProperty] public partial AudioSampleRate SampleRate { get; set; } = AudioSampleRate._48000;
-		[ObservableProperty][MinMax(15, 300)] public partial UInt32 AudioLatency { get; set; } = 60;
+		[ObservableProperty][MinMax(15, 300)] public partial UInt32 AudioLatency { get; set; } = 30;
 
 		[ObservableProperty] public partial bool MuteSoundInBackground { get; set; } = false;
 		[ObservableProperty] public partial bool ReduceSoundInBackground { get; set; } = true;
@@ -61,6 +62,7 @@ namespace Mesen.Config
 		public void ApplyConfig()
 		{
 			ConfigApi.SetAudioConfig(new InteropAudioConfig() {
+				AudioBackend = AudioBackend,
 				AudioDevice = AudioDevice,
 				EnableAudio = EnableAudio,
 				DisableDynamicSampleRate = DisableDynamicSampleRate,
@@ -113,6 +115,7 @@ namespace Mesen.Config
 	[StructLayout(LayoutKind.Sequential)]
 	public struct InteropAudioConfig
 	{
+		public AudioBackendType AudioBackend;
 		[MarshalAs(UnmanagedType.LPStr)] public string AudioDevice;
 		[MarshalAs(UnmanagedType.I1)] public bool EnableAudio;
 		[MarshalAs(UnmanagedType.I1)] public bool DisableDynamicSampleRate;
@@ -169,5 +172,13 @@ namespace Mesen.Config
 		_44100 = 44100,
 		_48000 = 48000,
 		_96000 = 96000
+	}
+
+	public enum AudioBackendType
+	{
+		Default,
+		Wasapi,
+		DirectSound,
+		Sdl2
 	}
 }

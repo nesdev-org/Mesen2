@@ -28,6 +28,10 @@ namespace Mesen.ViewModels
 		{
 			Cheat = cheat;
 
+			if(Design.IsDesignMode) {
+				return;
+			}
+
 			AvailableCheatTypes = Enum.GetValues<CheatType>().Where(e => MainWindowViewModel.Instance.RomInfo.CpuTypes.Contains(e.ToCpuType())).Cast<Enum>().ToArray();
 			if(!AvailableCheatTypes.Contains(Cheat.Type)) {
 				Cheat.Type = (CheatType)AvailableCheatTypes[0];

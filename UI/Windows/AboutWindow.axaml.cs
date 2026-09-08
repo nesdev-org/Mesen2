@@ -50,7 +50,6 @@ namespace Mesen.Windows
 				new("libspng", "","BSD", "https://github.com/randy408/libspng"),
 				new("Lua", "","MIT", "https://www.lua.org"),
 				new("7-Zip", "","Public domain", "https://www.7-zip.org/"),
-				new("DirectXTK", "", "MIT", "https://github.com/microsoft/DirectXTK"),
 				new("scale2x", "","GPL2+", "https://github.com/amadvance/scale2x/"),
 				new("Super Eagle + 2xSai", "", "GPL3", "https://vdnoort.home.xs4all.nl/emulation/2xsai/"),
 				new("xBRZ", "","GPL3", "https://sourceforge.net/projects/xbrz/"),
@@ -70,6 +69,7 @@ namespace Mesen.Windows
 				new("ELFSharp", "", "MIT", "https://github.com/konrad-kruczynski/elfsharp"),
 				new("ymfm", "", "BSD 3-clause", "https://github.com/aaronsgiles/ymfm"),
 				new("GBA Multiply Algo (zaydlang)", "", "zlib", "https://github.com/zaydlang/multiplication-algorithm/"),
+				new("librashader", "", "MPL-2.0", "https://github.com/SnowflakePowered/librashader/"),
 			};
 
 			LibraryList.Sort((a, b) => a.Name.CompareTo(b.Name));

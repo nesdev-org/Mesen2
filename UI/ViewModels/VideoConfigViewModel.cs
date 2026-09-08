@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mesen.Config;
+using Mesen.Interop;
 using Mesen.Utilities;
 using System;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Mesen.ViewModels
 		public bool IsWindows { get; }
 		public bool IsWindows10 { get; }
 		public bool IsMacOs { get; }
+		public bool ShowShaderConfig { get; }
 
 		public IRelayCommand PresetCompositeCommand { get; }
 		public IRelayCommand PresetSVideoCommand { get; }
@@ -49,6 +51,8 @@ namespace Mesen.ViewModels
 
 			//MacOS only supports the software renderer
 			IsMacOs = OperatingSystem.IsMacOS();
+
+			ShowShaderConfig = ConfigApi.CheckShaderSupport();
 
 			if(Design.IsDesignMode) {
 				return;

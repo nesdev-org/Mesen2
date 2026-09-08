@@ -59,7 +59,15 @@
 		</Border>
 
 		<Panel Name="RendererPanel" Background="Black">
-			<m:NativeRenderer Name="Renderer" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !IsSoftwareRendererVisible}" />
+			<Canvas>
+				<m:NativeRenderer
+					Name="Renderer"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					IsVisible="{Binding !IsSoftwareRendererVisible}"
+					UseLayoutRounding="False"
+				/>
+			</Canvas>
 			
 			<Panel IsVisible="{Binding IsSoftwareRendererVisible}">
 				<c:SoftwareRendererView

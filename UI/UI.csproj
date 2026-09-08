@@ -143,6 +143,9 @@
     <Compile Update="Controls\HelpTooltip.axaml.cs">
       <DependentUpon>HelpTooltip.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Controls\ShaderSelector.axaml.cs">
+      <DependentUpon>ShaderSelector.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Controls\SoftwareRendererView.axaml.cs">
       <DependentUpon>SoftwareRendererView.axaml</DependentUpon>
     </Compile>
@@ -490,6 +493,9 @@
     </Compile>
     <Compile Update="Windows\CheatEditWindow.axaml.cs">
       <DependentUpon>CheatEditWindow.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Windows\ShaderConfigWindow.axaml.cs">
+      <DependentUpon>ShaderConfigWindow.axaml</DependentUpon>
     </Compile>
     <Compile Update="Windows\HistoryViewerRangePickerWindow.axaml.cs">
       <DependentUpon>HistoryViewerRangePickerWindow.axaml</DependentUpon>

@@ -13,6 +13,7 @@ namespace Mesen.Config
 	{
 		private const int MaxRecentFiles = 10;
 		public List<RecentItem> Items { get; set; } = new List<RecentItem>();
+		public List<string> Shaders { get; set; } = new List<string>();
 
 		public void AddRecentFile(ResourcePath romFile, ResourcePath? patchFile)
 		{
@@ -29,6 +30,19 @@ namespace Mesen.Config
 			Items.Insert(0, recentItem);
 			if(Items.Count > RecentItems.MaxRecentFiles) {
 				Items.RemoveAt(RecentItems.MaxRecentFiles);
+			}
+		}
+
+		public void AddRecentShader(string path)
+		{
+			string? existingItem = Shaders.FirstOrDefault(p => p == path);
+			if(existingItem != null) {
+				Shaders.Remove(existingItem);
+			}
+
+			Shaders.Insert(0, path);
+			if(Shaders.Count > RecentItems.MaxRecentFiles) {
+				Shaders.RemoveAt(RecentItems.MaxRecentFiles);
 			}
 		}
 	}

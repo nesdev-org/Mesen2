@@ -50,6 +50,12 @@ namespace Mesen.ViewModels
 			IsMenuVisible = !Config.Preferences.AutoHideMenu;
 		}
 
+		protected override void DisposeView()
+		{
+			base.DisposeView();
+			MainMenu.Dispose();
+		}
+
 		public void Init(MainWindow wnd)
 		{
 			MainMenu.Initialize(wnd);

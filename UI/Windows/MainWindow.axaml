@@ -42,11 +42,12 @@
 		<Panel Name="RendererPanel" Background="Black" Focusable="True">
 			<ContentControl Background="#181818" Content="{Binding RecentGames}" IsVisible="{Binding RecentGames.Visible}" />
 
-			<ContentControl
-				Name="RendererContainer"
-				HorizontalAlignment="Center"
-				VerticalAlignment="Center"
-			/>
+			<Canvas>
+				<ContentControl
+					Name="RendererContainer"
+					UseLayoutRounding="False"
+				/>
+			</Canvas>
 
 			<Panel IsVisible="{Binding IsSoftwareRendererVisible}">
 				<c:SoftwareRendererView

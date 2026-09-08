@@ -20,8 +20,9 @@
 			<Control ID="chkEnableAudio">Enable Audio</Control>
 			<Control ID="lblSampleRate">Sample Rate:</Control>
 			<Control ID="lblLatencyMs">ms</Control>
-			<Control ID="lblLatencyWarning">Low values may cause sound problems</Control>
+			<Control ID="lblLatencyWarning">A lower latency reduces the delay between video and audio, but may cause audio glitches if set too low.&#13;&#13;On Windows:&#13;  -WASAPI is recommended and allows lower latency values (25-35 ms).&#13;  -DirectSound usually requires 50-60+ ms of latency.</Control>
 			<Control ID="lblAudioLatency">Latency:</Control>
+			<Control ID="lblAudioDriver">Driver:</Control>
 			<Control ID="lblAudioDevice">Device:</Control>
 			<Control ID="lblVolume">Volume:</Control>
 			<Control ID="grpVolume">Volume</Control>
@@ -191,6 +192,8 @@
 			<Control ID="mnuPresetSVideo">S-Video</Control>
 			<Control ID="mnuPresetRgb">RGB</Control>
 			<Control ID="mnuPresetMonochrome">Monochrome</Control>
+			
+			<Control ID="lblShaderSettings">Shader settings</Control>
 
 			<Control ID="tpgAdvanced">Advanced</Control>
 			<Control ID="lblScreenRotation">Screen Rotation:</Control>
@@ -226,8 +229,13 @@
 			<Control ID="lblHeader">Global settings overrides</Control>
 
 			<Control ID="chkOverrideVideoFilter">Override video filter:</Control>
+			<Control ID="chkOverrideShader">Override shader:</Control>
 			<Control ID="chkOverrideAspectRatio">Override aspect ratio:</Control>
 			<Control ID="lblCustomRatio">Custom Ratio: </Control>
+		</Form>
+
+		<Form ID="ShaderSelector">
+			<Control ID="btnLoadShader">Load shader...</Control>
 		</Form>
 
 		<Form ID="SnesConfigView">
@@ -976,6 +984,13 @@
 			<Control ID="btnCancel">Cancel</Control>
 		</Form>
 
+		<Form ID="ShaderConfigWindow">
+			<Control ID="wndTitle">Shader Settings</Control>
+			<Control ID="btnReset">Reset to Defaults</Control>
+			<Control ID="btnOk">OK</Control>
+			<Control ID="btnCancel">Cancel</Control>
+		</Form>
+		
 		<Form ID="SelectRomWindow">
 			<Control ID="wndTitle">Select rom...</Control>
 			<Control ID="lblSearch">Search:</Control>
@@ -1858,6 +1873,8 @@ E
 		<Message ID="btnCancel">Cancel</Message>
 		<Message ID="btnYes">Yes</Message>
 		<Message ID="btnNo">No</Message>
+		
+		<Message ID="None">None</Message>
 
 		<Message ID="ScriptSaveConfirmation">You have unsaved changes for this script - would you like to save them?</Message>
 		
@@ -2551,6 +2568,12 @@ E
 			<Value ID="StartWithoutSaveData">Power on</Value>
 			<Value ID="StartWithSaveData">Power on, with save data</Value>
 			<Value ID="CurrentState">Current state</Value>
+		</Enum>
+		<Enum ID="AudioBackendType">
+			<Value ID="Default">Default</Value>
+			<Value ID="Wasapi">WASAPI (default)</Value>
+			<Value ID="DirectSound">DirectSound (legacy)</Value>
+			<Value ID="Sdl2">SDL2 (default)</Value>
 		</Enum>
 		<Enum ID="AudioSampleRate">
 			<Value ID="_11025">11,025 Hz</Value>
@@ -3635,6 +3658,7 @@ E
 			<Value ID="AspectRatio">Aspect Ratio</Value>
 			<Value ID="Fullscreen">Fullscreen</Value>
 			<Value ID="VideoFilter">Video Filter</Value>
+			<Value ID="Shader">Shader</Value>
 			<Value ID="Region">Region / Model</Value>
 
 			<Value ID="Audio">Audio</Value>
@@ -3769,6 +3793,15 @@ E
 
 			<Value ID="CopyToClipboard">Copy to clipboard</Value>
 			<Value ID="ResetProfilerData">Reset profiler data</Value>
+
+			<Value ID="Shader">Shaders</Value>
+			<Value ID="LoadShader">Load shader...</Value>
+			<Value ID="RecentShaders">Recent shaders</Value>
+			<Value ID="AllShaders">All shaders</Value>
+			<Value ID="ClearShader">Remove shader</Value>
+			<Value ID="ShaderSettings">Configure shader...</Value>
+			<Value ID="OpenShaderFolder">Open shader folder</Value>
+			<Value ID="NoShadersFound">Shaders (.slangp files) in the "Shaders" folder will be listed here.</Value>
 		</Enum>
 	</Enums>
 </Resources>

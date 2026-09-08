@@ -2,19 +2,14 @@
 
 #include "Common.h"
 #include "Core/Shared/Interfaces/IRenderingDevice.h"
-#include "Core/Shared/Interfaces/IMessageManager.h"
-#include "Utilities/FolderUtilities.h"
 #include "Utilities/SimpleLock.h"
-#include "Utilities/Timer.h"
+
+#define LIBRA_RUNTIME_D3D11
+#include "Utilities/Video/librashader_ld.h"
 
 using namespace DirectX;
 
 class Emulator;
-
-namespace DirectX
-{
-	class SpriteBatch;
-}
 
 struct HudRenderInfo
 {
@@ -41,17 +36,23 @@ private:
 	ID3D11Texture2D* _pTexture = nullptr;
 	ID3D11ShaderResourceView* _pTextureSrv = nullptr;
 
+	ID3D11VertexShader* _pVertexShader = nullptr;
+	ID3D11PixelShader* _pPixelShader = nullptr;
+	ID3D11InputLayout* _pInputLayout = nullptr;
+	ID3D11Buffer* _pVertexBuffer = nullptr;
+	ID3D11SamplerState* _pSamplerLinear = nullptr;
+	ID3D11SamplerState* _pSamplerPoint = nullptr;
+	ID3D11BlendState* _pBlendState = nullptr;
+
+	libra_instance_t _libra = {};
+	libra_d3d11_filter_chain_t _filterChain = {};
+	bool _shaderEnabled = false;
+
 	HudRenderInfo _emuHud = {};
 	HudRenderInfo _scriptHud = {};
 
-	bool _frameChanged = true;
 	SimpleLock _frameLock;
 	SimpleLock _textureLock;
-
-	unique_ptr<SpriteBatch> _spriteBatch;
-
-	const uint32_t _bytesPerPixel = 4;
-	uint32_t _screenBufferSize = 0;
 
 	FullscreenMode _newFullscreen = FullscreenMode::Disabled;
 	FullscreenMode _fullscreen = FullscreenMode::Disabled;
@@ -73,6 +74,8 @@ private:
 	uint32_t _emuFrameHeight = 0;
 	uint32_t _emuFrameWidth = 0;
 
+	ShaderConfig _shaderCfg = {};
+
 	atomic<int> _resetCounter = 0;
 
 	void LogError(const char* msg, HRESULT hr);
@@ -81,12 +84,17 @@ private:
 	HRESULT InitDevice();
 	HRESULT InitDeviceCommon();
 
+	void InitShader();
+	void UpdateShaderParams();
+	void LogShaderError(const char* msg, libra_error_t error);
+
 	void CleanupDevice();
 
 	void SetScreenSize(uint32_t width, uint32_t height);
 
 	ID3D11Texture2D* CreateTexture(uint32_t width, uint32_t height);
 	ID3D11ShaderResourceView* GetShaderResourceView(ID3D11Texture2D* texture);
+	void ResetViewport();
 	void DrawScreen();
 
 	bool CreateHudTexture(HudRenderInfo& hud, uint32_t newWidth, uint32_t newHeight);
@@ -98,6 +106,11 @@ private:
 	void ResetTextureBuffers();
 
 	DXGI_FORMAT GetTextureFormat();
+
+	template<typename T>
+	void CleanupCom(T& ptr);
+
+	void DrawTexture(ID3D11ShaderResourceView* texture, RECT& destRect);
 
 public:
 	Renderer(Emulator* emu, HWND hWnd);

@@ -13,7 +13,6 @@
 #include "Core/Shared/CheatManager.h"
 #include "Core/Shared/DebuggerRequest.h"
 #include "Core/Netplay/GameClient.h"
-#include "Core/Netplay/GameServer.h"
 #include "Utilities/ArchiveReader.h"
 #include "Utilities/FolderUtilities.h"
 #include "Utilities/StringUtilities.h"
@@ -29,7 +28,7 @@
 	#include "MacOS/MacOSKeyManager.h"
 	#include "MacOS/MacOSMouseManager.h"
 #else
-	#include "Sdl/SdlRenderer.h"
+	#include "Linux/LinuxOglRenderer.h"
 	#include "Sdl/SdlSoundManager.h"
 	#include "Linux/LinuxKeyManager.h"
 	#include "Linux/LinuxMouseManager.h"
@@ -37,8 +36,6 @@
 
 #include "Shared/Video/SoftwareRenderer.h"
 
-unique_ptr<IRenderingDevice> _renderer;
-unique_ptr<IAudioDevice> _soundManager;
 unique_ptr<IKeyManager> _keyManager;
 unique_ptr<IMouseManager> _mouseManager;
 unique_ptr<Emulator> _emu(new Emulator());
@@ -61,6 +58,30 @@ struct InteropRomInfo
 	CpuType CpuTypes[5];
 	uint32_t CpuTypeCount;
 };
+
+IRenderingDevice* InitRenderer()
+{
+	if(_softwareRenderer) {
+		return new SoftwareRenderer(_emu.get());
+	} else {
+#ifdef _WIN32
+		return new Renderer(_emu.get(), (HWND)_viewerHandle);
+#elif __APPLE__
+		return new SoftwareRenderer(_emu.get());
+#else
+		return new LinuxOglRenderer(_emu.get(), _viewerHandle);
+#endif
+	}
+}
+
+IAudioDevice* InitSoundManager()
+{
+#ifdef _WIN32
+	return SoundManager::Create(_emu.get(), (HWND)_windowHandle);
+#else
+	return SdlSoundManager::Create(_emu.get());
+#endif
+}
 
 extern "C"
 {
@@ -94,27 +115,7 @@ extern "C"
 			_viewerHandle = viewerHandle;
 			_softwareRenderer = softwareRenderer;
 
-			if(!noVideo) {
-				if(softwareRenderer) {
-					_renderer.reset(new SoftwareRenderer(_emu.get()));
-				} else {
-#ifdef _WIN32
-					_renderer.reset(new Renderer(_emu.get(), (HWND)_viewerHandle));
-#elif __APPLE__
-					_renderer.reset(new SoftwareRenderer(_emu.get()));
-#else
-					_renderer.reset(new SdlRenderer(_emu.get(), _viewerHandle));
-#endif
-				}
-			}
-
-			if(!noAudio) {
-#ifdef _WIN32
-				_soundManager.reset(new SoundManager(_emu.get(), (HWND)_windowHandle));
-#else
-				_soundManager.reset(new SdlSoundManager(_emu.get()));
-#endif
-			}
+			_emu->SetAudioVideoInitCallback(noVideo ? nullptr : InitSoundManager, noAudio ? nullptr : InitRenderer);
 
 			if(!noInput) {
 #ifdef _WIN32
@@ -135,8 +136,9 @@ extern "C"
 
 	DllExport void __stdcall SetFullscreenMode(FullscreenSettings settings)
 	{
-		if(_renderer) {
-			_renderer->SetFullscreenMode(settings);
+		shared_ptr<IRenderingDevice> renderer = _emu->GetRenderer();
+		if(renderer) {
+			renderer->SetFullscreenMode(settings);
 		}
 	}
 
@@ -244,8 +246,6 @@ extern "C"
 			_emu->Release();
 		}
 
-		_renderer.reset();
-		_soundManager.reset();
 		_keyManager.reset();
 		_emu.reset();
 	}

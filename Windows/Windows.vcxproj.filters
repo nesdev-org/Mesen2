@@ -1,75 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="DirectXTK">
-      <UniqueIdentifier>{904b6202-95e0-49c4-9530-dc6ffd391fcf}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="DirectXTK\SpriteBatch.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\VertexTypes.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\SharedResourcePool.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\DirectXHelpers.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\PlatformHelpers.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\DemandCreate.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\CommonStates.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\common.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\AlignedNew.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXTK\BufferHelpers.h">
-      <Filter>DirectXTK</Filter>
-    </ClInclude>
     <ClInclude Include="WindowsMouseManager.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="DirectInputManager.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="WasapiSoundManager.h" />
     <ClInclude Include="WindowsKeyManager.h" />
     <ClInclude Include="XInputManager.h" />
+    <ClInclude Include="DirectSoundManager.h" />
+    <ClInclude Include="SoundManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DirectXTK\CommonStates.cpp">
-      <Filter>DirectXTK</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXTK\BufferHelpers.cpp">
-      <Filter>DirectXTK</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXTK\VertexTypes.cpp">
-      <Filter>DirectXTK</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXTK\SpriteBatch.cpp">
-      <Filter>DirectXTK</Filter>
-    </ClCompile>
     <ClCompile Include="DirectInputManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="WasapiSoundManager.cpp" />
     <ClCompile Include="WindowsKeyManager.cpp" />
     <ClCompile Include="WindowsMouseManager.cpp" />
     <ClCompile Include="XInputManager.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DirectXTK\SpriteEffect_SpritePixelShader.inc">
-      <Filter>DirectXTK</Filter>
-    </None>
-    <None Include="DirectXTK\SpriteEffect_SpriteVertexShader.inc">
-      <Filter>DirectXTK</Filter>
-    </None>
+    <ClCompile Include="DirectSoundManager.cpp" />
   </ItemGroup>
 </Project>

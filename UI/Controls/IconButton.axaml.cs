@@ -1,11 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Markup.Xaml;
-using Avalonia.Styling;
-using Mesen.Interop;
 using Mesen.Utilities;
-using Mesen.Windows;
 using System;
 
 namespace Mesen.Controls
@@ -14,7 +10,7 @@ namespace Mesen.Controls
 	{
 		protected override Type StyleKeyOverride => typeof(Button);
 
-		public static readonly StyledProperty<string> IconProperty = AvaloniaProperty.Register<KeyBindingButton, string>(nameof(Icon), "");
+		public static readonly StyledProperty<string> IconProperty = AvaloniaProperty.Register<IconButton, string>(nameof(Icon), "");
 
 		public string Icon
 		{

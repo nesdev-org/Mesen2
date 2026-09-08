@@ -2,6 +2,7 @@
 	xmlns="https://github.com/avaloniaui"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:c="using:Mesen.Controls"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="50"
 	x:Name="root"
@@ -13,12 +14,21 @@
 		<x:Double x:Key="ToolTipContentMaxWidth">400</x:Double>
 	</UserControl.Resources>
 
+	<UserControl.Styles>
+		<Style Selector="c|HelpTooltip Image">
+			<Setter Property="Source" Value="/Assets/Help.png" />
+		</Style>
+
+		<Style Selector="c|HelpTooltip[IsWarning=True] Image">
+			<Setter Property="Source" Value="/Assets/Warning.png" />
+		</Style>
+	</UserControl.Styles>
+
 	<Image
 		Stretch="None"
 		Margin="3 0"
-		Source="/Assets/Help.png"
 		ToolTip.Tip="{Binding Text, ElementName=root}"
-		ToolTip.Placement="Right"
+		ToolTip.Placement="RightEdgeAlignedTop"
 		ToolTip.ShowDelay="100"
 	/>
 </UserControl>

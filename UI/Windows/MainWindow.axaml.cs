@@ -296,6 +296,8 @@ namespace Mesen.Windows
 						_model.MainMenu.CheckForUpdate(this, true);
 					}
 				});
+
+				ConfigApi.CheckShaderSupport();
 			});
 		}
 
@@ -570,8 +572,21 @@ namespace Mesen.Windows
 
 			uint realWidth = (uint)Math.Round(width * dpiScale);
 			uint realHeight = (uint)Math.Round(height * dpiScale);
+
+			//Make sure the height & width are always a multiple of 2 pixels
+			//This prevents issues with shaders, where a vertical or horizontal
+			//line artifact can appear in the middle of the frame if odd.
+			if((realWidth & 0x01) != 0) {
+				realWidth++;
+			}
+			if((realHeight & 0x01) != 0) {
+				realHeight++;
+			}
 			EmuApi.SetRendererSize(realWidth, realHeight);
 			_model.RendererSize = new Size(realWidth, realHeight);
+
+			width = Math.Round(realWidth / dpiScale, 8, MidpointRounding.ToZero) + 0.00001;
+			height = Math.Round(realHeight / dpiScale, 8, MidpointRounding.ToZero) + 0.00001;
 
 			if(WindowState == WindowState.FullScreen && !ConfigManager.Config.Video.UseExclusiveFullscreen && ConfigManager.Config.Video.EnableVariableRefreshRate) {
 				//When VRR is enabled, set the renderer to the same size as the monitor when in fullscreen mode
@@ -588,6 +603,12 @@ namespace Mesen.Windows
 				_renderer.Width = width;
 				_renderer.Height = height;
 			}
+
+			//Position the renderer in the center
+			ContentControl container = this.GetControl<ContentControl>("RendererContainer");
+			Canvas.SetTop(container, finalSize.Height > _renderer.Height ? (finalSize.Height - _renderer.Height) / 2 : 0);
+			Canvas.SetLeft(container, finalSize.Width > _renderer.Width ? (finalSize.Width - _renderer.Width) / 2 : 0);
+
 			_model.SoftwareRenderer.Width = width;
 			_model.SoftwareRenderer.Height = height;
 		}
